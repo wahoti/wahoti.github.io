@@ -5,7 +5,7 @@
 	<style>
 		body {
 			font-family: "Verdana";
-			font-size: 50px;
+			font-size: 30px;
 			font-weight: bold;
 			color: gray;
 			margin: 0;
@@ -54,8 +54,12 @@
 			padding 6px 12px;
 			border: 1px solid #ccc;
 			border-top: none;
+			height: 100%;
+			width: 100%;
 		}
 		.box {
+			height: 75px;
+			width: 75px;
 			border-width: 5px;
 			border-style: solid;
 			opacity: 1;
@@ -70,15 +74,13 @@
 	</head>
 	<body>
 	<div class="tab">
-		<button class="tablinks" onclick="openTab(event, 'Box')"><p>Box</p></button>
+		<button class="tablinks" onclick="openTab(event, 'Dark Squares')">Dark Squares</button>
+		<button class="tablinks" onclick="openTab(event, 'Box')">Box</button>
 		<button class="tablinks" onclick="openTab(event, 'About Me')">About Me</button>
 	</div>
 	
 	<div id="About Me" class="tabcontent">
-		<h3>About Me</h3>
-		<div id="frame" class="box">
 		<!img id="linkedinpic" src="res/linkedinpic.jpg" alt="linkedinpic">
-		</div>
 		<p>Hello</p>
 	</div>
 	
@@ -87,6 +89,10 @@
 		<div class="box" id="boxer">
 		Box
 		</div>
+	</div>
+	
+	<div id="Dark Squares" class="tabcontent">
+		<div>yo</div>
 	</div>
 	<script src="js/three.min.js"></script>
 	<script src="js/wahotiScript.js"></script>
