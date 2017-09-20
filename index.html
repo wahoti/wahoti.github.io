@@ -1,84 +1,147 @@
 <html>
 	<head>
-		<meta charset=utf-8>
-		<title>WAHOTI</title>
-		<style>
-			body {
-				font-family: "Verdana";
-				font-size: 50px;
-				font-weight: bold;
-				color: gray;
-				margin: 0;
-				background-color: #FFFFFF;
-				height: 100%;
-				width: 100%;
-			}
-			p {
-				display:table-cell;
-				text-align: center;
-				vertical-align: middle;
-			}
-			#lens {
-				width: 100%;
-				height: 100%;
-				background-color: #222222;
-				opacity: .5;
-			}
-			.box {
-				border-width: 5px;
-				border-style: solid;
-				height: 150px;
-				width: 150px;
-				opacity: 1;
-				background-color: #660066;
-				display: inline-block;
-				text-align: center;
-				vertical-align: middle;
-				margin: 5px;
-				position: relative;
-			}
-		</style>
+	<meta charset=utf-8>
+	<title>WAHOTI</title>
+	<style>
+		body {
+			font-family: "Verdana";
+			font-size: 50px;
+			font-weight: bold;
+			color: gray;
+			margin: 0;
+			height: 100%;
+			width: 100%;
+			background-image: url("res/symphony.png");
+			background-repeat: repeat;
+		}
+		p {
+			display:table-cell;
+			text-align: center;
+			vertical-align: middle;
+		}
+		#linkedinpic {
+			max-width:100%;
+			border: 1px solid #ddd;
+			border-radius: 4px;
+			padding: 5px;
+			width: 250px;
+		}
+		div.tab {
+			overflow: hidden;
+			border: 1px solid #ccc;
+			background-color:#f1f1f1;
+		}
+		div.tab button {
+			background-color: inherit;
+			float: left;
+			border: none;
+			outline: none;
+			cursor: pointer:
+			padding: 14px 16px;
+			transition: 0.3s;
+		}
+		div.tab button:hover {
+			background-color: #ddd;
+		}
+		div.tab button.active {
+			background-color: #ccc;
+		}
+		button.tablinks {
+			font-size: 30px;
+		}
+		.tabcontent {
+			display: none;
+			padding 6px 12px;
+			border: 1px solid #ccc;
+			border-top: none;
+		}
+		.box {
+			border-width: 5px;
+			border-style: solid;
+			opacity: 1;
+			background-color: #660066;
+			display: inline-block;
+			text-align: center;
+			vertical-align: middle;
+			margin: 5px;
+			position: relative;
+		}
+	</style>
 	</head>
 	<body>
-		<div id="lens">
+	<div class="tab">
+		<button class="tablinks" onclick="openTab(event, 'Box')"><p>Box</p></button>
+		<button class="tablinks" onclick="openTab(event, 'About Me')">About Me</button>
+	</div>
+	
+	<div id="About Me" class="tabcontent">
+		<h3>About Me</h3>
+		<div id="frame" class="box">
+		<!img id="linkedinpic" src="res/linkedinpic.jpg" alt="linkedinpic">
+		</div>
+		<p>Hello</p>
+	</div>
+	
+
+	<div id="Box" class="tabcontent">
 		<div class="box" id="boxer">
 		Box
 		</div>
-		</div>
-		<script src="js/three.min.js"></script>
-		<script src="js/wahotiScript.js"></script>
-		<script>	
-			function load() {
-				test_import();
-				var boxer = document.getElementById('boxer');
-				boxer.style.cursor = "pointer";
-				boxer.onclick = makeABox;
+	</div>
+	<script src="js/three.min.js"></script>
+	<script src="js/wahotiScript.js"></script>
+	<script>
+		function openTab(event, tabName) {
+			var i, tabcontent, tablinks;
+			// Get all elements with class="tabcontent" and hide them
+			tabcontent = document.getElementsByClassName("tabcontent");
+			for (i = 0; i < tabcontent.length; i++) {
+				tabcontent[i].style.display = "none";
 			}
-			window.onload = load;
 			
-			/*
-			var scene = new THREE.Scene();
-			var camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
-			var renderer = new THREE.WebGLRenderer();
-			renderer.setSize( window.innerWidth, window.innerHeight );
-			document.body.appendChild( renderer.domElement );			
-			
-			var geometry = new THREE.BoxGeometry( 1, 1, 1 );
-			var material = new THREE.MeshBasicMaterial( { color: 0xffffff } );
-			var cube = new THREE.Mesh( geometry, material );
-			scene.add( cube );
+			// Get all elements with class="tablinks" and remove the class "active"
+			tablinks = document.getElementsByClassName("tablinks");
+			for (i = 0; i < tablinks.length; i++) {
+				tablinks[i].className = tablinks[i].className.replace(" active", "");
+			}
 
-			camera.position.z = 5;	
+			// Show the current tab, and add an "active" class to the button that opened the tab
+			document.getElementById(tabName).style.display = "block";
+			event.currentTarget.className += " active";
+		}
+	
+	
+		function load() {
+			test_import();
+			var boxer = document.getElementById('boxer');
+			boxer.style.cursor = "pointer";
+			boxer.onclick = makeABox;
+		}
+		window.onload = load;
 		
-			
-			function render() {
-				requestAnimationFrame( render );
-				cube.rotation.x += 0.05;
-				cube.rotation.y += 0.1;		
-				renderer.render( scene, camera );
-			}
-			//render();			
-			*/
-		</script>
+		/*
+		var scene = new THREE.Scene();
+		var camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
+		var renderer = new THREE.WebGLRenderer();
+		renderer.setSize( window.innerWidth, window.innerHeight );
+		document.body.appendChild( renderer.domElement );			
+		
+		var geometry = new THREE.BoxGeometry( 1, 1, 1 );
+		var material = new THREE.MeshBasicMaterial( { color: 0xffffff } );
+		var cube = new THREE.Mesh( geometry, material );
+		scene.add( cube );
+
+		camera.position.z = 5;	
+	
+		
+		function render() {
+			requestAnimationFrame( render );
+			cube.rotation.x += 0.05;
+			cube.rotation.y += 0.1;		
+			renderer.render( scene, camera );
+		}
+		//render();			
+		*/
+	</script>
 	</body>
 </html>
