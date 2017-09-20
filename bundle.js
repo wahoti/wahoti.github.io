@@ -5,6 +5,8 @@ function test_main() {
 	console.log('test_main success! \t document.baseURI: ' + document.baseURI);
 }
 
+test_main();
+
 var test_interval = setInterval(function(){
 	console.log('yoo');
 }, 1000);
