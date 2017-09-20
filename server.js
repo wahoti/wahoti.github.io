@@ -9,8 +9,8 @@ app.get('/', function(req, res) {
 	res.sendFile(__dirname + '/index.html');
 });
 
-app.get('/js/test_import.js', function(req,res) {
-	res.sendFile(__dirname + '/js/test_import.js');
+app.get('/js/wahotiScript.js', function(req,res) {
+	res.sendFile(__dirname + '/js/wahotiScript.js');
 });
 
 app.get('/js/three.min.js', function(req,res) {
