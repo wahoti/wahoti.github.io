@@ -17,6 +17,10 @@ app.get('/js/three.min.js', function(req,res) {
 	res.sendFile(__dirname + '/js/three.min.js');
 });
 
+app.get('/bundle.js', function(req,res) {
+	res.sendFile(__dirname + '/bundle.js');
+});
+
 app.get('/res/linkedinpic.jpg', function(req,res) {
 	res.sendFile(__dirname + '/res/linkedinpic.jpg');
 });
