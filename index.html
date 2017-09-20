@@ -13,6 +13,7 @@
 			width: 100%;
 			background-image: url("res/symphony.png");
 			background-repeat: repeat;
+			overflow: hidden;
 		}
 		p {
 			display:table-cell;
@@ -70,6 +71,95 @@
 			margin: 5px;
 			position: relative;
 		}
+		
+		/* DARK SQUARES */
+		canvas#field {
+			background-color: #FFF;
+			display: block;
+			margin: 0px auto;
+			border:1px solid #000000;
+			width: 500px;
+			height: 500px;
+		}
+
+		canvas#hp {
+			background-color: #FFF;
+			display: inline-block;
+			margin: 0px auto;
+			border:1px solid #000000;
+			position: fixed;
+			left: 0px;
+		}
+
+		canvas#stamina {
+			background-color: #FFF;
+			display: inline-block;
+			margin: 0px auto;
+			border:1px solid #000000;
+			position: fixed;
+			top: 70px;
+			left: 0px;
+		}
+
+		.butt{
+			font-size: 100%;
+		}
+
+		.buttt{
+			font-size: 100%;
+		}
+
+		div#divbutton1 {
+			width: 10%;
+			display: inline-block;
+			margin: 0px auto;
+			border:1px solid #000000;
+			position: fixed;
+			top: 40px;
+			right: 0px;
+		}
+
+		div#divbutton2 {
+			width: 10%;
+			display: inline-block;
+			margin: 0px auto;
+			border:1px solid #000000;
+			position: fixed;
+			top: 120px;
+			right: 0px;
+		}
+
+		div#divbutton3 {
+			width: 10%;
+			display: inline-block;
+			margin: 0px auto;
+			border:1px solid #000000;
+			position: fixed;
+			top: 200px;
+			right: 0px;
+		}
+		
+		div#divbutton4 {
+			width: 10%;
+			display: inline-block;
+			margin: 0px auto;
+			border:1px solid #000000;
+			position: fixed;
+			bottom: 0px;
+			left: 0px;
+		}
+
+		div#infobox{
+			font-size: 30%;
+			width: 10%;
+			display: inline-block;
+			margin: 0px auto;
+			border:1px solid #000000;
+			position: fixed;
+			bottom: 0px;
+			right: 0px;
+		}
+
 	</style>
 	</head>
 	<body>
@@ -92,7 +182,43 @@
 	</div>
 	
 	<div id="Dark Squares" class="tabcontent">
-		<div>yo</div>
+		<canvas id="hp" width="300" height="30"></canvas>
+		<canvas id="stamina" width="300" height="30"></canvas>
+		<canvas id="field" width="1000" height="1000" ></canvas>
+	
+		<div id="infobox">
+		<p>CONTROLS: wasd, left click, right click, space, shift</p>
+		</div>
+	
+		<div id="divbutton1">
+		<button type="button" id="m1" class="butt"> weapon </button>
+		<select name="actions" id='_m1' class='buttt'>
+		<option value="sword" selected="selected">sword</option>	
+		</select>
+		</div>
+	
+		<div id="divbutton2">
+		<button type="button" id="m2" class="butt"> spell </button>
+		<select name="actions" id='_m2' class="buttt">
+			<option value="freeze" selected="selected">freeze</option>
+		</select>	
+		</div>
+	
+		<div id="divbutton3">
+		<button type="button" id="space" class="butt"> ability </button>
+		<select name="actions" id='_space' class="buttt">
+			<option value="dodge" selected="selected">dodge</option>
+			<option value="sprint">sprint</option>
+		</select>	
+		</div>	
+
+		<div id="divbutton4">
+		<button type="button" id="agent" class="butt"> AI </button>
+		<select name="actions" id='_agent' class="buttt">
+			<option value="agent" selected="selected">agent</option>
+			<option value="samurai">samurai</option>
+		</select>	
+		</div>
 	</div>
 	<script src="js/three.min.js"></script>
 	<script src="js/wahotiScript.js"></script>
