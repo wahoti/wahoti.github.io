@@ -1,6 +1,7 @@
 var victor = require('victor');
 var _ = require('lodash');
 var domready = require("domready");
+var shortid = require('shortid');
 
 var what_is_going_on = false;
 
@@ -168,7 +169,126 @@ function do_action(agent, action){
 
 
 var agents = {
-	
+	agent: object = {
+		//shoots bullets and dodges
+		step: function(){
+			//console.log(this._pos.x, this._pos.y);
+			//console.log(this.phase);
+			this._pos.x = this.pos.x;
+			this._pos.y = this.pos.y;
+			var _size = this.size/2;
+			var xQuad = this.pos.x/width;
+			var yQuad = this.pos.y/height;
+			if(this.xQuad != xQuad){
+				this.xQuad = xQuad;
+				this.xQuad_ = true;
+			}
+			else{
+				this.xQuad_ = false;
+			}
+			if(this.yQuad != yQuad){
+				this.yQuad = yQuad;
+				this.yQuad_ = true;
+			}
+			else{
+				this.yQuad_ = false;
+			}
+				
+				
+			switch(this.phase){
+				case 'moving':
+					var x_left = this.pos.x < width/2;
+					var y_top = this.pos.y < height/2;
+					if(x_left) this.direction.x = -this.pos.x;
+					else this.direction.x = width-this.pos.x;
+					if(y_top) this.direction.y = -this.pos.y;
+					else this.direction.y = height-this.pos.y;
+					this.direction.normalize();
+					// console.log(this.direction.x, this.direction.y);
+					this._pos.x += this.direction.x*this.speed;
+					this._pos.y += this.direction.y*this.speed;
+					this.dodge_cd_count++;
+					if(this.dodge_cd_count >= this.dodge_cd){
+						if(!x_left && !y_top){//bottom right
+							this.phase_direction.x = Math.random() - 1;
+							this.phase_direction.y = Math.random() - 1;
+							this.phase_direction.normalize();				
+						}
+						else if(!x_left && y_top){//top right
+							this.phase_direction.x = Math.random() - 1;
+							this.phase_direction.y = Math.random();
+							this.phase_direction.normalize();				
+						}
+						else if(x_left && y_top){//top left
+							this.phase_direction.x = Math.random();
+							this.phase_direction.y = Math.random();
+							this.phase_direction.normalize();				
+						}
+						else if(x_left && !y_top){//bottom left
+							this.phase_direction.x = Math.random();
+							this.phase_direction.y = Math.random()-1;
+							this.phase_direction.normalize();	
+						}
+						this.dodge_cd_count = 0;
+						this.phase_count = 0;
+						this.phase = 'dodging';
+					}
+					this.shoot_cd++;
+					if(this.shoot_cd_count >= this.shoot_cd){
+						this.shoot_cd_count = 0;
+						actions['shoot'].go(this, things['player'].pos.x, things[x].pos.y);
+					}							
+					break;
+				case 'dodging':
+					this._pos.x += this.phase_direction.x * this.dodge_speed;
+					this._pos.y += this.phase_direction.y * this.dodge_speed;
+					this.phase_count += 1;
+					if(this.phase_count == this.dodge_distance) this.phase = "moving";					
+					break;
+				case 'knockback':
+					this._pos.x += this.phase_direction.x * this.dodge_speed;
+					this._pos.y += this.phase_direction.y * this.dodge_speed;
+					this.phase_count += 1;
+					if(this.phase_count == this.dodge_distance) this.phase = "moving";
+					break;
+				case 'frozen':
+					this.phase_count += 1;
+					if(this.phase_count == this.phase_time) this.phase = "moving";
+					break;
+				default:
+					console.log('no state');
+			}
+			if(colliding(this, true)) return;
+			else{
+				this.pos.x = this._pos.x;
+				this.pos.y = this._pos.y;
+				return;
+			}
+		},
+		collide: function(){
+			
+		},
+		end: function(){
+			//where/how to do end?
+		},
+		go: function(){
+			var id = shortid.generate();
+			things[id] = new Square(id, true, true, agents['agent'].step, 10, -100, -100);
+			things[id].speed = 3;
+			things[id].phase_count = 0;
+			things[id].phase_time = 0;
+			things[id].dodge_cd = 100;
+			things[id].dodge_cd_count = 0; 
+			things[id].dodge_speed = 20;
+			things[id].dodge_distance = 30;
+			things[id].shoot_cd = 200;
+			things[id].shoot_cd_count = 0;
+			things[id].direction = new victor(0,0)
+			things[id].phase = 'moving';
+			random_teleport(things[id]);
+		}
+	},
+
 };
 
 function new_agent(agent) {
@@ -214,8 +334,22 @@ function Square(id, draw, is_agent, step_function, size, x, y) {
 	this.dodge_distance = 12;
 }
 
-function colliding() {
+function colliding(square, do_collision) {
 	return false;
+}
+
+function random_teleport(square) {
+	var done = false;
+	while(!done){
+		square._pos.x = Math.random() * (1000 - square.size) + square.size;
+		square._pos.y = Math.random() * (1000 - square.size) + square.size;
+		if(!colliding(square, false)){
+			square.pos.x = square._pos.x;
+			square.pos.y = square._pos.y;
+			done = true;
+		}
+	}
+	return; 
 }
 
 function player_step() {
@@ -236,7 +370,7 @@ function player_step() {
 		this.phase_count += 1;
 		if(this.phase_count == this.dodge_distance) this.phase = "moving";
 	}
-	if(!colliding(this)){
+	if(!colliding(this, true)){
 		//move_weapons(this)
 		this.pos.x = this._pos.x;
 		this.pos.y = this._pos.y;
@@ -268,10 +402,12 @@ function create_player() {
 	things['player'].phase = 'moving';
 	things['player'].speed = 5;
 	things['player'].space = 'dodge';
-	things['player'].shift = 'freeze';
-	things['player'].m1 = 'sword';
-	things['player'].m2 = 'axe';
-	
+	things['player'].shift = 'dodge';
+	things['player'].m1 = 'dodge';
+	things['player'].m2 = 'dodge';
+	things['player'].dodge_speed = 20;
+	things['player'].dodge_distance = 12;
+	random_teleport(things['player']);
 }
 
 create_player();
@@ -323,8 +459,7 @@ var dark_squares_step_interval = setInterval(function(){
 
 var second_interval = setInterval(function(){
 	if (what_is_going_on){
-		console.log(this.phase_count);
-		console.log(this.pos.x, this.pos.y);
+		
 	}
 	
 	for(var x in things){

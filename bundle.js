@@ -2,6 +2,7 @@
 var victor = require('victor');
 var _ = require('lodash');
 var domready = require("domready");
+var shortid = require('shortid');
 
 var what_is_going_on = false;
 
@@ -169,11 +170,130 @@ function do_action(agent, action){
 
 
 var agents = {
-	
+	agent: object = {
+		//shoots bullets and dodges
+		step: function(){
+			//console.log(this._pos.x, this._pos.y);
+			//console.log(this.phase);
+			this._pos.x = this.pos.x;
+			this._pos.y = this.pos.y;
+			var _size = this.size/2;
+			var xQuad = this.pos.x/width;
+			var yQuad = this.pos.y/height;
+			if(this.xQuad != xQuad){
+				this.xQuad = xQuad;
+				this.xQuad_ = true;
+			}
+			else{
+				this.xQuad_ = false;
+			}
+			if(this.yQuad != yQuad){
+				this.yQuad = yQuad;
+				this.yQuad_ = true;
+			}
+			else{
+				this.yQuad_ = false;
+			}
+				
+				
+			switch(this.phase){
+				case 'moving':
+					var x_left = this.pos.x < width/2;
+					var y_top = this.pos.y < height/2;
+					if(x_left) this.direction.x = -this.pos.x;
+					else this.direction.x = width-this.pos.x;
+					if(y_top) this.direction.y = -this.pos.y;
+					else this.direction.y = height-this.pos.y;
+					this.direction.normalize();
+					// console.log(this.direction.x, this.direction.y);
+					this._pos.x += this.direction.x*this.speed;
+					this._pos.y += this.direction.y*this.speed;
+					this.dodge_cd_count++;
+					if(this.dodge_cd_count >= this.dodge_cd){
+						if(!x_left && !y_top){//bottom right
+							this.phase_direction.x = Math.random() - 1;
+							this.phase_direction.y = Math.random() - 1;
+							this.phase_direction.normalize();				
+						}
+						else if(!x_left && y_top){//top right
+							this.phase_direction.x = Math.random() - 1;
+							this.phase_direction.y = Math.random();
+							this.phase_direction.normalize();				
+						}
+						else if(x_left && y_top){//top left
+							this.phase_direction.x = Math.random();
+							this.phase_direction.y = Math.random();
+							this.phase_direction.normalize();				
+						}
+						else if(x_left && !y_top){//bottom left
+							this.phase_direction.x = Math.random();
+							this.phase_direction.y = Math.random()-1;
+							this.phase_direction.normalize();	
+						}
+						this.dodge_cd_count = 0;
+						this.phase_count = 0;
+						this.phase = 'dodging';
+					}
+					this.shoot_cd++;
+					if(this.shoot_cd_count >= this.shoot_cd){
+						this.shoot_cd_count = 0;
+						actions['shoot'].go(this, things['player'].pos.x, things[x].pos.y);
+					}							
+					break;
+				case 'dodging':
+					this._pos.x += this.phase_direction.x * this.dodge_speed;
+					this._pos.y += this.phase_direction.y * this.dodge_speed;
+					this.phase_count += 1;
+					if(this.phase_count == this.dodge_distance) this.phase = "moving";					
+					break;
+				case 'knockback':
+					this._pos.x += this.phase_direction.x * this.dodge_speed;
+					this._pos.y += this.phase_direction.y * this.dodge_speed;
+					this.phase_count += 1;
+					if(this.phase_count == this.dodge_distance) this.phase = "moving";
+					break;
+				case 'frozen':
+					this.phase_count += 1;
+					if(this.phase_count == this.phase_time) this.phase = "moving";
+					break;
+				default:
+					console.log('no state');
+			}
+			if(colliding(this, true)) return;
+			else{
+				this.pos.x = this._pos.x;
+				this.pos.y = this._pos.y;
+				return;
+			}
+		},
+		collide: function(){
+			
+		},
+		end: function(){
+			//where/how to do end?
+		},
+		go: function(){
+			var id = shortid.generate();
+			things[id] = new Square(id, true, true, agents['agent'].step, 10, -100, -100);
+			things[id].speed = 3;
+			things[id].phase_count = 0;
+			things[id].phase_time = 0;
+			things[id].dodge_cd = 100;
+			things[id].dodge_cd_count = 0; 
+			things[id].dodge_speed = 20;
+			things[id].dodge_distance = 30;
+			things[id].shoot_cd = 200;
+			things[id].shoot_cd_count = 0;
+			things[id].direction = new victor(0,0)
+			things[id].phase = 'moving';
+			random_teleport(things[id]);
+		}
+	},
+
 };
 
 function new_agent(agent) {
-	
+	agents[agent].go();
 }
 
 
@@ -215,8 +335,22 @@ function Square(id, draw, is_agent, step_function, size, x, y) {
 	this.dodge_distance = 12;
 }
 
-function colliding() {
+function colliding(square, do_collision) {
 	return false;
+}
+
+function random_teleport(square) {
+	var done = false;
+	while(!done){
+		square._pos.x = Math.random() * (1000 - square.size) + square.size;
+		square._pos.y = Math.random() * (1000 - square.size) + square.size;
+		if(!colliding(square, false)){
+			square.pos.x = square._pos.x;
+			square.pos.y = square._pos.y;
+			done = true;
+		}
+	}
+	return; 
 }
 
 function player_step() {
@@ -237,7 +371,7 @@ function player_step() {
 		this.phase_count += 1;
 		if(this.phase_count == this.dodge_distance) this.phase = "moving";
 	}
-	if(!colliding(this)){
+	if(!colliding(this, true)){
 		//move_weapons(this)
 		this.pos.x = this._pos.x;
 		this.pos.y = this._pos.y;
@@ -269,10 +403,12 @@ function create_player() {
 	things['player'].phase = 'moving';
 	things['player'].speed = 5;
 	things['player'].space = 'dodge';
-	things['player'].shift = 'freeze';
-	things['player'].m1 = 'sword';
-	things['player'].m2 = 'axe';
-	
+	things['player'].shift = 'dodge';
+	things['player'].m1 = 'dodge';
+	things['player'].m2 = 'dodge';
+	things['player'].dodge_speed = 20;
+	things['player'].dodge_distance = 12;
+	random_teleport(things['player']);
 }
 
 create_player();
@@ -324,8 +460,7 @@ var dark_squares_step_interval = setInterval(function(){
 
 var second_interval = setInterval(function(){
 	if (what_is_going_on){
-		console.log(this.phase_count);
-		console.log(this.pos.x, this.pos.y);
+		
 	}
 	
 	for(var x in things){
@@ -336,7 +471,7 @@ var second_interval = setInterval(function(){
 		}
 	}
 }, 1000) 
-},{"domready":2,"lodash":3,"victor":4}],2:[function(require,module,exports){
+},{"domready":2,"lodash":3,"shortid":4,"victor":14}],2:[function(require,module,exports){
 /*!
   * domready (c) Dustin Diaz 2014 - License MIT
   */
@@ -17457,6 +17592,336 @@ var second_interval = setInterval(function(){
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{}],4:[function(require,module,exports){
+'use strict';
+module.exports = require('./lib/index');
+
+},{"./lib/index":9}],5:[function(require,module,exports){
+'use strict';
+
+var randomFromSeed = require('./random/random-from-seed');
+
+var ORIGINAL = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_-';
+var alphabet;
+var previousSeed;
+
+var shuffled;
+
+function reset() {
+    shuffled = false;
+}
+
+function setCharacters(_alphabet_) {
+    if (!_alphabet_) {
+        if (alphabet !== ORIGINAL) {
+            alphabet = ORIGINAL;
+            reset();
+        }
+        return;
+    }
+
+    if (_alphabet_ === alphabet) {
+        return;
+    }
+
+    if (_alphabet_.length !== ORIGINAL.length) {
+        throw new Error('Custom alphabet for shortid must be ' + ORIGINAL.length + ' unique characters. You submitted ' + _alphabet_.length + ' characters: ' + _alphabet_);
+    }
+
+    var unique = _alphabet_.split('').filter(function(item, ind, arr){
+       return ind !== arr.lastIndexOf(item);
+    });
+
+    if (unique.length) {
+        throw new Error('Custom alphabet for shortid must be ' + ORIGINAL.length + ' unique characters. These characters were not unique: ' + unique.join(', '));
+    }
+
+    alphabet = _alphabet_;
+    reset();
+}
+
+function characters(_alphabet_) {
+    setCharacters(_alphabet_);
+    return alphabet;
+}
+
+function setSeed(seed) {
+    randomFromSeed.seed(seed);
+    if (previousSeed !== seed) {
+        reset();
+        previousSeed = seed;
+    }
+}
+
+function shuffle() {
+    if (!alphabet) {
+        setCharacters(ORIGINAL);
+    }
+
+    var sourceArray = alphabet.split('');
+    var targetArray = [];
+    var r = randomFromSeed.nextValue();
+    var characterIndex;
+
+    while (sourceArray.length > 0) {
+        r = randomFromSeed.nextValue();
+        characterIndex = Math.floor(r * sourceArray.length);
+        targetArray.push(sourceArray.splice(characterIndex, 1)[0]);
+    }
+    return targetArray.join('');
+}
+
+function getShuffled() {
+    if (shuffled) {
+        return shuffled;
+    }
+    shuffled = shuffle();
+    return shuffled;
+}
+
+/**
+ * lookup shuffled letter
+ * @param index
+ * @returns {string}
+ */
+function lookup(index) {
+    var alphabetShuffled = getShuffled();
+    return alphabetShuffled[index];
+}
+
+module.exports = {
+    characters: characters,
+    seed: setSeed,
+    lookup: lookup,
+    shuffled: getShuffled
+};
+
+},{"./random/random-from-seed":12}],6:[function(require,module,exports){
+'use strict';
+
+var encode = require('./encode');
+var alphabet = require('./alphabet');
+
+// Ignore all milliseconds before a certain time to reduce the size of the date entropy without sacrificing uniqueness.
+// This number should be updated every year or so to keep the generated id short.
+// To regenerate `new Date() - 0` and bump the version. Always bump the version!
+var REDUCE_TIME = 1459707606518;
+
+// don't change unless we change the algos or REDUCE_TIME
+// must be an integer and less than 16
+var version = 6;
+
+// Counter is used when shortid is called multiple times in one second.
+var counter;
+
+// Remember the last time shortid was called in case counter is needed.
+var previousSeconds;
+
+/**
+ * Generate unique id
+ * Returns string id
+ */
+function build(clusterWorkerId) {
+
+    var str = '';
+
+    var seconds = Math.floor((Date.now() - REDUCE_TIME) * 0.001);
+
+    if (seconds === previousSeconds) {
+        counter++;
+    } else {
+        counter = 0;
+        previousSeconds = seconds;
+    }
+
+    str = str + encode(alphabet.lookup, version);
+    str = str + encode(alphabet.lookup, clusterWorkerId);
+    if (counter > 0) {
+        str = str + encode(alphabet.lookup, counter);
+    }
+    str = str + encode(alphabet.lookup, seconds);
+
+    return str;
+}
+
+module.exports = build;
+
+},{"./alphabet":5,"./encode":8}],7:[function(require,module,exports){
+'use strict';
+var alphabet = require('./alphabet');
+
+/**
+ * Decode the id to get the version and worker
+ * Mainly for debugging and testing.
+ * @param id - the shortid-generated id.
+ */
+function decode(id) {
+    var characters = alphabet.shuffled();
+    return {
+        version: characters.indexOf(id.substr(0, 1)) & 0x0f,
+        worker: characters.indexOf(id.substr(1, 1)) & 0x0f
+    };
+}
+
+module.exports = decode;
+
+},{"./alphabet":5}],8:[function(require,module,exports){
+'use strict';
+
+var randomByte = require('./random/random-byte');
+
+function encode(lookup, number) {
+    var loopCounter = 0;
+    var done;
+
+    var str = '';
+
+    while (!done) {
+        str = str + lookup( ( (number >> (4 * loopCounter)) & 0x0f ) | randomByte() );
+        done = number < (Math.pow(16, loopCounter + 1 ) );
+        loopCounter++;
+    }
+    return str;
+}
+
+module.exports = encode;
+
+},{"./random/random-byte":11}],9:[function(require,module,exports){
+'use strict';
+
+var alphabet = require('./alphabet');
+var encode = require('./encode');
+var decode = require('./decode');
+var build = require('./build');
+var isValid = require('./is-valid');
+
+// if you are using cluster or multiple servers use this to make each instance
+// has a unique value for worker
+// Note: I don't know if this is automatically set when using third
+// party cluster solutions such as pm2.
+var clusterWorkerId = require('./util/cluster-worker-id') || 0;
+
+/**
+ * Set the seed.
+ * Highly recommended if you don't want people to try to figure out your id schema.
+ * exposed as shortid.seed(int)
+ * @param seed Integer value to seed the random alphabet.  ALWAYS USE THE SAME SEED or you might get overlaps.
+ */
+function seed(seedValue) {
+    alphabet.seed(seedValue);
+    return module.exports;
+}
+
+/**
+ * Set the cluster worker or machine id
+ * exposed as shortid.worker(int)
+ * @param workerId worker must be positive integer.  Number less than 16 is recommended.
+ * returns shortid module so it can be chained.
+ */
+function worker(workerId) {
+    clusterWorkerId = workerId;
+    return module.exports;
+}
+
+/**
+ *
+ * sets new characters to use in the alphabet
+ * returns the shuffled alphabet
+ */
+function characters(newCharacters) {
+    if (newCharacters !== undefined) {
+        alphabet.characters(newCharacters);
+    }
+
+    return alphabet.shuffled();
+}
+
+/**
+ * Generate unique id
+ * Returns string id
+ */
+function generate() {
+  return build(clusterWorkerId);
+}
+
+// Export all other functions as properties of the generate function
+module.exports = generate;
+module.exports.generate = generate;
+module.exports.seed = seed;
+module.exports.worker = worker;
+module.exports.characters = characters;
+module.exports.decode = decode;
+module.exports.isValid = isValid;
+
+},{"./alphabet":5,"./build":6,"./decode":7,"./encode":8,"./is-valid":10,"./util/cluster-worker-id":13}],10:[function(require,module,exports){
+'use strict';
+var alphabet = require('./alphabet');
+
+function isShortId(id) {
+    if (!id || typeof id !== 'string' || id.length < 6 ) {
+        return false;
+    }
+
+    var characters = alphabet.characters();
+    var len = id.length;
+    for(var i = 0; i < len;i++) {
+        if (characters.indexOf(id[i]) === -1) {
+            return false;
+        }
+    }
+    return true;
+}
+
+module.exports = isShortId;
+
+},{"./alphabet":5}],11:[function(require,module,exports){
+'use strict';
+
+var crypto = typeof window === 'object' && (window.crypto || window.msCrypto); // IE 11 uses window.msCrypto
+
+function randomByte() {
+    if (!crypto || !crypto.getRandomValues) {
+        return Math.floor(Math.random() * 256) & 0x30;
+    }
+    var dest = new Uint8Array(1);
+    crypto.getRandomValues(dest);
+    return dest[0] & 0x30;
+}
+
+module.exports = randomByte;
+
+},{}],12:[function(require,module,exports){
+'use strict';
+
+// Found this seed-based random generator somewhere
+// Based on The Central Randomizer 1.3 (C) 1997 by Paul Houle (houle@msc.cornell.edu)
+
+var seed = 1;
+
+/**
+ * return a random number based on a seed
+ * @param seed
+ * @returns {number}
+ */
+function getNextValue() {
+    seed = (seed * 9301 + 49297) % 233280;
+    return seed/(233280.0);
+}
+
+function setSeed(_seed_) {
+    seed = _seed_;
+}
+
+module.exports = {
+    nextValue: getNextValue,
+    seed: setSeed
+};
+
+},{}],13:[function(require,module,exports){
+'use strict';
+
+module.exports = 0;
+
+},{}],14:[function(require,module,exports){
 exports = module.exports = Victor;
 
 /**
