@@ -20,6 +20,52 @@ domready(function () {
 //DARK SQUARES//
 
 
+function default_end(){
+	if(this.is_agent){
+		_.forEach(this.weapons, function(weapon){
+			weapon.end();
+		});	
+	}
+	//things[this.id] = {};
+	delete things[this.id];
+	delete this;
+}
+
+function Square(id, is_agent, step_function, collide_function, end_function, size, x, y, color) {
+	this.id = id;
+	this.is_agent = is_agent;//something that acts on the game opposed to a box or projectile
+	this.color = color || '#000000';
+	
+	this.step = step_function || function(){};
+	this.collide = collide_function || function(){};
+	this.end = end_function || default_end;
+	
+	this.pos = new victor(x || -100, y || -100); //position
+	this._pos = new victor(x || -100, y || -100); //test position
+	this.direction = new victor(0,0);
+	
+	this.size = size || 10;
+	this.speed = 0;
+	
+	this.phase = 'moving';
+	this.phase_count = 0;
+	this.phase_time = 0;
+	this.phase_direction = new victor(0, 0);
+
+	this.dodge_speed = 20;
+	this.dodge_distance = 12;
+
+	this.health = 10;
+	this.energy = 10;
+	this.weapons = {};
+	this.collisions = [];
+	
+	this.draw = true;
+	this.block = false;
+	this.destroy_on_wall = false;
+	this.trigger_on_wall = false;
+}
+
 
 //KEYS / CONTROLLS
 
@@ -128,6 +174,13 @@ function add_event_listeners() {//CALL THIS IN DOMREADY
 
 
 
+function do_action(agent, action){
+	if((agent.energy - action.cost) >= 0){
+		agent.energy -= action.cost;
+		action.go(agent);
+	}
+}
+
 var actions = {
 	dodge: object = {
 		cost: 1,
@@ -155,14 +208,54 @@ var actions = {
 			}
 		}
 	},
-};
+	beam: object = {
+		cost: 3,
+		step: function(){		
+			this._pos.x = this.pos.x + (this.direction.x * this.speed);
+			this._pos.y = this.pos.y + (this.direction.y * this.speed);
+			this.pos.x = this._pos.x;
+			this.pos.y = this._pos.y
+			colliding(this, true);
+			return;
+		},
+		collide: function(thing){//3 damage
+			console.log('beam collide');
+			if(thing.block){
+				this.end();
+				return;
+			}				
+			if(this.collisions.indexOf(thing.id) > -1){ return; }
+			else{
+				if(thing.is_agent){ hit(thing, 3); }	
+				this.collisions.push(thing.id);
+				return;
+			}
+		},
+		go: function(player, coord){
+			var shots = 0;
+			beam_interval = setInterval(function(){
+				if(shots >= 10){
+					clearInterval(this);
+					return;
+				}
+				shots++;		
+				
+				var direction = new victor(coord[0] - player.pos.x, coord[1] - player.pos.y);
+				direction.normalize();
+				
+				var id = shortid.generate();
+				things[id] = new Square(id, false, actions['beam'].step, actions['beam'].collide, default_end, 10, player.pos.x + (30*direction.x), player.pos.y + (30*direction.y));	
+				things[id].direction = direction;
+				things[id].speed = 20;
+				things[id].color = '#FF00FF';
+				things[id].destroy_on_wall = true;
+			},10)	
 
-function do_action(agent, action){
-	if((agent.energy - action.cost) >= 0){
-		agent.energy -= action.cost;
-		action.go(agent);
-	}
-}
+			//setTimeout(function(){clearInterval(beam_interval)}, 500)
+		}
+	},
+
+};
 
 
 
@@ -170,12 +263,14 @@ function do_action(agent, action){
 
 
 
+function new_agent(agent) {
+	agents[agent].go();
+}
+
 var agents = {
 	agent: object = {
 		//shoots bullets and dodges
 		step: function(){
-			//console.log(this._pos.x, this._pos.y);
-			//console.log(this.phase);
 			this._pos.x = this.pos.x;
 			this._pos.y = this.pos.y;
 			var _size = this.size/2;
@@ -235,10 +330,10 @@ var agents = {
 						this.phase_count = 0;
 						this.phase = 'dodging';
 					}
-					this.shoot_cd++;
+					this.shoot_cd_count++;
 					if(this.shoot_cd_count >= this.shoot_cd){
 						this.shoot_cd_count = 0;
-						actions['shoot'].go(this, things['player'].pos.x, things[x].pos.y);
+						actions['beam'].go(this, [things['player'].pos.x, things['player'].pos.y]);
 					}							
 					break;
 				case 'dodging':
@@ -272,22 +367,18 @@ var agents = {
 			
 		},
 		end: function(){
-			//where/how to do end?
+			
 		},
 		go: function(){
 			var id = shortid.generate();
-			things[id] = new Square(id, true, true, agents['agent'].step, 10, -100, -100);
+			things[id] = new Square(id, true, agents['agent'].step, agents['agent'].collide(), default_end, 10, -100, -100);
 			things[id].speed = 3;
-			things[id].phase_count = 0;
-			things[id].phase_time = 0;
 			things[id].dodge_cd = 100;
 			things[id].dodge_cd_count = 0;
 			things[id].dodge_speed = 20;
 			things[id].dodge_distance = 30;
 			things[id].shoot_cd = 200;
 			things[id].shoot_cd_count = 0;
-			things[id].direction = new victor(0,0);
-			things[id].phase = 'moving';
 			random_teleport(things[id]);
 		}
 	},
@@ -297,7 +388,6 @@ var agents = {
 			this._pos.x = this.pos.x;
 			this._pos.y = this.pos.y;
 			var _size = this.size/2;
-				
 				
 			switch(this.phase){
 				case 'moving':						
@@ -321,6 +411,7 @@ var agents = {
 				default:
 					console.log('no state');
 			}
+			
 			if(colliding(this, true)) return;
 			else{
 				this.pos.x = this._pos.x;
@@ -333,33 +424,17 @@ var agents = {
 			
 		},
 		end: function(){
-			//where/how to do end?
+			
 		},
 		go: function(){
 			var id = shortid.generate();
-			things[id] = new Square(id, true, true, agents['test'].step, 100, -100, -100);
+			things[id] = new Square(id, true, agents['test'].step, agents['test'].collide, default_end, 100, -100, -100);
 			things[id].health = 100;
-			things[id].speed = 3;
-			things[id].phase_count = 0;
-			things[id].phase_time = 0;
-			things[id].dodge_cd = 100;
-			things[id].dodge_cd_count = 0;
-			things[id].dodge_speed = 20;
-			things[id].dodge_distance = 30;
-			things[id].shoot_cd = 200;
-			things[id].shoot_cd_count = 0;
-			things[id].direction = new victor(0,0);
-			things[id].phase = 'moving';
 			random_teleport(things[id]);
 		}
 	},
 
 };
-
-function new_agent(agent) {
-	agents[agent].go();
-}
-
 
 
 
@@ -381,27 +456,6 @@ var stamina_ctx = stamina_canvas.getContext("2d");
 hp_ctx.fillStyle = "#e60000";
 stamina_ctx.fillStyle = "#00b300";
 
-var overlaps = [];
-
-function Square(id, draw, is_agent, step_function, size, x, y) {
-	this.id = id;
-	this.draw = draw;
-	this.is_agent = is_agent;//something that acts on the game opposed to a box or projectile
-	this.step = step_function || function(){};
-	this.collide = function(square){};
-	this.size = size || 10;
-	this.pos = new victor(x || -100, y || -100); //position
-	this._pos = new victor(x || -100, y || -100); //test position
-	this.health = 10;
-	this.energy = 10;
-	this.speed = 0;
-	this.phase = '';
-	this.phase_count = 0;
-	this.phase_direction = new victor(0, 0);
-	this.dodge_speed = 20;
-	this.dodge_distance = 12;
-}
-
 function colliding(this_square, do_collision) {
 	//NOTE this works only for squares
 	var this_size = this_square.size / 2;
@@ -409,6 +463,7 @@ function colliding(this_square, do_collision) {
 	//wall
 	if(this_square._pos.x < this_size || this_square._pos.x > (width-this_size) || this_square._pos.y < this_size || this_square._pos.y > (height-this_size)){
 		if(this_square.destroy_on_wall){
+			console.log('destroy_on_wall');;
 			this_square.end();
 			return true;
 		}
@@ -417,13 +472,13 @@ function colliding(this_square, do_collision) {
 		}
 		return true;
 	}
-	
+	else{
 	for(var x in things){
 		var that_square = things[x];
 		if(this_square.id != that_square.id){
 			var that_size = that_square.size / 2;
-			if((this_square._pos.x+this_size) >= (that_square.pos.x-that_size)&&(this_square._pos.x-this_size) <= (that_square.pos.x+that_size) &&
-			   (this_square._pos.y+this_size) >= (that_square.pos.y-that_size)&&(this_square._pos.y-this_size) <= (that_square.pos.y+that_size)){ 	
+			if((this_square._pos.x+this_size) >= (that_square._pos.x-that_size)&&(this_square._pos.x-this_size) <= (that_square._pos.x+that_size) &&
+			   (this_square._pos.y+this_size) >= (that_square._pos.y-that_size)&&(this_square._pos.y-this_size) <= (that_square._pos.y+that_size)){ 	
 				if(that_square.isweapon){
 					if((that_square.owner != this_square.id) && do_collision){
 						this_square.collide(that_square);
@@ -437,7 +492,7 @@ function colliding(this_square, do_collision) {
 			}
 		}
 	}
-			  
+	}	  
 	return false;
 }
 
@@ -453,6 +508,23 @@ function random_teleport(square) {
 		}
 	}
 	return; 
+}
+
+function hit(thing, damage){
+	//console.log('hit')
+	if(thing.is_agent){
+		if((thing.phase != "dodging") && (thing.phase != "dead")){
+			thing.health -= damage;
+		}
+	}
+	else{
+		thing.health -= damage;
+	}
+	
+	if(thing.health <= 0){
+		thing.end();
+		return;
+	}
 }
 
 function player_step() {
@@ -500,18 +572,28 @@ function player_step() {
 	// }
 }
 
+function player_collide(square) {}//this is supposed to be empty
+
+function player_end() {
+	things['player'].phase = 'dead';
+	things['player'].pos.x = -100;
+	things['player'].pos.y = -100;
+	setTimeout(function(){
+		things['player'].health = 10;
+		things['player'].phase = 'moving';
+		random_teleport(things['player']);
+	}, 5000);
+}
+
 function create_player() {
-	things['player'] = new Square('player', true, true, player_step, 10, 250, 250);
+	things['player'] = new Square('player', true, player_step, player_collide, player_end, 10, 250, 250);
 	things['player'].phase = 'moving';
 	things['player'].speed = 5;
 	things['player'].space = 'dodge';
 	things['player'].shift = 'dodge';
 	things['player'].m1 = 'dodge';
 	things['player'].m2 = 'dodge';
-	things['player'].dodge_speed = 20;
-	things['player'].dodge_distance = 12;
 	random_teleport(things['player']);
-	things['player'].collide = function(square){};
 }
 
 create_player();
@@ -573,7 +655,7 @@ var second_interval = setInterval(function(){
 			}
 		}
 	}
-}, 1000) 
+}, 1000); 
 },{"domready":2,"lodash":3,"shortid":4,"victor":14}],2:[function(require,module,exports){
 /*!
   * domready (c) Dustin Diaz 2014 - License MIT
