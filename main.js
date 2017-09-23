@@ -2,6 +2,7 @@ var victor = require('victor');
 var _ = require('lodash');
 var domready = require("domready");
 var shortid = require('shortid');
+// var boxIntersect = require('box-intersect')
 
 var what_is_going_on = false;
 
@@ -265,7 +266,8 @@ var agents = {
 				return;
 			}
 		},
-		collide: function(){
+		collide: function(square){
+			console.log('agent collide!');
 			
 		},
 		end: function(){
@@ -278,12 +280,74 @@ var agents = {
 			things[id].phase_count = 0;
 			things[id].phase_time = 0;
 			things[id].dodge_cd = 100;
-			things[id].dodge_cd_count = 0; 
+			things[id].dodge_cd_count = 0;
 			things[id].dodge_speed = 20;
 			things[id].dodge_distance = 30;
 			things[id].shoot_cd = 200;
 			things[id].shoot_cd_count = 0;
-			things[id].direction = new victor(0,0)
+			things[id].direction = new victor(0,0);
+			things[id].phase = 'moving';
+			random_teleport(things[id]);
+		}
+	},
+	test: object = {
+		//damage sponge - for testing
+		step: function(){
+			this._pos.x = this.pos.x;
+			this._pos.y = this.pos.y;
+			var _size = this.size/2;
+				
+				
+			switch(this.phase){
+				case 'moving':						
+					break;
+				case 'dodging':
+					this._pos.x += this.phase_direction.x * this.dodge_speed;
+					this._pos.y += this.phase_direction.y * this.dodge_speed;
+					this.phase_count += 1;
+					if(this.phase_count == this.dodge_distance) this.phase = "moving";					
+					break;
+				case 'knockback':
+					this._pos.x += this.phase_direction.x * this.dodge_speed;
+					this._pos.y += this.phase_direction.y * this.dodge_speed;
+					this.phase_count += 1;
+					if(this.phase_count == this.dodge_distance) this.phase = "moving";
+					break;
+				case 'frozen':
+					this.phase_count += 1;
+					if(this.phase_count == this.phase_time) this.phase = "moving";
+					break;
+				default:
+					console.log('no state');
+			}
+			if(colliding(this, true)) return;
+			else{
+				this.pos.x = this._pos.x;
+				this.pos.y = this._pos.y;
+				return;
+			}
+		},
+		collide: function(square){
+			console.log('test collide!');
+			
+		},
+		end: function(){
+			//where/how to do end?
+		},
+		go: function(){
+			var id = shortid.generate();
+			things[id] = new Square(id, true, true, agents['test'].step, 100, -100, -100);
+			things[id].health = 100;
+			things[id].speed = 3;
+			things[id].phase_count = 0;
+			things[id].phase_time = 0;
+			things[id].dodge_cd = 100;
+			things[id].dodge_cd_count = 0;
+			things[id].dodge_speed = 20;
+			things[id].dodge_distance = 30;
+			things[id].shoot_cd = 200;
+			things[id].shoot_cd_count = 0;
+			things[id].direction = new victor(0,0);
 			things[id].phase = 'moving';
 			random_teleport(things[id]);
 		}
@@ -316,11 +380,14 @@ var stamina_ctx = stamina_canvas.getContext("2d");
 hp_ctx.fillStyle = "#e60000";
 stamina_ctx.fillStyle = "#00b300";
 
+var overlaps = [];
+
 function Square(id, draw, is_agent, step_function, size, x, y) {
 	this.id = id;
 	this.draw = draw;
 	this.is_agent = is_agent;//something that acts on the game opposed to a box or projectile
 	this.step = step_function || function(){};
+	this.collide = function(square){};
 	this.size = size || 10;
 	this.pos = new victor(x || -100, y || -100); //position
 	this._pos = new victor(x || -100, y || -100); //test position
@@ -334,7 +401,42 @@ function Square(id, draw, is_agent, step_function, size, x, y) {
 	this.dodge_distance = 12;
 }
 
-function colliding(square, do_collision) {
+function colliding(this_square, do_collision) {
+	//NOTE this works only for squares
+	var this_size = this_square.size / 2;
+	
+	//wall
+	if(this_square._pos.x < this_size || this_square._pos.x > (width-this_size) || this_square._pos.y < this_size || this_square._pos.y > (height-this_size)){
+		if(this_square.destroy_on_wall){
+			this_square.end();
+			return true;
+		}
+		if(this_square.trigger_on_wall){
+			if(do_collision) this_square.wall_collision();
+		}
+		return true;
+	}
+	
+	for(var x in things){
+		var that_square = things[x];
+		if(this_square.id != that_square.id){
+			var that_size = that_square.size / 2;
+			if((this_square._pos.x+this_size) >= (that_square._pos.x-that_size)&&(this_square._pos.x-this_size) <= (that_square._pos.x+that_size) &&
+			   (this_square._pos.y+this_size) >= (that_square._pos.y-that_size)&&(this_square._pos.y-this_size) <= (that_square._pos.y+that_size)){ 	
+				if(that_square.isweapon){
+					if((that_square.owner != this_square.id) && do_collision){
+						this_square.collide(that_square);
+						return false;//weapons dont block
+					}
+				}
+				else if(do_collision){
+					this_square.collide(that_square);
+					return true;
+				}
+			}
+		}
+	}
+			  
 	return false;
 }
 
@@ -408,6 +510,7 @@ function create_player() {
 	things['player'].dodge_speed = 20;
 	things['player'].dodge_distance = 12;
 	random_teleport(things['player']);
+	things['player'].collide = function(square){};
 }
 
 create_player();
@@ -452,9 +555,9 @@ var dark_squares_draw_interval = setInterval(function(){
 }, 17);	
 
 var dark_squares_step_interval = setInterval(function(){
-	for(var x in things){
-		things[x].step();
-	}
+	_.forEach(things, function(value) {
+		things[value.id].step();
+	});
 }, 17);
 
 var second_interval = setInterval(function(){
