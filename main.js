@@ -512,7 +512,7 @@ var agents = {
 					this._pos.x += this.phase_direction.x * this.dodge_speed;
 					this._pos.y += this.phase_direction.y * this.dodge_speed;
 					this.phase_count += 1;
-					if(this.phase_count == this.dodge_distance) this.phase = "moving";
+					if(this.phase_count >= this.phase_time) this.phase = "moving";
 					break;
 				case 'frozen':
 					this.phase_count += 1;
@@ -521,8 +521,7 @@ var agents = {
 				default:
 					console.log('no state');
 			}
-			if(colliding(this, true)) return;
-			else{
+			if(!colliding(this, true)){ 
 				this.pos.x = this._pos.x;
 				this.pos.y = this._pos.y;
 				return;
@@ -547,6 +546,135 @@ var agents = {
 			things[id].shoot_cd_count = 0;
 			random_teleport(things[id]);
 		}
+	},
+	samurai: object = {
+		step: function(){
+			this._pos.x = this.pos.x;
+			this._pos.y = this.pos.y
+			var target = things[this.target];
+			var distance = Math.sqrt(Math.pow(target.pos.x - this.pos.x, 2), Math.pow(target.pos.y - this.pos.y));
+			this.direction.x = target.pos.x - this.pos.x;
+			this.direction.y = target.pos.y - this.pos.y
+			this.direction.normalize();
+			//handle null targets	
+				
+			switch(this.phase){
+				case 'default':		
+					if(this.attack_phase == 'attacking'){
+						if(!this.has_attacked){//swing sword if haven't already
+							this.has_attacked = true;
+							actions['axe'].go(things[this.id], [target.pos.x, target.pos.y]);
+						}
+						this.attack_phase_count++;
+						if(this.attack_phase_count == this.attack_duration){//retreat if attack duration is up
+							this.attack_phase = 'waiting';
+							this.has_attacked = false;
+							this.attack_phase_count = 0;
+							
+							this.phase = 'dodging';						
+							this.phase_direction.x = this.pos.x - target.pos.x;
+							this.phase_direction.y = this.pos.y - target.pos.y;
+							this.phase_direction.normalize();
+							this.phase_count = 0;
+							this.phase_time = this.dodge_distance;
+						}
+						else{//maintain a distance of 100
+							if(target != null){
+								if(distance > 100){
+									this._pos.x = this.pos.x + (this.direction.x * this.speed);
+									this._pos.y = this.pos.y + (this.direction.y * this.speed);
+								}
+								else if(distance < 100){
+									this._pos.x = this.pos.x - (this.direction.x * this.speed);
+									this._pos.y = this.pos.y - (this.direction.y * this.speed);
+								}
+							}
+						}
+					}				
+					else if(this.attack_phase == 'waiting'){
+						this.attack_phase_count++;
+						if(target != null){
+							if(distance > 400){//maintain a distance of 400
+								this._pos.x = this.pos.x + (this.direction.x * this.speed);
+								this._pos.y = this.pos.y + (this.direction.y * this.speed);
+							}
+							else if(distance < 400){
+								this._pos.x = this.pos.x - (this.direction.x * this.speed);
+								this._pos.y = this.pos.y - (this.direction.y * this.speed);
+							}
+							if(this.attack_phase_count >= this.attack_cd){//if attack cooldown is up - attack
+								this.attack_phase = 'attacking';	
+								this.attack_phase_count = 0;
+							
+								this.phase = 'dodging';
+								this.phase_direction.x = this.direction.x;
+								this.phase_direction.y = this.direction.y;
+								this.phase_count = 0;
+								this.phase_time = (((distance - 90) / this.dodge_speed) > 0) ? ((distance - 90) / this.dodge_speed) : 0;
+							}
+						}
+					}
+					break;
+				case 'dodging':
+					this._pos.x += this.phase_direction.x * this.dodge_speed;
+					this._pos.y += this.phase_direction.y * this.dodge_speed;
+					this.phase_count += 1;
+					if(this.phase_count >= this.phase_time) this.phase = "default";
+					break;
+				case 'knockback':
+					this._pos.x += this.phase_direction.x * this.dodge_speed;
+					this._pos.y += this.phase_direction.y * this.dodge_speed;
+					this.phase_count += 1;
+					if(this.phase_count >= this.phase_time) this.phase = "default";
+					break;
+				case 'frozen':
+					this.phase_count += 1;
+					if(this.phase_count == this.phase_time) this.phase = "default";
+					break;
+				default:
+					console.log('no state');
+			}
+				
+			for(var weapon in this.weapons){
+				if (typeof things[this.weapons[weapon]] != 'undefined') things[this.weapons[weapon]].update();
+				else console.log('UNDEFINED: things[weapon] IN player_step() - update', things[this.weapons[weapon]]);
+			}
+			
+			if(!colliding(this, true)){
+				for(var weapon in this.weapons){
+					if (typeof things[this.weapons[weapon]] != 'undefined') things[this.weapons[weapon]].move();
+					else console.log('UNDEFINED: things[weapon] IN player_step() - move');
+				}
+				this.pos.x = this._pos.x;
+				this.pos.y = this._pos.y;
+				return;
+			}
+		},
+		collide: function(){
+			
+		},
+		end: function(){
+			
+		},
+		go: function(){
+			var id = shortid.generate();
+			things[id] = new Square(id, true, agents['samurai'].step, agents['samurai'].collide, default_end, 20, -3000, -3000, '#000000');
+			things[id].target = 'player';
+			things[id].phase = 'default';
+			
+			things[id].attack_phase = 'waiting';
+			things[id].attack_cd = 500;
+			things[id].attack_duration = 50;
+			things[id].attack_phase_count = 0;
+			things[id].has_attacked = false;
+			
+			things[id].dodge_speed = 20;
+			things[id].dodge_distance = 30;
+			things[id].speed = 1;
+			things[id].health = 10;
+		
+			random_teleport(things[id]);
+		},		
 	},
 	test: object = {
 		//damage sponge - for testing
@@ -699,19 +827,33 @@ function player_step() {
 	this._pos.x = this.pos.x;
 	this._pos.y = this.pos.y;
 	var _size = this.size/2;
-	if(this.phase == "moving"){
-		if(up){ this._pos.y -= this.speed; }
-		else if(down){ this._pos.y += this.speed; }
-		if(left){ this._pos.x -= this.speed; }
-		else if(right){ this._pos.x += this.speed; }	
-	}
-	else if(this.phase == "dodging"){
-		if(!this.dodge_in_place){
+	switch(this.phase){
+		case 'moving':
+			if(up){ this._pos.y -= this.speed; }
+			else if(down){ this._pos.y += this.speed; }
+			if(left){ this._pos.x -= this.speed; }
+			else if(right){ this._pos.x += this.speed; }	
+			break;
+		case 'dodging':
+			if(!this.dodge_in_place){
+				this._pos.x += this.phase_direction.x * this.dodge_speed;
+				this._pos.y += this.phase_direction.y * this.dodge_speed;
+			}
+			this.phase_count += 1;
+			if(this.phase_count == this.dodge_distance) this.phase = "moving";
+			break;
+		case 'knockback':
 			this._pos.x += this.phase_direction.x * this.dodge_speed;
 			this._pos.y += this.phase_direction.y * this.dodge_speed;
-		}
-		this.phase_count += 1;
-		if(this.phase_count == this.dodge_distance) this.phase = "moving";
+			this.phase_count += 1;
+			if(this.phase_count >= this.phase_time) this.phase = "moving";
+			break;
+		case 'frozen':
+			this.phase_count += 1;
+			if(this.phase_count == this.phase_time) this.phase = "moving";
+			break;
+		default:
+			console.log('no state');
 	}
 	
 	for(var weapon in this.weapons){
@@ -728,25 +870,6 @@ function player_step() {
 		this.pos.y = this._pos.y;
 		return;
 	}
-	// else if(this.phase == "knockback"){
-		// this._x += this.ddirection.x * this.dspeed
-		// this._y += this.ddirection.y * this.dspeed
-		// this.dcount += 1
-		// if(this.dcount == this.ddistance){ this.phase = "moving" }
-	// }
-	// else if(this.phase == 'frozen'){
-		// this.pcount += 1
-		// if(this.pcount == this.ptime){ this.phase = "moving"}
-	// }
-	
-	// update_weapons(this)
-	// //for knockback, have colliding change _x/_y
-	// if(!colliding(this)){
-		// move_weapons(this)
-		// this.x = this._x
-		// this.y = this._y
-		// return
-	// }
 }
 
 function player_collide(square) {}//this is supposed to be empty
