@@ -181,6 +181,92 @@ function do_action(agent, action, coord){
 }
 
 var actions = {
+	axe: object = {
+		cost: 1,
+		step: function(){
+		},
+		collide: function(thing){
+			// console.log('sword collide');
+			// if(thing.block){
+				// things[name].end()
+				// return
+			// }}
+			console.log(thing.owner);
+			if(thing.id == this.owner.id) console.log('owner in collide');
+			if(!(things[this.weapon_root].collisions.indexOf(thing.id) > 0)){				
+				if(thing.is_agent){
+					hit(thing, 5);
+					//knockback1(thing, this.owner)
+				}
+				if(thing.isweapon){
+					if(thing.owner != this.owner){
+						//knockback(thing.owner, this.owner)
+					}
+				}
+				things[this.weapon_root].collisions.push(thing.id);
+			}	
+			return;
+		},
+		end: function(){
+			for(var x in this.sections_array){
+				things[this.sections[x]].end();
+			}
+			delete things[this.owner].weapons['sword'];
+			delete things[this.id];
+			delete this;
+		},
+		update: function(){
+			this.direction.rotate(this.rotation_speed).normalize();
+			for(var x in this.sections_array){
+				things[this.sections[x]]._pos.x = things[this.owner]._pos.x + (this.offset*x*this.direction.x);
+				things[this.sections[x]]._pos.y = things[this.owner]._pos.y + (this.offset*x*this.direction.y);
+				colliding(things[this.sections[x]], true);
+			}		
+		},
+		move: function(){
+			for(var x in this.sections_array){
+				things[this.sections[x]].pos.x = things[this.sections[x]]._pos.x;
+				things[this.sections[x]].pos.y = things[this.sections[x]]._pos.y;
+			}
+		},
+		go: function(player, coord){
+			if(player.weapons['sword']){ things[player.weapons['sword']].end(); }
+
+			var direction = new victor(coord[0] - player.pos.x, coord[1] - player.pos.y);
+			direction.rotate(-1.5).normalize();	
+			direction.normalize();
+			var id = shortid.generate();
+			things[id] = new Square(id, false, actions['axe'].step, function(thing){}, actions['axe'].end, 10, player.pos.x + (30*direction.x), player.pos.y + (30*direction.y));	
+			things[id].direction = direction;
+			things[id].owner = player.id;
+			things[id].incorporeal = true;
+			things[id].offset = 20;
+			things[id].sections_array = [,1,2,3,4,5,6];
+			things[id].sections = {};
+			things[id].update = actions['axe'].update;
+			things[id].move = actions['axe'].move;
+			things[id].rotation_speed = .30	;
+			
+			//do sections
+			for(var x in things[id].sections_array){
+				var _id = shortid.generate();
+				things[_id] = new Square(_id, false, function(){}, actions['axe'].collide, default_end, 20, player.pos.x + (things[id].offset*x*direction.x), player.pos.y + (things[id].offset*x*direction.y));	
+				things[_id].owner = player.id;
+				things[_id].weapon_root = id;
+				things[_id].direction = things[id].direction;
+				things[_id].block = true;
+				things[_id].is_weapon = true;
+				things[id].sections[x] = _id;
+			}
+			
+			player.weapons['sword'] = id;
+			
+			setTimeout(function(){
+				if(things[id]) things[id].end();
+			}, 150)
+		}
+	},
+
 	beam: object = {
 		cost: 3,
 		step: function(){		
@@ -684,7 +770,7 @@ function create_player() {
 	things['player'].space = 'dodge';
 	things['player'].shift = 'dodge';
 	things['player'].m1 = 'sword';
-	things['player'].m2 = 'sword';
+	things['player'].m2 = 'axe';
 	random_teleport(things['player']);
 }
 
