@@ -22,10 +22,9 @@ domready(function () {
 function default_end(){
 	if(this.is_agent){
 		_.forEach(this.weapons, function(weapon){
-			weapon.end();
+			things[weapon].end();
 		});	
 	}
-	//things[this.id] = {};
 	delete things[this.id];
 	delete this;
 }
@@ -63,6 +62,8 @@ function Square(id, is_agent, step_function, collide_function, end_function, siz
 	this.block = false;
 	this.destroy_on_wall = false;
 	this.trigger_on_wall = false;
+	this.is_weapon = false;
+	this.incorporeal = false;
 }
 
 
@@ -91,10 +92,10 @@ var keydown = function(c){
 			right = true;
 			break;
 		case 32://space
-			do_action(things['player'], actions[things['player'].space]);
+			do_action(things['player'], actions[things['player'].space], [mx, my]);
 			break;
 		case 16://shift
-			do_action(things['player'], actions[things['player'].shift]);
+			do_action(things['player'], actions[things['player'].shift], [mx, my]);
 			break;
 		default:
 	}
@@ -128,17 +129,17 @@ function add_event_listeners() {//CALL THIS IN DOMREADY
 	
 	document.addEventListener('contextmenu', function(c) { c.preventDefault() }, false);
 	canvas.addEventListener("mousedown", function(c){
-		coord = [(c.clientX - canvas.offsetLeft), (c.clientY - canvas.offsetTop)]
+		coord = [(c.clientX - canvas.offsetLeft) * width_ratio, (c.clientY - canvas.offsetTop) * height_ratio]
 		if(c.which == 1){
-			do_action(things['player'], things['player'].m1);
+			do_action(things['player'], actions[things['player'].m1], coord);
 		}
 		if(c.which == 3){
-			do_action(things['player'], things['player'].m2);
+			do_action(things['player'], actions[things['player'].m2], coord);
 		}
 	}, false);
 	canvas.addEventListener('mousemove',function(c){
-		mx = (c.clientX - canvas.offsetLeft);
-		my = (c.clientY - canvas.offsetTop);
+		mx = (c.clientX - canvas.offsetLeft) * width_ratio;
+		my = (c.clientY - canvas.offsetTop) * height_ratio;
 	},false);
 
 	//buttons
@@ -171,42 +172,14 @@ function add_event_listeners() {//CALL THIS IN DOMREADY
 
 //ACTIONS
 
-
-
-function do_action(agent, action){
+function do_action(agent, action, coord){
 	if((agent.energy - action.cost) >= 0){
 		agent.energy -= action.cost;
-		action.go(agent);
+		action.go(agent, coord);
 	}
 }
 
 var actions = {
-	dodge: object = {
-		cost: 1,
-		go: function(player, coord){
-			if(player.phase == "moving"){
-				var dx = player.pos.x;
-				var dy = player.pos.y;
-				if(up){ dy -= 1; }
-				else if(down){ dy += 1; }
-				if(left){ dx -= 1; }
-				else if(right){ dx += 1; }
-				if((dx - player.pos.x) == 0 && (dy - player.pos.y) == 0){
-					player.dodge_in_place = true;
-					player.phase_count = 0;
-					player.phase = "dodging";
-				}
-				else{
-					player.dodge_in_place = false;
-					player.phase_count = 0;
-					player.phase_direction.x = dx - player.pos.x;
-					player.phase_direction.y = dy - player.pos.y;
-					player.phase_direction.normalize();
-					player.phase = "dodging";
-				}
-			}
-		}
-	},
 	beam: object = {
 		cost: 3,
 		step: function(){		
@@ -251,6 +224,111 @@ var actions = {
 			},10)	
 
 			//setTimeout(function(){clearInterval(beam_interval)}, 500)
+		}
+	},
+	dodge: object = {
+		cost: 1,
+		go: function(player, coord){
+			if(player.phase == "moving"){
+				var dx = player.pos.x;
+				var dy = player.pos.y;
+				if(up){ dy -= 1; }
+				else if(down){ dy += 1; }
+				if(left){ dx -= 1; }
+				else if(right){ dx += 1; }
+				if((dx - player.pos.x) == 0 && (dy - player.pos.y) == 0){
+					player.dodge_in_place = true;
+					player.phase_count = 0;
+					player.phase = "dodging";
+				}
+				else{
+					player.dodge_in_place = false;
+					player.phase_count = 0;
+					player.phase_direction.x = dx - player.pos.x;
+					player.phase_direction.y = dy - player.pos.y;
+					player.phase_direction.normalize();
+					player.phase = "dodging";
+				}
+			}
+		}
+	},
+	sword: object = {
+		cost: 1,
+		step: function(){
+		},
+		collide: function(thing){
+			// if(thing.block){
+				// things[name].end()
+				// return
+			// }}
+			if(things[this.weapon_root].collisions.indexOf(thing.id) < 0){				
+				if(thing.is_agent){
+					hit(thing, 5);
+					//knockback1(thing, this.owner)
+				}
+				if(thing.isweapon){
+					if(thing.owner != this.owner){
+						//knockback(thing.owner, this.owner)
+					}
+				}
+				else things[this.weapon_root].collisions.push(thing.id);
+			}										
+			return;
+		},
+		end: function(){
+			for(var x in this.sections_array){
+				things[this.sections[x]].end();
+			}
+			delete things[this.owner].weapons['sword'];
+			delete things[this.id];
+			delete this;
+		},
+		update: function(){
+			for(var x in this.sections_array){
+				things[this.sections[x]]._pos.x = things[this.owner]._pos.x + (this.offset*x*this.direction.x);
+				things[this.sections[x]]._pos.y = things[this.owner]._pos.y + (this.offset*x*this.direction.y);
+				colliding(things[this.sections[x]]);
+			}		
+		},
+		move: function(){
+			for(var x in this.sections_array){
+				things[this.sections[x]].pos.x = things[this.sections[x]]._pos.x;
+				things[this.sections[x]].pos.y = things[this.sections[x]]._pos.y;
+			}
+		},
+		go: function(player, coord){
+			if(player.weapons['sword']){ things[player.weapons['sword']].end(); }
+
+			var direction = new victor(coord[0] - player.pos.x, coord[1] - player.pos.y);
+			direction.normalize();
+			var id = shortid.generate();
+			things[id] = new Square(id, false, actions['sword'].step, function(thing){}, actions['sword'].end, 10, player.pos.x + (30*direction.x), player.pos.y + (30*direction.y));	
+			things[id].direction = direction;
+			things[id].owner = player.id;
+			things[id].incorporeal = true;
+			things[id].offset = 20;
+			things[id].sections_array = [,1,2,3,4,5,6];
+			things[id].sections = {};
+			things[id].update = actions['sword'].update;
+			things[id].move = actions['sword'].move;
+			
+			//do sections
+			for(var x in things[id].sections_array){
+				var _id = shortid.generate();
+				things[_id] = new Square(_id, false, function(){}, actions['sword'].collide, default_end, 20, player.pos.x + (things[id].offset*x*direction.x), player.pos.y + (things[id].offset*x*direction.y));	
+				things[_id].owner = player.id;
+				things[_id].weapon_root = id;
+				things[_id].direction = things[id].direction;
+				things[_id].block = true;
+				things[_id].is_weapon = true;
+				things[id].sections[x] = _id;
+			}
+			
+			player.weapons['sword'] = id;
+			
+			setTimeout(function(){
+				if(things[id]) things[id].end();
+			}, 500)
 		}
 	},
 
@@ -445,6 +523,10 @@ var things = {};
 var reverse = new victor(-1,-1)	;
 var width = 1000;
 var height = 1000;
+var style_width = 500;
+var style_height = 500;//NOTE NEED TO CHANGE THIS IN THE STYLE AND HERE - canvas clicks will be wrong otherwise
+var width_ratio = width / style_width;
+var height_ratio = height / style_height;
 	
 var canvas = document.getElementById("field");
 var hp_canvas = document.getElementById("hp");
@@ -474,15 +556,15 @@ function colliding(this_square, do_collision) {
 	else{
 	for(var x in things){
 		var that_square = things[x];
-		if(this_square.id != that_square.id){
+		if((this_square.id != that_square.id) && !that_square.incorporeal){
 			var that_size = that_square.size / 2;
 			if((this_square._pos.x+this_size) >= (that_square._pos.x-that_size)&&(this_square._pos.x-this_size) <= (that_square._pos.x+that_size) &&
 			   (this_square._pos.y+this_size) >= (that_square._pos.y-that_size)&&(this_square._pos.y-this_size) <= (that_square._pos.y+that_size)){ 	
 				if(that_square.isweapon){
-					if((that_square.owner != this_square.id) && do_collision){
+					if((that_square.owner != this_square.id) && (that_square.owner != this_square.owner) && do_collision){
 						this_square.collide(that_square);
-						return false;//weapons dont block
 					}
+					return false;//weapons dont block
 				}
 				else if(do_collision){
 					this_square.collide(that_square);
@@ -510,19 +592,16 @@ function random_teleport(square) {
 }
 
 function hit(thing, damage){
-	//console.log('hit')
+	console.log('hit')
 	if(thing.is_agent){
 		if((thing.phase != "dodging") && (thing.phase != "dead")){
 			thing.health -= damage;
 		}
-	}
-	else{
-		thing.health -= damage;
-	}
 	
-	if(thing.health <= 0){
-		thing.end();
-		return;
+		if(thing.health <= 0){
+			thing.end();
+			return;
+		}
 	}
 }
 
@@ -544,8 +623,17 @@ function player_step() {
 		this.phase_count += 1;
 		if(this.phase_count == this.dodge_distance) this.phase = "moving";
 	}
+	
+	for(var weapon in this.weapons){
+		if (typeof things[this.weapons[weapon]] != 'undefined') things[this.weapons[weapon]].update();
+		else console.log('UNDEFINED: things[weapon] IN player_step() - update', things[this.weapons[weapon]]);
+	}
+	
 	if(!colliding(this, true)){
-		//move_weapons(this)
+		for(var weapon in this.weapons){
+			if (typeof things[this.weapons[weapon]] != 'undefined') things[this.weapons[weapon]].move();
+			else console.log('UNDEFINED: things[weapon] IN player_step() - move');
+		}
 		this.pos.x = this._pos.x;
 		this.pos.y = this._pos.y;
 		return;
@@ -590,8 +678,8 @@ function create_player() {
 	things['player'].speed = 5;
 	things['player'].space = 'dodge';
 	things['player'].shift = 'dodge';
-	things['player'].m1 = 'dodge';
-	things['player'].m2 = 'dodge';
+	things['player'].m1 = 'sword';
+	things['player'].m2 = 'sword';
 	random_teleport(things['player']);
 }
 
@@ -610,26 +698,29 @@ var dark_squares_draw_interval = setInterval(function(){
 	hp_ctx.fillRect(0,0,(things['player'].health/10)*300,30);
 	stamina_ctx.fillRect(0,0,(things['player'].energy/10)*300,30);
 	for(var x in things){
-		if(things[x].draw){
+		if(!things[x].incorporeal){
 			var size = things[x].size;
 			var _size = things[x].size/2;
 			var __size = _size/2;
-			switch(things[x].phase){
-				case "moving":
-					ctx.fillStyle="#000000";
-					break;
-				case "dodging":
-					ctx.fillStyle="#00ffff";
-					break;
-				case "knockback":
-					ctx.fillStyle="#ff0000";
-					break;
-				case "frozen":
-					ctx.fillStyle = "#0000ff";
-					break;
-				default:
-					ctx.fillStyle="#000000";
+			if(things[x].is_agent){
+				switch(things[x].phase){
+					case "moving":
+						ctx.fillStyle="#000000";
+						break;
+					case "dodging":
+						ctx.fillStyle="#00ffff";
+						break;
+					case "knockback":
+						ctx.fillStyle="#ff0000";
+						break;
+					case "frozen":
+						ctx.fillStyle = "#0000ff";
+						break;
+					default:
+						ctx.fillStyle="#000000";
+				}
 			}
+			else ctx.fillStyle = things[x].color;
 			ctx.fillRect(things[x].pos.x - _size,things[x].pos.y - _size,size,size);
 		}
 		
@@ -638,7 +729,8 @@ var dark_squares_draw_interval = setInterval(function(){
 
 var dark_squares_step_interval = setInterval(function(){
 	_.forEach(things, function(value) {
-		things[value.id].step();
+		if(typeof things[value.id] != 'undefined') things[value.id].step();
+		else console.log('UNDEFINED: things[value.id] IN dark_squares_step_interval\t', value);
 	});
 }, 17);
 
