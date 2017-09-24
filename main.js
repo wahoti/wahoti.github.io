@@ -221,7 +221,7 @@ var actions = {
 				things[id].speed = 20;
 				things[id].color = '#FF00FF';
 				things[id].destroy_on_wall = true;
-			},10)	
+			},20)	
 
 			//setTimeout(function(){clearInterval(beam_interval)}, 500)
 		}
@@ -257,11 +257,14 @@ var actions = {
 		step: function(){
 		},
 		collide: function(thing){
+			// console.log('sword collide');
 			// if(thing.block){
 				// things[name].end()
 				// return
 			// }}
-			if(things[this.weapon_root].collisions.indexOf(thing.id) < 0){				
+			console.log(thing.owner);
+			if(thing.id == this.owner.id) console.log('owner in collide');
+			if(!(things[this.weapon_root].collisions.indexOf(thing.id) > 0)){				
 				if(thing.is_agent){
 					hit(thing, 5);
 					//knockback1(thing, this.owner)
@@ -271,8 +274,8 @@ var actions = {
 						//knockback(thing.owner, this.owner)
 					}
 				}
-				else things[this.weapon_root].collisions.push(thing.id);
-			}										
+				things[this.weapon_root].collisions.push(thing.id);
+			}	
 			return;
 		},
 		end: function(){
@@ -287,7 +290,7 @@ var actions = {
 			for(var x in this.sections_array){
 				things[this.sections[x]]._pos.x = things[this.owner]._pos.x + (this.offset*x*this.direction.x);
 				things[this.sections[x]]._pos.y = things[this.owner]._pos.y + (this.offset*x*this.direction.y);
-				colliding(things[this.sections[x]]);
+				colliding(things[this.sections[x]], true);
 			}		
 		},
 		move: function(){
@@ -440,7 +443,7 @@ var agents = {
 			}
 		},
 		collide: function(square){
-			console.log('agent collide!');
+			// console.log('agent collide!');
 			
 		},
 		end: function(){
@@ -497,7 +500,7 @@ var agents = {
 			}
 		},
 		collide: function(square){
-			console.log('test collide!');
+			// console.log('test collide!');
 			
 		},
 		end: function(){
@@ -560,8 +563,8 @@ function colliding(this_square, do_collision) {
 			var that_size = that_square.size / 2;
 			if((this_square._pos.x+this_size) >= (that_square._pos.x-that_size)&&(this_square._pos.x-this_size) <= (that_square._pos.x+that_size) &&
 			   (this_square._pos.y+this_size) >= (that_square._pos.y-that_size)&&(this_square._pos.y-this_size) <= (that_square._pos.y+that_size)){ 	
-				if(that_square.isweapon){
-					if((that_square.owner != this_square.id) && (that_square.owner != this_square.owner) && do_collision){
+				if(that_square.is_weapon || this_square.is_weapon){
+					if((that_square.owner != this_square.id) && (that_square.owner != this_square.owner) && (this_square.owner != that_square.id) && do_collision){
 						this_square.collide(that_square);
 					}
 					return false;//weapons dont block
@@ -592,6 +595,7 @@ function random_teleport(square) {
 }
 
 function hit(thing, damage){
+	console.log(thing.id);
 	console.log('hit')
 	if(thing.is_agent){
 		if((thing.phase != "dodging") && (thing.phase != "dead")){
