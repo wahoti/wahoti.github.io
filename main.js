@@ -534,7 +534,7 @@ var agents = {
 		},
 		go: function(){
 			var id = shortid.generate();
-			things[id] = new Square(id, true, agents['agent'].step, agents['agent'].collide(), default_end, 10, -100, -100);
+			things[id] = new Square(id, true, agents['agent'].step, agents['agent'].collide(), default_end, 20, -100, -100);
 			things[id].speed = 3;
 			things[id].dodge_cd = 100;
 			things[id].dodge_cd_count = 0;
@@ -896,7 +896,7 @@ function player_end() {
 }
 
 function create_player() {
-	things['player'] = new Square('player', true, player_step, player_collide, player_end, 10, 250, 250);
+	things['player'] = new Square('player', true, player_step, player_collide, player_end, 15, 250, 250);
 	things['player'].phase = 'moving';
 	things['player'].speed = 5;
 	things['player'].space = 'dodge';
