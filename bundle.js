@@ -26,6 +26,7 @@ function default_end(){
 			things[weapon].end();
 		});	
 	}
+	
 	delete things[this.id];
 	delete this;
 }
@@ -50,7 +51,8 @@ function Square(id, is_agent, step_function, collide_function, end_function, siz
 	this.phase_count = 0;
 	this.phase_time = 0;
 	this.phase_direction = new victor(0, 0);
-
+	this.phase_speed = 20;
+	
 	this.dodge_speed = 20;
 	this.dodge_distance = 12;
 
@@ -186,21 +188,19 @@ var actions = {
 		step: function(){
 		},
 		collide: function(thing){
-			// console.log('sword collide');
 			// if(thing.block){
 				// things[name].end()
 				// return
 			// }}
-			console.log(thing.owner);
 			if(thing.id == this.owner.id) console.log('owner in collide');
-			if(!(things[this.weapon_root].collisions.indexOf(thing.id) > 0)){				
+			if(!(things[this.weapon_root].collisions.indexOf(thing.id) >= 0)){				
 				if(thing.is_agent){
 					hit(thing, 5);
-					//knockback1(thing, this.owner)
+					knockback(thing.id, this.owner)
 				}
 				if(thing.isweapon){
 					if(thing.owner != this.owner){
-						//knockback(thing.owner, this.owner)
+						knockback(thing.owner, this.owner)
 					}
 				}
 				things[this.weapon_root].collisions.push(thing.id);
@@ -278,13 +278,11 @@ var actions = {
 			return;
 		},
 		collide: function(thing){//3 damage
-			console.log('beam collide');
 			if(thing.block){
 				this.end();
 				return;
 			}				
-			if(this.collisions.indexOf(thing.id) > -1){ return; }
-			else{
+			if(!(this.collisions.indexOf(thing.id) >= 0)){
 				if(thing.is_agent){ hit(thing, 3); }	
 				this.collisions.push(thing.id);
 				return;
@@ -313,7 +311,7 @@ var actions = {
 			//setTimeout(function(){clearInterval(beam_interval)}, 500)
 		}
 	},
-	dodge: object = {
+	dodge: object = {//note this is for players not agents
 		cost: 1,
 		go: function(player, coord){
 			if(player.phase == "moving"){
@@ -331,6 +329,8 @@ var actions = {
 				else{
 					player.dodge_in_place = false;
 					player.phase_count = 0;
+					player.phase_speed = player.dodge_speed;
+					player.phase_time = player.dodge_distance;
 					player.phase_direction.x = dx - player.pos.x;
 					player.phase_direction.y = dy - player.pos.y;
 					player.phase_direction.normalize();
@@ -344,21 +344,19 @@ var actions = {
 		step: function(){
 		},
 		collide: function(thing){
-			// console.log('sword collide');
 			// if(thing.block){
 				// things[name].end()
 				// return
 			// }}
-			console.log(thing.owner);
 			if(thing.id == this.owner.id) console.log('owner in collide');
-			if(!(things[this.weapon_root].collisions.indexOf(thing.id) > 0)){				
+			if(!(things[this.weapon_root].collisions.indexOf(thing.id) >= 0)){			
 				if(thing.is_agent){
 					hit(thing, 5);
-					//knockback1(thing, this.owner)
+					knockback(thing.id, this.owner)
 				}
 				if(thing.isweapon){
 					if(thing.owner != this.owner){
-						//knockback(thing.owner, this.owner)
+						knockback(thing.owner, this.owner)
 					}
 				}
 				things[this.weapon_root].collisions.push(thing.id);
@@ -468,11 +466,10 @@ var agents = {
 					if(y_top) this.direction.y = -this.pos.y;
 					else this.direction.y = height-this.pos.y;
 					this.direction.normalize();
-					// console.log(this.direction.x, this.direction.y);
 					this._pos.x += this.direction.x*this.speed;
 					this._pos.y += this.direction.y*this.speed;
 					this.dodge_cd_count++;
-					if(this.dodge_cd_count >= this.dodge_cd){
+					if(this.dodge_cd_count >= this.dodge_cd){//if dodge cd up - do a dodge - make cd variable????
 						if(!x_left && !y_top){//bottom right
 							this.phase_direction.x = Math.random() - 1;
 							this.phase_direction.y = Math.random() - 1;
@@ -494,26 +491,28 @@ var agents = {
 							this.phase_direction.normalize();	
 						}
 						this.dodge_cd_count = 0;
+						this.phase_time = this.dodge_distance;
+						this.phase_speed = this.dodge_speed;
 						this.phase_count = 0;
 						this.phase = 'dodging';
 					}
 					this.shoot_cd_count++;
-					if(this.shoot_cd_count >= this.shoot_cd){
+					if(this.shoot_cd_count >= this.shoot_cd){//if shoot cooldown up - do a shoot
 						this.shoot_cd_count = 0;
 						actions['beam'].go(this, [things['player'].pos.x, things['player'].pos.y]);
 					}							
 					break;
 				case 'dodging':
-					this._pos.x += this.phase_direction.x * this.dodge_speed;
-					this._pos.y += this.phase_direction.y * this.dodge_speed;
+					this._pos.x += this.phase_direction.x * this.phase_speed;
+					this._pos.y += this.phase_direction.y * this.phase_speed;
 					this.phase_count += 1;
-					if(this.phase_count == this.dodge_distance) this.phase = "moving";					
+					if(this.phase_count == this.phase_time) this.phase = "moving";		
 					break;
 				case 'knockback':
-					this._pos.x += this.phase_direction.x * this.dodge_speed;
-					this._pos.y += this.phase_direction.y * this.dodge_speed;
+					this._pos.x += this.phase_direction.x * this.phase_speed;
+					this._pos.y += this.phase_direction.y * this.phase_speed;
 					this.phase_count += 1;
-					if(this.phase_count >= this.phase_time) this.phase = "moving";
+					if(this.phase_count >= this.phase_time) this.phase = "default";
 					break;
 				case 'frozen':
 					this.phase_count += 1;
@@ -529,7 +528,6 @@ var agents = {
 			}
 		},
 		collide: function(square){
-			// console.log('agent collide!');
 			
 		},
 		end: function(){
@@ -553,7 +551,7 @@ var agents = {
 			this._pos.x = this.pos.x;
 			this._pos.y = this.pos.y
 			var target = things[this.target];
-			var distance = Math.sqrt(Math.pow(target.pos.x - this.pos.x, 2), Math.pow(target.pos.y - this.pos.y));
+			var distance = Math.sqrt(Math.pow(target.pos.x - this.pos.x, 2) + Math.pow(target.pos.y - this.pos.y, 2));
 			this.direction.x = target.pos.x - this.pos.x;
 			this.direction.y = target.pos.y - this.pos.y
 			this.direction.normalize();
@@ -578,6 +576,7 @@ var agents = {
 							this.phase_direction.normalize();
 							this.phase_count = 0;
 							this.phase_time = this.dodge_distance;
+							this.phase_speed = this.dodge_speed;
 						}
 						else{//maintain a distance of 100
 							if(target != null){
@@ -611,20 +610,23 @@ var agents = {
 								this.phase_direction.x = this.direction.x;
 								this.phase_direction.y = this.direction.y;
 								this.phase_count = 0;
-								this.phase_time = (((distance - 90) / this.dodge_speed) > 0) ? ((distance - 90) / this.dodge_speed) : 0;
+								this.phase_time = (((distance - 60) / this.dodge_speed) > 0) ? ((distance - 60) / this.dodge_speed) : 0;
+								//this.phase_time = distance / this.dodge_speed;
+								this.phase_speed = this.dodge_speed;
+								console.log(distance, this.phase_speed, this.phase_time);
 							}
 						}
 					}
 					break;
 				case 'dodging':
-					this._pos.x += this.phase_direction.x * this.dodge_speed;
-					this._pos.y += this.phase_direction.y * this.dodge_speed;
+					this._pos.x += this.phase_direction.x * this.phase_speed;
+					this._pos.y += this.phase_direction.y * this.phase_speed;
 					this.phase_count += 1;
 					if(this.phase_count >= this.phase_time) this.phase = "default";
 					break;
 				case 'knockback':
-					this._pos.x += this.phase_direction.x * this.dodge_speed;
-					this._pos.y += this.phase_direction.y * this.dodge_speed;
+					this._pos.x += this.phase_direction.x * this.phase_speed;
+					this._pos.y += this.phase_direction.y * this.phase_speed;
 					this.phase_count += 1;
 					if(this.phase_count >= this.phase_time) this.phase = "default";
 					break;
@@ -664,14 +666,14 @@ var agents = {
 			things[id].phase = 'default';
 			
 			things[id].attack_phase = 'waiting';
-			things[id].attack_cd = 500;
+			things[id].attack_cd = 300;
 			things[id].attack_duration = 50;
 			things[id].attack_phase_count = 0;
 			things[id].has_attacked = false;
 			
 			things[id].dodge_speed = 20;
 			things[id].dodge_distance = 30;
-			things[id].speed = 1;
+			things[id].speed = 2;
 			things[id].health = 10;
 		
 			random_teleport(things[id]);
@@ -682,22 +684,21 @@ var agents = {
 		step: function(){
 			this._pos.x = this.pos.x;
 			this._pos.y = this.pos.y;
-			var _size = this.size/2;
 				
 			switch(this.phase){
 				case 'moving':						
 					break;
 				case 'dodging':
-					this._pos.x += this.phase_direction.x * this.dodge_speed;
-					this._pos.y += this.phase_direction.y * this.dodge_speed;
+					this._pos.x += this.phase_direction.x * this.phase_speed;
+					this._pos.y += this.phase_direction.y * this.phase_speed;
 					this.phase_count += 1;
 					if(this.phase_count == this.dodge_distance) this.phase = "moving";					
 					break;
 				case 'knockback':
-					this._pos.x += this.phase_direction.x * this.dodge_speed;
-					this._pos.y += this.phase_direction.y * this.dodge_speed;
+					this._pos.x += this.phase_direction.x * this.phase_speed;
+					this._pos.y += this.phase_direction.y * this.phase_speed;
 					this.phase_count += 1;
-					if(this.phase_count == this.dodge_distance) this.phase = "moving";
+					if(this.phase_count == this.phase_time) this.phase = "moving";
 					break;
 				case 'frozen':
 					this.phase_count += 1;
@@ -707,15 +708,13 @@ var agents = {
 					console.log('no state');
 			}
 			
-			if(colliding(this, true)) return;
-			else{
+			if(!colliding(this, true)){
 				this.pos.x = this._pos.x;
 				this.pos.y = this._pos.y;
 				return;
 			}
 		},
 		collide: function(square){
-			// console.log('test collide!');
 			
 		},
 		end: function(){
@@ -724,7 +723,7 @@ var agents = {
 		go: function(){
 			var id = shortid.generate();
 			things[id] = new Square(id, true, agents['test'].step, agents['test'].collide, default_end, 100, -100, -100);
-			things[id].health = 100;
+			things[id].health = 20;
 			random_teleport(things[id]);
 		}
 	},
@@ -755,6 +754,18 @@ var stamina_ctx = stamina_canvas.getContext("2d");
 hp_ctx.fillStyle = "#e60000";
 stamina_ctx.fillStyle = "#00b300";
 
+function knockback(target_id, source_id){
+	if((typeof things[target_id] != 'undefined') && (typeof things[source_id] != 'undefined')){
+		things[target_id].phase = 'knockback';
+		things[target_id].phase_count = 0;
+		things[target_id].phase_time = 10;
+		things[target_id].phase_speed = 25;
+		things[target_id].phase_direction.x = things[target_id].pos.x - things[source_id].pos.x;
+		things[target_id].phase_direction.y = things[target_id].pos.y - things[source_id].pos.y;
+		things[target_id].phase_direction.normalize();
+	}
+}
+
 function colliding(this_square, do_collision) {
 	//NOTE this works only for squares
 	var this_size = this_square.size / 2;
@@ -762,7 +773,7 @@ function colliding(this_square, do_collision) {
 	//wall
 	if(this_square._pos.x < this_size || this_square._pos.x > (width-this_size) || this_square._pos.y < this_size || this_square._pos.y > (height-this_size)){
 		if(this_square.destroy_on_wall){
-			console.log('destroy_on_wall');;
+			console.log('destroy_on_wall');
 			this_square.end();
 			return true;
 		}
@@ -781,8 +792,8 @@ function colliding(this_square, do_collision) {
 				if(that_square.is_weapon || this_square.is_weapon){
 					if((that_square.owner != this_square.id) && (that_square.owner != this_square.owner) && (this_square.owner != that_square.id) && do_collision){
 						this_square.collide(that_square);
+						//no return because weapon don't block
 					}
-					return false;//weapons dont block
 				}
 				else if(do_collision){
 					this_square.collide(that_square);
@@ -810,8 +821,7 @@ function random_teleport(square) {
 }
 
 function hit(thing, damage){
-	console.log(thing.id);
-	console.log('hit')
+	console.log('hit');
 	if(thing.is_agent){
 		if((thing.phase != "dodging") && (thing.phase != "dead")){
 			thing.health -= damage;
@@ -837,15 +847,15 @@ function player_step() {
 			break;
 		case 'dodging':
 			if(!this.dodge_in_place){
-				this._pos.x += this.phase_direction.x * this.dodge_speed;
-				this._pos.y += this.phase_direction.y * this.dodge_speed;
+				this._pos.x += this.phase_direction.x * this.phase_speed;
+				this._pos.y += this.phase_direction.y * this.phase_speed;
 			}
 			this.phase_count += 1;
-			if(this.phase_count == this.dodge_distance) this.phase = "moving";
+			if(this.phase_count == this.phase_time) this.phase = "moving";
 			break;
 		case 'knockback':
-			this._pos.x += this.phase_direction.x * this.dodge_speed;
-			this._pos.y += this.phase_direction.y * this.dodge_speed;
+			this._pos.x += this.phase_direction.x * this.phase_speed;
+			this._pos.y += this.phase_direction.y * this.phase_speed;
 			this.phase_count += 1;
 			if(this.phase_count >= this.phase_time) this.phase = "moving";
 			break;
@@ -854,7 +864,7 @@ function player_step() {
 			if(this.phase_count == this.phase_time) this.phase = "moving";
 			break;
 		default:
-			console.log('no state');
+			console.log('no state', this.phase);
 	}
 	
 	for(var weapon in this.weapons){
