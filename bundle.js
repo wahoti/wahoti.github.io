@@ -512,14 +512,14 @@ var agents = {
 					this._pos.x += this.phase_direction.x * this.phase_speed;
 					this._pos.y += this.phase_direction.y * this.phase_speed;
 					this.phase_count += 1;
-					if(this.phase_count >= this.phase_time) this.phase = "default";
+					if(this.phase_count >= this.phase_time) this.phase = "moving";
 					break;
 				case 'frozen':
 					this.phase_count += 1;
 					if(this.phase_count == this.phase_time) this.phase = "moving";
 					break;
 				default:
-					console.log('no state');
+					console.log('no state', this.phase);
 			}
 			if(!colliding(this, true)){ 
 				this.pos.x = this._pos.x;

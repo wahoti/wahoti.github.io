@@ -25,6 +25,18 @@ app.get('/res/linkedinpic.jpg', function(req,res) {
 	res.sendFile(__dirname + '/res/linkedinpic.jpg');
 });
 
+app.get('/res/githubpic.jpg', function(req,res) {
+	res.sendFile(__dirname + '/res/githubpic.jpg');
+});
+
+app.get('/res/profilepic.jpg', function(req,res) {
+	res.sendFile(__dirname + '/res/profilepic.jpg');
+});
+
+app.get('/res/backgroundpic.jpg', function(req,res) {
+	res.sendFile(__dirname + '/res/backgroundpic.jpg');
+});
+
 app.get('/res/symphony.png', function(req,res) {
 	res.sendFile(__dirname + '/res/symphony.png');
 });

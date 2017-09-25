@@ -20,13 +20,6 @@
 			text-align: center;
 			vertical-align: middle;
 		}
-		#linkedinpic {
-			max-width:100%;
-			border: 1px solid #ddd;
-			border-radius: 4px;
-			padding: 5px;
-			width: 250px;
-		}
 		div.tab {
 			overflow: hidden;
 			border: 1px solid #ccc;
@@ -70,6 +63,27 @@
 			vertical-align: middle;
 			margin: 5px;
 			position: relative;
+		}
+		
+		
+		/*ABOUT ME*/
+		#frame{
+			background-image: url("res/backgroundpic.jpg");
+			background-size: auto;
+			background-size: cover;
+			height: 100%;
+			width: 100%;
+		}
+		#profilepic {
+			max-width:100%;
+			padding: 5px;
+			width: 250px;
+			display: inline-block;
+		}
+		#aboutmetext {
+			display: inline-block;
+			position: fixed;
+			top: 40px;
 		}
 		
 		/* DARK SQUARES */
@@ -164,14 +178,21 @@
 	</head>
 	<body>
 	<div class="tab">
+		<button class="tablinks" onclick="openTab(event, 'About Me')" id="defaultOpen">About</button>
 		<button class="tablinks" onclick="openTab(event, 'Dark Squares')">Dark Squares</button>
 		<button class="tablinks" onclick="openTab(event, 'Box')">Box</button>
-		<button class="tablinks" onclick="openTab(event, 'About Me')">About Me</button>
 	</div>
 	
 	<div id="About Me" class="tabcontent">
-		<!img id="linkedinpic" src="res/linkedinpic.jpg" alt="linkedinpic">
-		<p>Hello</p>
+		<div id="frame">
+			<img id="profilepic" src="res/profilepic.jpg" alt="profilepic">
+			<div id="aboutmetext"><p>
+			Hello! My name is Abdulwahed Wahedi. I am a graduate of Oregon State University with a bachelors in Computer Science.
+			I like programming with Node Js and Python. This page is a place for me to display some projects and try stuff out.
+			 <a href="https://github.com/wahoti">Github</a>
+			 <a href="https://www.linkedin.com/in/abdulwahed-wahedi-64b2478a/">LinkedIn</a>
+			</p></div>
+		</div>
 	</div>
 	
 
@@ -250,6 +271,7 @@
 			var boxer = document.getElementById('boxer');
 			boxer.style.cursor = "pointer";
 			boxer.onclick = makeABox;
+			document.getElementById("defaultOpen").click();
 		}
 		window.onload = load;
 		
