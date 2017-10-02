@@ -4,8 +4,6 @@ var _ = require('lodash');
 var domready = require("domready");
 var shortid = require('shortid');
 
-var what_is_going_on = false;
-
 function test_main() {
 	console.log('test_main success! \t document.baseURI: ' + document.baseURI);
 }
@@ -30,19 +28,22 @@ function tab_event(tab_name) {
 domready(function() {
 	test_main();
 	add_event_listeners();
-	controller_stuff()
+	// controller_stuff()//NOT NEEDED YO... YO
 });
 
 var gamepads = {};
 
 function gamepadHandler(e, connecting) {
 	var gp = connecting ? navigator.getGamepads()[e.gamepad.index] : e.gamepad;
-	console.log("Gamepad connected at index %d: %s. %d buttons, %d axes.", gp.index, gp.id, gp.buttons.length, gp.axes.length);
 	
 	if (connecting) {
+		console.log("Gamepad connected at index %d: %s. %d buttons, %d axes.", gp.index, gp.id, gp.buttons.length, gp.axes.length);
 		gamepads[gp.index] = gp;
+		document.getElementById('gamepad_p').innerHTML = 'Gamepads Connected: ' + Object.keys(gamepads).length;
 	} else {
+		console.log("Gamepad ", gp.index, " disconnected");
 		delete gamepads[gp.index];
+		document.getElementById('gamepad_p').innerHTML = 'Gamepads Connected: ' + Object.keys(gamepads).length;
 	}
 }
 
@@ -774,6 +775,7 @@ var agents = {
 
 
 var things = {};
+var players = {};
 var reverse = new victor(-1,-1)	;
 var width = 1000;
 var height = 1000;
@@ -957,7 +959,6 @@ function stop_dark_squares(){
 	clearInterval(intervals['dark_squares_draw_interval']);
 	clearInterval(intervals['dark_squares_step_interval']);
 	clearInterval(intervals['dark_squares_second_interval']);
-	console.log(intervals);
 }
 
 function start_dark_squares(){
@@ -1006,9 +1007,32 @@ function start_dark_squares(){
 	}, 17);
 
 	intervals['dark_squares_second_interval'] = setInterval(function(){
-		if (what_is_going_on){
+		//navigator.getGamepads()[e.gamepad.index]
+		console.log(navigator.getGamepads());
+		console.log(players);
+		_.forEach(navigator.getGamepads(), function(gamepad){
+			if(gamepad){
+				//var assigned = _.every(players, {'gamepad_index': gamepad.index})
+				var playa = _.filter(players, {'gamepad_index': gamepad.index});
+				console.log(playa, !playa.length);
+				if(!playa.length){
+					console.log('assigning gamepad to player');
+					players[shortid.generate()] = {
+						gamepad_index: gamepad.index
+					}
+				}
 			
-		}
+			
+			
+				// console.log(gamepad.index, gamepad.id);
+				// _.forEach(gamepad.buttons, function(button){
+					// if(button.pressed){
+						// console.log('\t', button.pressed);
+					// }
+				// });
+			}
+		});
+
 		
 		for(var x in things){
 			if(things[x].is_agent){
