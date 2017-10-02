@@ -3,7 +3,6 @@ var victor = require('victor');
 var _ = require('lodash');
 var domready = require("domready");
 var shortid = require('shortid');
-// var boxIntersect = require('box-intersect')
 
 var what_is_going_on = false;
 
@@ -11,11 +10,47 @@ function test_main() {
 	console.log('test_main success! \t document.baseURI: ' + document.baseURI);
 }
 
-domready(function () {
+var last_tab = 'About Me';
+function tab_event(tab_name) {
+	console.log(last_tab, '->', tab_name);
+	if(tab_name != 'Dark Squares' && last_tab == 'Dark Squares'){
+		last_tab = tab_name;
+		stop_dark_squares();
+	}
+	else if (tab_name == 'Dark Squares' && last_tab != 'Dark Squares'){
+		last_tab = tab_name;
+		start_dark_squares();
+	}
+	else {
+		last_tab = tab_name;
+	}
+	
+}
+
+domready(function() {
 	test_main();
 	add_event_listeners();
+	controller_stuff()
 });
 
+var gamepads = {};
+
+function gamepadHandler(e, connecting) {
+	var gp = connecting ? navigator.getGamepads()[e.gamepad.index] : e.gamepad;
+	console.log("Gamepad connected at index %d: %s. %d buttons, %d axes.", gp.index, gp.id, gp.buttons.length, gp.axes.length);
+	
+	if (connecting) {
+		gamepads[gp.index] = gp;
+	} else {
+		delete gamepads[gp.index];
+	}
+}
+
+
+function controller_stuff(){
+	window.addEventListener("gamepadconnected", function(e) { gamepadHandler(e, true); }, false);
+	window.addEventListener("gamepaddisconnected", function(e) { gamepadHandler(e, false); }, false);
+}
 
 //DARK SQUARES//
 
@@ -53,7 +88,7 @@ function Square(id, is_agent, step_function, collide_function, end_function, siz
 	this.phase_direction = new victor(0, 0);
 	this.phase_speed = 20;
 	
-	this.dodge_speed = 20;
+	this.dodge_speed = 10;
 	this.dodge_distance = 12;
 
 	this.health = 10;
@@ -81,45 +116,49 @@ var right = false;
 
 var keydown = function(c){
 	var key = c.keyCode;
-	switch(key){
-		case 87://w
-			up = true;
-			break;
-		case 83://s
-			down = true;
-			break;
-		case 65://a
-			left = true;
-			break;
-		case 68://d
-			right = true;
-			break;
-		case 32://space
-			do_action(things['player'], actions[things['player'].space], [mx, my]);
-			break;
-		case 16://shift
-			do_action(things['player'], actions[things['player'].shift], [mx, my]);
-			break;
-		default:
+	if(last_tab == 'Dark Squares'){
+		switch(key){
+			case 87://w
+				up = true;
+				break;
+			case 83://s
+				down = true;
+				break;
+			case 65://a
+				left = true;
+				break;
+			case 68://d
+				right = true;
+				break;
+			case 32://space
+				do_action(things['player'], actions[things['player'].space], [mx, my]);
+				break;
+			case 16://shift
+				do_action(things['player'], actions[things['player'].shift], [mx, my]);
+				break;
+			default:
+		}
 	}
 }
 
 var keyup = function(c){
 	var key = c.keyCode;
-	switch(key){
-		case 87://w
-			up = false;
-			break;
-		case 83://s
-			down = false;
-			break;
-		case 65://a
-			left = false;
-			break;	
-		case 68://d
-			right = false;
-			break;		
-		default:
+	if(last_tab == 'Dark Squares'){
+		switch(key){
+			case 87://w
+				up = false;
+				break;
+			case 83://s
+				down = false;
+				break;
+			case 65://a
+				left = false;
+				break;	
+			case 68://d
+				right = false;
+				break;		
+			default:
+		}
 	}
 }
 
@@ -127,12 +166,16 @@ var keyup = function(c){
 var mx = 0;
 var my = 0;	
 function add_event_listeners() {//CALL THIS IN DOMREADY
+	document.addEventListener("tab", function(e) {
+		tab_event(e.detail.tab_name);
+	});
+
 	document.addEventListener("keydown", keydown, false);
 	document.addEventListener("keyup", keyup, false);
 	
 	document.addEventListener('contextmenu', function(c) { c.preventDefault() }, false);
 	canvas.addEventListener("mousedown", function(c){
-		coord = [(c.clientX - canvas.offsetLeft) * width_ratio, (c.clientY - canvas.offsetTop) * height_ratio]
+		coord = [(c.clientX - canvas.offsetLeft) * width_ratio, (c.clientY - canvas.offsetTop) * height_ratio];
 		if(c.which == 1){
 			do_action(things['player'], actions[things['player'].m1], coord);
 		}
@@ -321,21 +364,15 @@ var actions = {
 				else if(down){ dy += 1; }
 				if(left){ dx -= 1; }
 				else if(right){ dx += 1; }
-				if((dx - player.pos.x) == 0 && (dy - player.pos.y) == 0){
-					player.dodge_in_place = true;
-					player.phase_count = 0;
-					player.phase = "dodging";
-				}
-				else{
-					player.dodge_in_place = false;
-					player.phase_count = 0;
-					player.phase_speed = player.dodge_speed;
-					player.phase_time = player.dodge_distance;
-					player.phase_direction.x = dx - player.pos.x;
-					player.phase_direction.y = dy - player.pos.y;
-					player.phase_direction.normalize();
-					player.phase = "dodging";
-				}
+				if((dx - player.pos.x) == 0 && (dy - player.pos.y) == 0) player.dodge_in_place = true;
+				else player.dodge_in_place = false;
+				player.phase_count = 0;
+				player.phase_speed = player.dodge_speed;
+				player.phase_time = player.dodge_distance;
+				player.phase_direction.x = dx - player.pos.x;
+				player.phase_direction.y = dy - player.pos.y;
+				player.phase_direction.normalize();
+				player.phase = "dodging";
 			}
 		}
 	},
@@ -913,64 +950,75 @@ create_player();
 
 //INTERVALS (LOOPS)
 
+var intervals = {};
 
+function stop_dark_squares(){
+	console.log('stop_dark_squares');
+	clearInterval(intervals['dark_squares_draw_interval']);
+	clearInterval(intervals['dark_squares_step_interval']);
+	clearInterval(intervals['dark_squares_second_interval']);
+	console.log(intervals);
+}
 
-var dark_squares_draw_interval = setInterval(function(){
-	ctx.clearRect(0, 0, width, height);
-	hp_ctx.clearRect(0,0,300,30);
-	stamina_ctx.clearRect(0,0,300,30);
-	hp_ctx.fillRect(0,0,(things['player'].health/10)*300,30);
-	stamina_ctx.fillRect(0,0,(things['player'].energy/10)*300,30);
-	for(var x in things){
-		if(!things[x].incorporeal){
-			var size = things[x].size;
-			var _size = things[x].size/2;
-			var __size = _size/2;
+function start_dark_squares(){
+	console.log('start_dark_squares');
+	intervals['dark_squares_draw_interval'] = setInterval(function(){
+		ctx.clearRect(0, 0, width, height);
+		hp_ctx.clearRect(0,0,300,30);
+		stamina_ctx.clearRect(0,0,300,30);
+		hp_ctx.fillRect(0,0,(things['player'].health/10)*300,30);
+		stamina_ctx.fillRect(0,0,(things['player'].energy/10)*300,30);
+		for(var x in things){
+			if(!things[x].incorporeal){
+				var size = things[x].size;
+				var _size = things[x].size/2;
+				var __size = _size/2;
+				if(things[x].is_agent){
+					switch(things[x].phase){
+						case "moving":
+							ctx.fillStyle="#000000";
+							break;
+						case "dodging":
+							ctx.fillStyle="#00ffff";
+							break;
+						case "knockback":
+							ctx.fillStyle="#ff0000";
+							break;
+						case "frozen":
+							ctx.fillStyle = "#0000ff";
+							break;
+						default:
+							ctx.fillStyle="#000000";
+					}
+				}
+				else ctx.fillStyle = things[x].color;
+				ctx.fillRect(things[x].pos.x - _size,things[x].pos.y - _size,size,size);
+			}
+			
+		}
+	}, 17);	
+
+	intervals['dark_squares_step_interval'] = setInterval(function(){
+		_.forEach(things, function(value) {
+			if(typeof things[value.id] != 'undefined') things[value.id].step();
+			else console.log('UNDEFINED: things[value.id] IN dark_squares_step_interval\t', value);
+		});
+	}, 17);
+
+	intervals['dark_squares_second_interval'] = setInterval(function(){
+		if (what_is_going_on){
+			
+		}
+		
+		for(var x in things){
 			if(things[x].is_agent){
-				switch(things[x].phase){
-					case "moving":
-						ctx.fillStyle="#000000";
-						break;
-					case "dodging":
-						ctx.fillStyle="#00ffff";
-						break;
-					case "knockback":
-						ctx.fillStyle="#ff0000";
-						break;
-					case "frozen":
-						ctx.fillStyle = "#0000ff";
-						break;
-					default:
-						ctx.fillStyle="#000000";
+				if(things[x].energy < 10){
+					things[x].energy++;
 				}
 			}
-			else ctx.fillStyle = things[x].color;
-			ctx.fillRect(things[x].pos.x - _size,things[x].pos.y - _size,size,size);
 		}
-		
-	}
-}, 17);	
-
-var dark_squares_step_interval = setInterval(function(){
-	_.forEach(things, function(value) {
-		if(typeof things[value.id] != 'undefined') things[value.id].step();
-		else console.log('UNDEFINED: things[value.id] IN dark_squares_step_interval\t', value);
-	});
-}, 17);
-
-var second_interval = setInterval(function(){
-	if (what_is_going_on){
-		
-	}
-	
-	for(var x in things){
-		if(things[x].is_agent){
-			if(things[x].energy < 10){
-				things[x].energy++;
-			}
-		}
-	}
-}, 1000); 
+	}, 1000); 
+}
 },{"domready":2,"lodash":3,"shortid":4,"victor":14}],2:[function(require,module,exports){
 /*!
   * domready (c) Dustin Diaz 2014 - License MIT
