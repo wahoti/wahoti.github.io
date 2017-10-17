@@ -226,6 +226,15 @@ function do_action(agent, action, coord){
 	}
 }
 
+function art_square(position, direction, speed, size, duration, color){
+	var id = shortid.generate();
+	things[id] = new Square(id, false, actions['beam'].step, function(){}, default_end, size, position.x, position.y);
+	things[id].color = color;
+	things[id].direction = direction;
+	things[id].speed = speed;
+	setTimeout(function(){things[id].end()}, duration);
+}
+
 var actions = {
 	axe: object = {
 		cost: 1,
@@ -262,8 +271,9 @@ var actions = {
 		update: function(){
 			this.direction.rotate(this.rotation_speed).normalize();
 			for(var x in this.sections_array){
-				things[this.sections[x]]._pos.x = things[this.owner]._pos.x + (this.offset*x*this.direction.x);
-				things[this.sections[x]]._pos.y = things[this.owner]._pos.y + (this.offset*x*this.direction.y);
+				var R = this.sections_array[x];//RADIUS
+				things[this.sections[x]]._pos.x = things[this.owner]._pos.x + (this.offset*R*this.direction.x);
+				things[this.sections[x]]._pos.y = things[this.owner]._pos.y + (this.offset*R*this.direction.y);
 				colliding(things[this.sections[x]], true);
 			}		
 		},
@@ -285,7 +295,7 @@ var actions = {
 			things[id].owner = player.id;
 			things[id].incorporeal = true;
 			things[id].offset = 20;
-			things[id].sections_array = [,1,2,3,4,5,6];
+			things[id].sections_array = [1,2,3,4,5];
 			things[id].sections = {};
 			things[id].update = actions['axe'].update;
 			things[id].move = actions['axe'].move;
@@ -293,8 +303,9 @@ var actions = {
 			
 			//do sections
 			for(var x in things[id].sections_array){
+				var R = things[id].sections_array[x];//RADIUS
 				var _id = shortid.generate();
-				things[_id] = new Square(_id, false, function(){}, actions['axe'].collide, default_end, 20, player.pos.x + (things[id].offset*x*direction.x), player.pos.y + (things[id].offset*x*direction.y));	
+				things[_id] = new Square(_id, false, function(){}, actions['axe'].collide, default_end, 20, player.pos.x + (things[id].offset*R*direction.x), player.pos.y + (things[id].offset*R*direction.y));	
 				things[_id].owner = player.id;
 				things[_id].weapon_root = id;
 				things[_id].direction = things[id].direction;
@@ -377,6 +388,101 @@ var actions = {
 			}
 		}
 	},
+	fist_of_the_north_star: object = {
+		cost: 1,
+		step: function(){
+		},
+		collide: function(thing){
+			// if(thing.block){
+				// things[name].end()
+				// return
+			// }}
+			if(thing.id == this.owner.id) console.log('owner in collide');
+			if(!(things[this.weapon_root].collisions.indexOf(thing.id) >= 0)){				
+				if(thing.is_agent){
+					document.getElementById('omae.mp3').play();
+					setTimeout(function(){
+						var tl = new victor(-.5, -.5);
+						var tr = new victor(.5, -.5);
+						var bl = new victor(-.5, .5);
+						var br = new victor(.5, .5);
+						art_square(thing.pos, tl, 3, thing.size/4, 1000, "#000000");
+						art_square(thing.pos, tr, 3, thing.size/4, 1000, "#000000");
+						art_square(thing.pos, bl, 3, thing.size/4, 1000, "#000000");
+						art_square(thing.pos, br, 3, thing.size/4, 1000, "#000000");
+						hit(thing, 10000000);
+					}, 3000)
+				}
+				if(thing.isweapon){
+					if(thing.owner != this.owner){
+						knockback(thing.owner, this.owner)
+					}
+				}
+				things[this.weapon_root].collisions.push(thing.id);
+			}	
+			return;
+		},
+		end: function(){
+			for(var x in this.sections_array){
+				things[this.sections[x]].end();
+			}
+			delete things[this.owner].weapons['sword'];
+			delete things[this.id];
+			delete this;
+		},
+		update: function(){
+			this.direction.rotate(this.rotation_speed).normalize();
+			for(var x in this.sections_array){
+				var R = this.sections_array[x];//RADIUS
+				things[this.sections[x]]._pos.x = things[this.owner]._pos.x + (this.offset*R*this.direction.x);
+				things[this.sections[x]]._pos.y = things[this.owner]._pos.y + (this.offset*R*this.direction.y);
+				colliding(things[this.sections[x]], true);
+			}		
+		},
+		move: function(){
+			for(var x in this.sections_array){
+				things[this.sections[x]].pos.x = things[this.sections[x]]._pos.x;
+				things[this.sections[x]].pos.y = things[this.sections[x]]._pos.y;
+			}
+		},
+		go: function(player, coord){
+			if(player.weapons['sword']){ things[player.weapons['sword']].end(); }
+
+			var direction = new victor(coord[0] - player.pos.x, coord[1] - player.pos.y);
+			direction.rotate(-1.5).normalize();	
+			direction.normalize();
+			var id = shortid.generate();
+			things[id] = new Square(id, false, actions['fist_of_the_north_star'].step, function(thing){}, actions['axe'].end, 10, player.pos.x + (30*direction.x), player.pos.y + (30*direction.y));	
+			things[id].direction = direction;
+			things[id].owner = player.id;
+			things[id].incorporeal = true;
+			things[id].offset = 20;
+			things[id].sections_array = [1];
+			things[id].sections = {};
+			things[id].update = actions['fist_of_the_north_star'].update;
+			things[id].move = actions['fist_of_the_north_star'].move;
+			things[id].rotation_speed = .30	;
+			
+			//do sections
+			for(var x in things[id].sections_array){
+				var R = things[id].sections_array[x];//RADIUS
+				var _id = shortid.generate();
+				things[_id] = new Square(_id, false, function(){}, actions['fist_of_the_north_star'].collide, default_end, 20, player.pos.x + (things[id].offset*R*direction.x), player.pos.y + (things[id].offset*R*direction.y));	
+				things[_id].owner = player.id;
+				things[_id].weapon_root = id;
+				things[_id].direction = things[id].direction;
+				things[_id].block = true;
+				things[_id].is_weapon = true;
+				things[id].sections[x] = _id;
+			}
+			
+			player.weapons['sword'] = id;
+			
+			setTimeout(function(){
+				if(things[id]) things[id].end();
+			}, 150)
+		}
+	},
 	sword: object = {
 		cost: 1,
 		step: function(){
@@ -411,8 +517,9 @@ var actions = {
 		},
 		update: function(){
 			for(var x in this.sections_array){
-				things[this.sections[x]]._pos.x = things[this.owner]._pos.x + (this.offset*x*this.direction.x);
-				things[this.sections[x]]._pos.y = things[this.owner]._pos.y + (this.offset*x*this.direction.y);
+				var R = this.sections_array[x];//RADIUS
+				things[this.sections[x]]._pos.x = things[this.owner]._pos.x + (this.offset*R*this.direction.x);
+				things[this.sections[x]]._pos.y = things[this.owner]._pos.y + (this.offset*R*this.direction.y);
 				colliding(things[this.sections[x]], true);
 			}		
 		},
@@ -433,15 +540,16 @@ var actions = {
 			things[id].owner = player.id;
 			things[id].incorporeal = true;
 			things[id].offset = 20;
-			things[id].sections_array = [,1,2,3,4,5,6];
+			things[id].sections_array = [1,2,3,4,5];
 			things[id].sections = {};
 			things[id].update = actions['sword'].update;
 			things[id].move = actions['sword'].move;
 			
 			//do sections
 			for(var x in things[id].sections_array){
+				var R = things[id].sections_array[x];//RADIUS
 				var _id = shortid.generate();
-				things[_id] = new Square(_id, false, function(){}, actions['sword'].collide, default_end, 20, player.pos.x + (things[id].offset*x*direction.x), player.pos.y + (things[id].offset*x*direction.y));	
+				things[_id] = new Square(_id, false, function(){}, actions['sword'].collide, default_end, 20, player.pos.x + (things[id].offset*R*direction.x), player.pos.y + (things[id].offset*R*direction.y));	
 				things[_id].owner = player.id;
 				things[_id].weapon_root = id;
 				things[_id].direction = things[id].direction;
@@ -537,7 +645,7 @@ var agents = {
 					this.shoot_cd_count++;
 					if(this.shoot_cd_count >= this.shoot_cd){//if shoot cooldown up - do a shoot
 						this.shoot_cd_count = 0;
-						actions['beam'].go(this, [things['player'].pos.x, things['player'].pos.y]);
+						actions['beam'].go(this, [things['player'].pos.x, things['player'].pos.y]);//todo - get target
 					}							
 					break;
 				case 'dodging':
@@ -700,7 +808,140 @@ var agents = {
 		go: function(){
 			var id = shortid.generate();
 			things[id] = new Square(id, true, agents['samurai'].step, agents['samurai'].collide, default_end, 20, -3000, -3000, '#000000');
-			things[id].target = 'player';
+			things[id].target = 'player';//todo set target to closest player
+			things[id].phase = 'default';
+			
+			things[id].attack_phase = 'waiting';
+			things[id].attack_cd = 300;
+			things[id].attack_duration = 50;
+			things[id].attack_phase_count = 0;
+			things[id].has_attacked = false;
+			
+			things[id].dodge_speed = 20;
+			things[id].dodge_distance = 30;
+			things[id].speed = 2;
+			things[id].health = 10;
+		
+			random_teleport(things[id]);
+		},		
+	},
+	samurai_boss: object = {
+		step: function(){
+			this._pos.x = this.pos.x;
+			this._pos.y = this.pos.y
+			var target = things[this.target];
+			var distance = Math.sqrt(Math.pow(target.pos.x - this.pos.x, 2) + Math.pow(target.pos.y - this.pos.y, 2));
+			this.direction.x = target.pos.x - this.pos.x;
+			this.direction.y = target.pos.y - this.pos.y
+			this.direction.normalize();
+			//handle null targets	
+				
+			switch(this.phase){
+				case 'default':		
+					if(this.attack_phase == 'attacking'){
+						if(!this.has_attacked){//swing sword if haven't already
+							this.has_attacked = true;
+							actions['axe'].go(things[this.id], [target.pos.x, target.pos.y]);
+						}
+						this.attack_phase_count++;
+						if(this.attack_phase_count == this.attack_duration){//retreat if attack duration is up
+							this.attack_phase = 'waiting';
+							this.has_attacked = false;
+							this.attack_phase_count = 0;
+							
+							this.phase = 'dodging';						
+							this.phase_direction.x = this.pos.x - target.pos.x;
+							this.phase_direction.y = this.pos.y - target.pos.y;
+							this.phase_direction.normalize();
+							this.phase_count = 0;
+							this.phase_time = this.dodge_distance;
+							this.phase_speed = this.dodge_speed;
+						}
+						else{//maintain a distance of 100
+							if(target != null){
+								if(distance > 100){
+									this._pos.x = this.pos.x + (this.direction.x * this.speed);
+									this._pos.y = this.pos.y + (this.direction.y * this.speed);
+								}
+								else if(distance < 100){
+									this._pos.x = this.pos.x - (this.direction.x * this.speed);
+									this._pos.y = this.pos.y - (this.direction.y * this.speed);
+								}
+							}
+						}
+					}				
+					else if(this.attack_phase == 'waiting'){
+						this.attack_phase_count++;
+						if(target != null){
+							if(distance > 400){//maintain a distance of 400
+								this._pos.x = this.pos.x + (this.direction.x * this.speed);
+								this._pos.y = this.pos.y + (this.direction.y * this.speed);
+							}
+							else if(distance < 400){
+								this._pos.x = this.pos.x - (this.direction.x * this.speed);
+								this._pos.y = this.pos.y - (this.direction.y * this.speed);
+							}
+							if(this.attack_phase_count >= this.attack_cd){//if attack cooldown is up - attack
+								this.attack_phase = 'attacking';	
+								this.attack_phase_count = 0;
+							
+								this.phase = 'dodging';
+								this.phase_direction.x = this.direction.x;
+								this.phase_direction.y = this.direction.y;
+								this.phase_count = 0;
+								this.phase_time = (((distance - 60) / this.dodge_speed) > 0) ? ((distance - 60) / this.dodge_speed) : 0;
+								//this.phase_time = distance / this.dodge_speed;
+								this.phase_speed = this.dodge_speed;
+								console.log(distance, this.phase_speed, this.phase_time);
+							}
+						}
+					}
+					break;
+				case 'dodging':
+					this._pos.x += this.phase_direction.x * this.phase_speed;
+					this._pos.y += this.phase_direction.y * this.phase_speed;
+					this.phase_count += 1;
+					if(this.phase_count >= this.phase_time) this.phase = "default";
+					break;
+				case 'knockback':
+					this._pos.x += this.phase_direction.x * this.phase_speed;
+					this._pos.y += this.phase_direction.y * this.phase_speed;
+					this.phase_count += 1;
+					if(this.phase_count >= this.phase_time) this.phase = "default";
+					break;
+				case 'frozen':
+					this.phase_count += 1;
+					if(this.phase_count == this.phase_time) this.phase = "default";
+					break;
+				default:
+					console.log('no state');
+			}
+				
+			for(var weapon in this.weapons){
+				if (typeof things[this.weapons[weapon]] != 'undefined') things[this.weapons[weapon]].update();
+				else console.log('UNDEFINED: things[weapon] IN player_step() - update', things[this.weapons[weapon]]);
+			}
+			
+			if(!colliding(this, true)){
+				for(var weapon in this.weapons){
+					if (typeof things[this.weapons[weapon]] != 'undefined') things[this.weapons[weapon]].move();
+					else console.log('UNDEFINED: things[weapon] IN player_step() - move');
+				}
+				this.pos.x = this._pos.x;
+				this.pos.y = this._pos.y;
+				return;
+			}
+		},
+		collide: function(){
+			
+		},
+		end: function(){
+			
+		},
+		go: function(){
+			var id = shortid.generate();
+			things[id] = new Square(id, true, agents['samurai'].step, agents['samurai'].collide, default_end, 20, -3000, -3000, '#000000');
+			things[id].target = 'player';//todo set target to closest player
 			things[id].phase = 'default';
 			
 			things[id].attack_phase = 'waiting';
@@ -879,10 +1120,21 @@ function player_step() {
 	var _size = this.size/2;
 	switch(this.phase){
 		case 'moving':
-			if(up){ this._pos.y -= this.speed; }
-			else if(down){ this._pos.y += this.speed; }
-			if(left){ this._pos.x -= this.speed; }
-			else if(right){ this._pos.x += this.speed; }	
+			if(this.gamepad_index == null){
+				if(up){ this._pos.y -= this.speed; }
+				else if(down){ this._pos.y += this.speed; }
+				if(left){ this._pos.x -= this.speed; }
+				else if(right){ this._pos.x += this.speed; }
+			}
+			else{
+				var gamepad = navigator.getGamepads()[this.gamepad_index];
+				if(gamepad){
+					for(var x in gamepad.buttons){
+						if(gamepad.buttons[x].pressed) console.log(x);
+					}
+				}
+			}
+			
 			break;
 		case 'dodging':
 			if(!this.dodge_in_place){
@@ -925,28 +1177,41 @@ function player_step() {
 function player_collide(square) {}//this is supposed to be empty
 
 function player_end() {
-	things['player'].phase = 'dead';
-	things['player'].pos.x = -100;
-	things['player'].pos.y = -100;
+	var id = this.id;
+	things[id].phase = 'dead';
+	things[id].pos.x = -100;
+	things[id].pos.y = -100;
 	setTimeout(function(){
-		things['player'].health = 10;
-		things['player'].phase = 'moving';
-		random_teleport(things['player']);
+		things[id].health = 10;
+		things[id].phase = 'moving';
+		random_teleport(things[id]);
 	}, 5000);
 }
 
-function create_player() {
-	things['player'] = new Square('player', true, player_step, player_collide, player_end, 15, 250, 250);
-	things['player'].phase = 'moving';
-	things['player'].speed = 5;
-	things['player'].space = 'dodge';
-	things['player'].shift = 'dodge';
-	things['player'].m1 = 'sword';
-	things['player'].m2 = 'axe';
-	random_teleport(things['player']);
+function remove_player(id){
+	_.forEach(things[id].weapons, function(weapon){
+		things[weapon].end();
+	});	
+	delete things[id];
+	delete players[id];
 }
 
-create_player();
+function create_player(id) {
+	things[id] = new Square(id, true, player_step, player_collide, player_end, 15, 250, 250);
+	things[id].phase = 'moving';
+	things[id].speed = 5;
+	things[id].space = 'dodge';
+	things[id].shift = 'fist_of_the_north_star';
+	things[id].m1 = 'sword';
+	things[id].m2 = 'axe';
+	things[id].is_player = true;
+	things[id].gamepad_index = null;
+	players[id] = things[id];
+	random_teleport(things[id]);
+	return id;
+}
+
+create_player('player');
 
 
 
@@ -1007,29 +1272,31 @@ function start_dark_squares(){
 	}, 17);
 
 	intervals['dark_squares_second_interval'] = setInterval(function(){
-		//navigator.getGamepads()[e.gamepad.index]
-		console.log(navigator.getGamepads());
-		console.log(players);
+		// //navigator.getGamepads()[e.gamepad.index]
+		// console.log(navigator.getGamepads());
+		// console.log(players);
+		document.getElementById('gamepad_p').innerHTML = 'Gamepads Connected: ' + Object.keys(players).length;
 		_.forEach(navigator.getGamepads(), function(gamepad){
 			if(gamepad){
-				//var assigned = _.every(players, {'gamepad_index': gamepad.index})
-				var playa = _.filter(players, {'gamepad_index': gamepad.index});
-				console.log(playa, !playa.length);
-				if(!playa.length){
-					console.log('assigning gamepad to player');
-					players[shortid.generate()] = {
-						gamepad_index: gamepad.index
+				if(!gamepad.id.includes('Unknown')){
+					//var assigned = _.every(players, {'gamepad_index': gamepad.index})
+					var playa = _.filter(players, {'gamepad_index': gamepad.index});
+					//console.log(playa, !playa.length);
+					if(!playa.length){
+						console.log('assigning gamepad to player');
+						var id = create_player(shortid.generate());
+						things[id].gamepad_index = gamepad.index;
 					}
+				
+				
+				
+					// console.log(gamepad.index, gamepad.id);
+					// _.forEach(gamepad.buttons, function(button){
+						// if(button.pressed){
+							// console.log('\t', button.pressed);
+						// }
+					// });
 				}
-			
-			
-			
-				// console.log(gamepad.index, gamepad.id);
-				// _.forEach(gamepad.buttons, function(button){
-					// if(button.pressed){
-						// console.log('\t', button.pressed);
-					// }
-				// });
 			}
 		});
 

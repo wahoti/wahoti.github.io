@@ -41,6 +41,10 @@ app.get('/res/symphony.png', function(req,res) {
 	res.sendFile(__dirname + '/res/symphony.png');
 });
 
+app.get('/res/omae.mp3', function(req,res) {
+	res.sendFile(__dirname + '/res/omae.mp3');
+});
+
 http.listen(app.get('port'), function() {
 	console.log('listening on ' + app.get('port') + '...');
 });
