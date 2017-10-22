@@ -1,3 +1,5 @@
+//browserify main.js -o bundle.js
+//node server.js
 var victor = require('victor');
 var _ = require('lodash');
 var domready = require("domready");
@@ -107,28 +109,21 @@ function Square(id, is_agent, step_function, collide_function, end_function, siz
 
 //KEYS / CONTROLLS
 
-
-
-var up = false;
-var down = false;
-var left = false;
-var right = false;
-
 var keydown = function(c){
 	var key = c.keyCode;
 	if(last_tab == 'Dark Squares'){
 		switch(key){
 			case 87://w
-				up = true;
+				things['player'].up = true;
 				break;
 			case 83://s
-				down = true;
+				things['player'].down = true;
 				break;
 			case 65://a
-				left = true;
+				things['player'].left = true;
 				break;
 			case 68://d
-				right = true;
+				things['player'].right = true;
 				break;
 			case 32://space
 				do_action(things['player'], actions[things['player'].space], [mx, my]);
@@ -146,16 +141,16 @@ var keyup = function(c){
 	if(last_tab == 'Dark Squares'){
 		switch(key){
 			case 87://w
-				up = false;
+				things['player'].up = false;
 				break;
 			case 83://s
-				down = false;
+				things['player'].down = false;
 				break;
 			case 65://a
-				left = false;
+				things['player'].left = false;
 				break;	
 			case 68://d
-				right = false;
+				things['player'].right = false;
 				break;		
 			default:
 		}
@@ -371,10 +366,10 @@ var actions = {
 			if(player.phase == "moving"){
 				var dx = player.pos.x;
 				var dy = player.pos.y;
-				if(up){ dy -= 1; }
-				else if(down){ dy += 1; }
-				if(left){ dx -= 1; }
-				else if(right){ dx += 1; }
+				if(player.up){ dy -= 1; }
+				else if(player.down){ dy += 1; }
+				if(player.left){ dx -= 1; }
+				else if(player.right){ dx += 1; }
 				if((dx - player.pos.x) == 0 && (dy - player.pos.y) == 0) player.dodge_in_place = true;
 				else player.dodge_in_place = false;
 				player.phase_count = 0;
@@ -385,6 +380,31 @@ var actions = {
 				player.phase_direction.normalize();
 				player.phase = "dodging";
 			}
+		}
+	},
+	freeze: object = {
+		cost: 1,
+		collide: function(thing){
+			console.log('freeze collide')
+			if(!(this.collisions.indexOf(thing.id) >= 0)){				
+				if(thing.is_agent){
+					thing.phase = 'frozen';
+					thing.phase_count = 0;
+					thing.phase_time = 100;
+				}
+				this.collisions.push(thing.id);
+			}	
+		},
+		go: function(player, coord){		
+			var direction = new victor(coord[0] - player.pos.x, coord[1] - player.pos.y);
+			direction.normalize();
+			var id = shortid.generate();
+			things[id] = new Square(id, false, actions['beam'].step, actions['freeze'].collide, default_end, 60, player.pos.x + (60*direction.x), player.pos.y + (60*direction.y));	
+			things[id].direction = direction;
+			things[id].speed = 6;
+			things[id].color = '#00ccff';
+			this.collisions = [];
+			things[id].destroy_on_wall = true;
 		}
 	},
 	fist_of_the_north_star: object = {
@@ -529,6 +549,7 @@ var actions = {
 			}
 		},
 		go: function(player, coord){
+			console.log('SWORD GO', coord);
 			if(player.weapons['sword']){ things[player.weapons['sword']].end(); }
 
 			var direction = new victor(coord[0] - player.pos.x, coord[1] - player.pos.y);
@@ -1119,21 +1140,63 @@ function player_step() {
 	var _size = this.size/2;
 	switch(this.phase){
 		case 'moving':
-			if(this.gamepad_index == null){
-				if(up){ this._pos.y -= this.speed; }
-				else if(down){ this._pos.y += this.speed; }
-				if(left){ this._pos.x -= this.speed; }
-				else if(right){ this._pos.x += this.speed; }
-			}
-			else{
+			if(this.gamepad_index != null){
 				var gamepad = navigator.getGamepads()[this.gamepad_index];
 				if(gamepad){
+					if(gamepad.buttons[12].pressed) this.up = true;
+					else this.up = false;
+					if(gamepad.buttons[13].pressed) this.down = true;
+					else this.down = false;
+					if(gamepad.buttons[14].pressed) this.left = true;
+					else this.left = false;
+					if(gamepad.buttons[15].pressed) this.right = true;
+					else this.right = false;
+					
+					//get direction from movement or use R3???
+					var dx = this.pos.x;
+					var dy = this.pos.y;
+					if(this.up) dy -= 1;
+					else if(this.down) dy += 1;
+					if(this.left) dx -= 1;
+					else if(this.right) dx += 1;
+					
+					if(gamepad.buttons[0].pressed){//X
+						if(!this.X_pressed){
+							do_action(things[this.id], actions[things[this.id].space], [dx, dy]);
+							this.X_pressed = true;
+						}
+					}
+					else this.X_pressed = false;
+					if(gamepad.buttons[1].pressed){//O
+						if(!this.O_pressed){
+							do_action(things[this.id], actions[things[this.id].shift], [dx, dy]);
+							this.O_pressed = true;
+						}
+					}
+					else this.O_pressed = false;
+					if(gamepad.buttons[2].pressed){//[] 
+						if(!this.square_pressed){
+							do_action(things[this.id], actions[things[this.id].m1], [dx, dy]);
+							this.square_pressed = true;
+						}
+					}
+					else this.square_pressed = false;
+					if(gamepad.buttons[3].pressed){//<|
+						if(!this.triangle_pressed || true){
+							do_action(things[this.id], actions[things[this.id].m2], [dx, dy]);	
+							this.triangle_pressed = true;
+						}
+					}
+					else this.triangle_pressed = false;
 					for(var x in gamepad.buttons){
-						if(gamepad.buttons[x].pressed) console.log(x);
+						//if(gamepad.buttons[x].pressed) console.log(x, gamepad.buttons[x]);
 					}
 				}
 			}
-			
+			if(this.up){ this._pos.y -= this.speed; }
+			else if(this.down){ this._pos.y += this.speed; }
+			if(this.left){ this._pos.x -= this.speed; }
+			else if(this.right){ this._pos.x += this.speed; }
 			break;
 		case 'dodging':
 			if(!this.dodge_in_place){
@@ -1197,10 +1260,19 @@ function remove_player(id){
 
 function create_player(id) {
 	things[id] = new Square(id, true, player_step, player_collide, player_end, 15, 250, 250);
+	things[id].up = false;
+	things[id].down = false;
+	things[id].left = false;
+	things[id].right = false;
+	things[id].X_pressed = false;
+	things[id].O_pressed = false;
+	things[id].square_pressed = false;
+	things[id].triangle_pressed = false;
+	things[id].gamepad_direction = new victor(0,0);
 	things[id].phase = 'moving';
 	things[id].speed = 5;
 	things[id].space = 'dodge';
-	things[id].shift = 'fist_of_the_north_star';
+	things[id].shift = 'freeze';
 	things[id].m1 = 'sword';
 	things[id].m2 = 'axe';
 	things[id].is_player = true;
