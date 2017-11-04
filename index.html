@@ -28,7 +28,6 @@
 		div.tab button {
 			background-color: inherit;
 			float: left;
-			border: none;
 			outline: none;
 			cursor: pointer:
 			padding: 14px 16px;
@@ -42,6 +41,7 @@
 		}
 		button.tablinks {
 			font-size: 30px;
+			border-right: 1px solid #000;
 		}
 		.tabcontent {
 			display: none;
@@ -189,6 +189,53 @@
 			display: none
 		}
 
+		/* CHESS CLOCK */
+		.chess_clock_div{
+			border:1px solid #000000;
+			position: absolute;
+			text-align: center;
+			color: #FFFFFF;
+			font-size: 150%;
+		}
+		.active_player{
+			text-decoration: underline;
+		}
+		div#player1_div{
+			width: 50%;
+			height: 50%;
+			left: 0px;
+			background-color: #9966ff;
+			font-size: 300%;
+		}
+		div#player2_div{
+			width: 50%;
+			height: 50%;
+			right: 0px;
+			background-color: #9933ff;
+			font-size: 300%;
+		}
+		div#chess_clock_start_stop{
+			width: 33%;
+			height: 45%;
+			left: 0px;
+			bottom: 0px;
+			background-color: #cc66ff;
+		}
+		div#chess_clock_switch{
+			width: 34%;
+			height: 45%;
+			left: 33%;
+			bottom: 0px;
+			background-color: #cc33ff;
+		}
+		div#chess_clock_reset{
+			width: 33%;
+			height: 45%;
+			right: 0px;
+			bottom: 0px;
+			background-color: #cc00ff;
+		}
+		
 	</style>
 	</head>
 	<body>
@@ -196,6 +243,7 @@
 		<button class="tablinks" onclick="openTab(event, 'About Me')" id="defaultOpen">About</button>
 		<button class="tablinks" onclick="openTab(event, 'Dark Squares')">Dark Squares</button>
 		<button class="tablinks" onclick="openTab(event, 'Box')">Box</button>
+		<button class="tablinks" onclick="openTab(event, 'Chess Clock')">Chess Clock</button>
 	</div>
 	
 	<div id="About Me" class="tabcontent">
@@ -260,6 +308,13 @@
 			<option value="test">test</option>
 		</select>	
 		</div>
+	</div>
+	<div id="Chess Clock" class="tabcontent">
+		<div id="player1_div" class="chess_clock_div"></div>
+		<div id="player2_div" class="chess_clock_div"></div>
+		<div id="chess_clock_start_stop" class="chess_clock_div">Start/Stop</div>
+		<div id="chess_clock_switch" class="chess_clock_div">Switch</div>
+		<div id="chess_clock_reset" class="chess_clock_div">Reset</div>
 	</div>
 	<script src="js/three.min.js"></script>
 	<script src="js/wahotiScript.js"></script>

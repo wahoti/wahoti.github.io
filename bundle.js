@@ -12,6 +12,9 @@ function test_main() {
 
 var last_tab = 'About Me';
 function tab_event(tab_name) {
+	//logic for tab select
+	//don't want to use resources on a tab that isn't being used
+	//add event listeners here? not sure how much sense it makes
 	console.log(last_tab, '->', tab_name);
 	if(tab_name != 'Dark Squares' && last_tab == 'Dark Squares'){
 		last_tab = tab_name;
@@ -21,15 +24,26 @@ function tab_event(tab_name) {
 		last_tab = tab_name;
 		start_dark_squares();
 	}
+	else if (tab_name == 'Chess Clock' && last_tab != 'Chess Clock'){
+		last_tab = tab_name;
+		start_chess_clock();
+	}
+	else if (tab_name != 'Chess Clock' && last_tab == 'Chess Clock'){
+		last_tab = tab_name;
+		stop_chess_clock();
+	}
 	else {
+		//delete else right? WRONG might happen first and fucks up logic
 		last_tab = tab_name;
 	}
 	
 }
 
 domready(function() {
+	//this is called after all the resources are loaded available - I think???
 	test_main();
-	add_event_listeners();
+	add_event_listeners();//put this in tab - and add remove_event_listeners()?????
+	iniate_chess_clock();
 	// controller_stuff()//NOT NEEDED YO... YO
 });
 
@@ -112,6 +126,15 @@ function Square(id, is_agent, step_function, collide_function, end_function, siz
 
 var keydown = function(c){
 	var key = c.keyCode;
+	if(last_tab == 'Chess Clock'){
+		switch(key){
+			case 32://space
+				console.log('space');
+				turn_switch_chess_clock();
+				break;
+			default:
+		}
+	}
 	if(last_tab == 'Dark Squares'){
 		switch(key){
 			case 87://w
@@ -1290,6 +1313,145 @@ create_player('player');
 //INTERVALS (LOOPS)
 
 var intervals = {};
+var chess_clock = {};
+
+function reset_chess_clock(){
+var now = new Date().getTime();
+	chess_clock['end_time'] = new Date(now + 60*60000).getTime();
+	chess_clock['player1_time'] = new Date(now).getTime();
+	chess_clock['player1_turn_start_time'] = new Date(now).getTime();
+	chess_clock['player2_time'] = new Date(now).getTime();
+	chess_clock['player2_turn_start_time'] = new Date(now).getTime();
+	chess_clock['turn'] = 0;
+	chess_clock['hold_turn'] = 1; //for pausing
+	display_chess_clock('player1');
+	display_chess_clock('player2');	
+}
+
+function iniate_chess_clock(){
+	console.log('iniate');
+	chess_clock['player1_div'] = document.getElementById("player1_div");
+	chess_clock['player2_div'] = document.getElementById("player2_div");
+	var now = new Date().getTime();
+	chess_clock['end_time'] = new Date(now + 60*60000).getTime();
+	chess_clock['player1_time'] = new Date(now).getTime();
+	chess_clock['player1_turn_start_time'] = new Date(now).getTime();
+	chess_clock['player2_time'] = new Date(now).getTime();
+	chess_clock['player2_turn_start_time'] = new Date(now).getTime();
+	chess_clock['turn'] = 0;
+	chess_clock['hold_turn'] = 1; //for pausing
+	display_chess_clock('player1');
+	display_chess_clock('player2');
+	//on turn start get a new now time
+	//on turn end find difference from turn start time.
+		// add that to player_time
+		// calculate remaining time
+		
+		
+	document.getElementById("chess_clock_start_stop").onclick = function(){
+		if(chess_clock['turn'] == 0){
+			unpause_chess_clock();
+		}
+		else{
+			pause_chess_clock();
+		}
+	}
+	document.getElementById("chess_clock_switch").onclick = turn_switch_chess_clock;
+	document.getElementById("chess_clock_reset").onclick = reset_chess_clock;
+}
+
+function turn_start_chess_clock(player){
+	console.log('start turn');
+	chess_clock[player + '_turn_start_time'] = new Date().getTime();
+}
+
+function turn_end_chess_clock(player){
+	console.log('end turn');
+	var now = new Date().getTime();
+	var distance = now - chess_clock[player + '_turn_start_time'];
+	chess_clock[player + '_time'] = new Date(chess_clock[player + '_time'] + distance).getTime();
+}
+
+function turn_switch_chess_clock(){
+	console.log('turn switch');
+	if (chess_clock['turn'] == 1){
+		chess_clock['turn'] = 2;
+		turn_end_chess_clock('player1');
+		turn_start_chess_clock('player2');
+	}
+	else if (chess_clock['turn'] == 2){
+		chess_clock['turn'] = 1;
+		turn_end_chess_clock('player2');
+		turn_start_chess_clock('player1');
+	}
+}
+
+function pause_chess_clock(){
+	console.log('pause');
+	if (chess_clock['turn'] == 1){
+		chess_clock['hold_turn'] = chess_clock['turn'];
+		chess_clock['turn'] = 0;
+		turn_end_chess_clock('player1');
+	}
+	else if (chess_clock['turn'] == 2){
+		chess_clock['hold_turn'] = chess_clock['turn'];
+		chess_clock['turn'] = 0;
+		turn_end_chess_clock('player2');
+	}	
+}
+
+function unpause_chess_clock(){
+	console.log('unpause');
+	if (chess_clock['hold_turn'] == 1){
+		turn_start_chess_clock('player1');
+		chess_clock['turn'] = 1;
+	}
+	else if (chess_clock['hold_turn'] == 2){
+		turn_start_chess_clock('player2');
+		chess_clock['turn'] = 2;
+	}	
+}
+
+function display_chess_clock(player){
+	console.log('display');
+	var distance = chess_clock['end_time'] - chess_clock[player + '_time'];
+	console.log(distance);
+	var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)).toString();
+	var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60)).toString();
+	var seconds = Math.floor((distance % (1000 * 60)) / 1000).toString();
+	chess_clock[player + '_div'].innerHTML = hours + ':' + minutes + ':' + seconds;
+	
+	if(chess_clock['turn'] == 1){
+		console.log('??')
+		chess_clock['player1_div'].classList.add('active_player');
+		chess_clock['player2_div'].classList.remove('active_player');
+	}
+	else if(chess_clock['turn'] == 2){
+		chess_clock['player2_div'].classList.add('active_player');
+		chess_clock['player1_div'].classList.remove('active_player');
+	}
+}
+
+function stop_chess_clock(){
+	console.log('stop');
+	clearInterval(intervals['chess_clock_interval']);
+}
+
+function start_chess_clock(){
+	console.log('start');
+	intervals['chess_clock_interval'] = setInterval(function(){
+		if(chess_clock['turn'] == 1){
+			turn_end_chess_clock('player1');
+			turn_start_chess_clock('player1');
+			display_chess_clock('player1');
+		}
+		else if(chess_clock['turn'] == 2){
+			turn_end_chess_clock('player2');
+			turn_start_chess_clock('player2');
+			display_chess_clock('player2');
+		}		
+	}, 500)
+}
 
 function stop_dark_squares(){
 	console.log('stop_dark_squares');
