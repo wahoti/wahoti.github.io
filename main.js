@@ -85,7 +85,7 @@ function default_end(){
 function Square(id, is_agent, step_function, collide_function, end_function, size, x, y, color) {
 	this.id = id;
 	this.is_agent = is_agent;//something that acts on the game opposed to a box or projectile
-	this.color = color || '#000000';
+	this.color = color || '#ffffff';
 	
 	this.step = step_function || function(){};
 	this.collide = collide_function || function(){};
@@ -448,10 +448,10 @@ var actions = {
 						var tr = new victor(.5, -.5);
 						var bl = new victor(-.5, .5);
 						var br = new victor(.5, .5);
-						art_square(thing.pos, tl, 3, thing.size/4, 1000, "#000000");
-						art_square(thing.pos, tr, 3, thing.size/4, 1000, "#000000");
-						art_square(thing.pos, bl, 3, thing.size/4, 1000, "#000000");
-						art_square(thing.pos, br, 3, thing.size/4, 1000, "#000000");
+						art_square(thing.pos, tl, 3, thing.size/4, 1000, "#ffffff");
+						art_square(thing.pos, tr, 3, thing.size/4, 1000, "#ffffff");
+						art_square(thing.pos, bl, 3, thing.size/4, 1000, "#ffffff");
+						art_square(thing.pos, br, 3, thing.size/4, 1000, "#ffffff");
 						hit(thing, 10000000);
 					}, 3000)
 				}
@@ -983,7 +983,7 @@ var agents = {
 		},
 		go: function(){
 			var id = shortid.generate();
-			things[id] = new Square(id, true, agents['samurai'].step, agents['samurai'].collide, default_end, 20, -3000, -3000, '#000000');
+			things[id] = new Square(id, true, agents['samurai'].step, agents['samurai'].collide, default_end, 20, -3000, -3000, '#ffffff');
 			things[id].target = 'player';//todo set target to closest player
 			things[id].phase = 'default';
 			
@@ -1475,7 +1475,7 @@ function start_dark_squares(){
 				if(things[x].is_agent){
 					switch(things[x].phase){
 						case "moving":
-							ctx.fillStyle="#000000";
+							ctx.fillStyle="#ffffff";
 							break;
 						case "dodging":
 							ctx.fillStyle="#00ffff";
@@ -1487,7 +1487,7 @@ function start_dark_squares(){
 							ctx.fillStyle = "#0000ff";
 							break;
 						default:
-							ctx.fillStyle="#000000";
+							ctx.fillStyle="#ffffff";
 					}
 				}
 				else ctx.fillStyle = things[x].color;
