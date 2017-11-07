@@ -15,27 +15,24 @@ function tab_event(tab_name) {
 	//don't want to use resources on a tab that isn't being used
 	//add event listeners here? not sure how much sense it makes
 	console.log(last_tab, '->', tab_name);
-	if(tab_name != 'Dark Squares' && last_tab == 'Dark Squares'){
-		last_tab = tab_name;
+	
+	hold_last_tab = last_tab;
+	last_tab = tab_name;
+	
+	
+	if(tab_name != 'Dark Squares' && hold_last_tab == 'Dark Squares'){
 		stop_dark_squares();
 	}
-	else if (tab_name == 'Dark Squares' && last_tab != 'Dark Squares'){
-		last_tab = tab_name;
+	else if (tab_name == 'Dark Squares' && hold_last_tab != 'Dark Squares'){
 		start_dark_squares();
-	}
-	else if (tab_name == 'Chess Clock' && last_tab != 'Chess Clock'){
-		last_tab = tab_name;
+	}	
+
+	if (tab_name == 'Chess Clock' && hold_last_tab != 'Chess Clock'){
 		start_chess_clock();
 	}
-	else if (tab_name != 'Chess Clock' && last_tab == 'Chess Clock'){
-		last_tab = tab_name;
+	else if (tab_name != 'Chess Clock' && hold_last_tab == 'Chess Clock'){
 		stop_chess_clock();
 	}
-	else {
-		//delete else right? WRONG might happen first and fucks up logic
-		last_tab = tab_name;
-	}
-	
 }
 
 domready(function() {
@@ -1328,7 +1325,7 @@ var now = new Date().getTime();
 }
 
 function iniate_chess_clock(){
-	console.log('iniate');
+	console.log('iniate chess clock');
 	chess_clock['player1_div'] = document.getElementById("player1_div");
 	chess_clock['player2_div'] = document.getElementById("player2_div");
 	var now = new Date().getTime();
@@ -1360,19 +1357,16 @@ function iniate_chess_clock(){
 }
 
 function turn_start_chess_clock(player){
-	console.log('start turn');
 	chess_clock[player + '_turn_start_time'] = new Date().getTime();
 }
 
 function turn_end_chess_clock(player){
-	console.log('end turn');
 	var now = new Date().getTime();
 	var distance = now - chess_clock[player + '_turn_start_time'];
 	chess_clock[player + '_time'] = new Date(chess_clock[player + '_time'] + distance).getTime();
 }
 
 function turn_switch_chess_clock(){
-	console.log('turn switch');
 	if (chess_clock['turn'] == 1){
 		chess_clock['turn'] = 2;
 		turn_end_chess_clock('player1');
@@ -1386,7 +1380,6 @@ function turn_switch_chess_clock(){
 }
 
 function pause_chess_clock(){
-	console.log('pause');
 	if (chess_clock['turn'] == 1){
 		chess_clock['hold_turn'] = chess_clock['turn'];
 		chess_clock['turn'] = 0;
@@ -1400,7 +1393,6 @@ function pause_chess_clock(){
 }
 
 function unpause_chess_clock(){
-	console.log('unpause');
 	if (chess_clock['hold_turn'] == 1){
 		turn_start_chess_clock('player1');
 		chess_clock['turn'] = 1;
@@ -1412,16 +1404,13 @@ function unpause_chess_clock(){
 }
 
 function display_chess_clock(player){
-	console.log('display');
 	var distance = chess_clock['end_time'] - chess_clock[player + '_time'];
-	console.log(distance);
 	var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)).toString();
 	var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60)).toString();
 	var seconds = Math.floor((distance % (1000 * 60)) / 1000).toString();
 	chess_clock[player + '_div'].innerHTML = hours + ':' + minutes + ':' + seconds;
 	
 	if(chess_clock['turn'] == 1){
-		console.log('??')
 		chess_clock['player1_div'].classList.add('active_player');
 		chess_clock['player2_div'].classList.remove('active_player');
 	}
@@ -1432,12 +1421,12 @@ function display_chess_clock(player){
 }
 
 function stop_chess_clock(){
-	console.log('stop');
+	console.log('stop chess clock');
 	clearInterval(intervals['chess_clock_interval']);
 }
 
 function start_chess_clock(){
-	console.log('start');
+	console.log('start chess clock');
 	intervals['chess_clock_interval'] = setInterval(function(){
 		if(chess_clock['turn'] == 1){
 			turn_end_chess_clock('player1');
