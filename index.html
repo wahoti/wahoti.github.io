@@ -244,6 +244,15 @@
 			background-color: #cc00ff;
 			cursor: pointer;
 		}
+		/*BEKAARI*/
+		canvas#bekaari_canvas {
+			background-color: #333333;
+			display: block;
+			margin: 15px auto;
+			border:1px solid #000000;
+			width: 1000px;
+			height: 500px;
+		}
 		
 	</style>
 	</head>
@@ -253,6 +262,7 @@
 		<button class="tablinks" onclick="openTab(event, 'Dark Squares')">Dark Squares</button>
 		<button class="tablinks" onclick="openTab(event, 'Box')">Box</button>
 		<button class="tablinks" onclick="openTab(event, 'Chess Clock')">Chess Clock</button>
+		<button class="tablinks" onclick="openTab(event, 'Bekaari')">Bekaari</button>
 	</div>
 	
 	<div id="About Me" class="tabcontent">
@@ -324,6 +334,9 @@
 		<div id="chess_clock_start_stop" class="chess_clock_div">Start/Stop</div>
 		<div id="chess_clock_switch" class="chess_clock_div">Switch</div>
 		<div id="chess_clock_reset" class="chess_clock_div">Reset</div>
+	</div>
+	<div id="Bekaari" class="tabcontent">
+		<canvas id="bekaari_canvas" width="2000" height="1000" ></canvas>
 	</div>
 	<script src="js/three.min.js"></script>
 	<script src="js/wahotiScript.js"></script>

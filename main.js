@@ -33,13 +33,21 @@ function tab_event(tab_name) {
 	else if (tab_name != 'Chess Clock' && hold_last_tab == 'Chess Clock'){
 		stop_chess_clock();
 	}
+	
+	if (tab_name == 'Bekaari' && hold_last_tab != 'Bekaari'){
+		start_bekaari();
+	}
+	else if (tab_name != 'Bekaari' && hold_last_tab == 'Bekaari'){
+		stop_bekaari();
+	}
 }
 
 domready(function() {
 	//this is called after all the resources are loaded available - I think???
 	test_main();
 	add_event_listeners();//put this in tab - and add remove_event_listeners()?????
-	iniate_chess_clock();
+	initiate_chess_clock();
+	initiate_bekaari();
 	// controller_stuff()//NOT NEEDED YO... YO
 });
 
@@ -181,6 +189,16 @@ var keyup = function(c){
 var mx = 0;
 var my = 0;	
 function add_event_listeners() {//CALL THIS IN DOMREADY
+	canvas = document.getElementById("field");
+	hp_canvas = document.getElementById("hp");
+	stamina_canvas = document.getElementById("stamina");
+	ctx = canvas.getContext("2d");
+	hp_ctx = hp_canvas.getContext("2d");
+	stamina_ctx = stamina_canvas.getContext("2d");
+	hp_ctx.fillStyle = "#e60000";
+	stamina_ctx.fillStyle = "#00b300";
+
+
 	document.addEventListener("tab", function(e) {
 		tab_event(e.detail.tab_name);
 	});
@@ -1065,14 +1083,21 @@ var style_height = 500;//NOTE NEED TO CHANGE THIS IN THE STYLE AND HERE - canvas
 var width_ratio = width / style_width;
 var height_ratio = height / style_height;
 	
-var canvas = document.getElementById("field");
-var hp_canvas = document.getElementById("hp");
-var stamina_canvas = document.getElementById("stamina");
-var ctx = canvas.getContext("2d");
-var hp_ctx = hp_canvas.getContext("2d");
-var stamina_ctx = stamina_canvas.getContext("2d");
-hp_ctx.fillStyle = "#e60000";
-stamina_ctx.fillStyle = "#00b300";
+var canvas = {};
+var hp_canvas = {};
+var stamina_canvas = {};
+ctx = {};
+hp_ctx = {};
+stamina_ctx = {};
+	
+// var canvas = document.getElementById("field");
+// var hp_canvas = document.getElementById("hp");
+// var stamina_canvas = document.getElementById("stamina");
+// var ctx = canvas.getContext("2d");
+// var hp_ctx = hp_canvas.getContext("2d");
+// var stamina_ctx = stamina_canvas.getContext("2d");
+// hp_ctx.fillStyle = "#e60000";
+// stamina_ctx.fillStyle = "#00b300";
 
 function knockback(target_id, source_id){
 	if((typeof things[target_id] != 'undefined') && (typeof things[source_id] != 'undefined')){
@@ -1310,6 +1335,7 @@ create_player('player');
 
 var intervals = {};
 var chess_clock = {};
+var bekaari = {}
 
 function reset_chess_clock(){
 var now = new Date().getTime();
@@ -1324,8 +1350,8 @@ var now = new Date().getTime();
 	display_chess_clock('player2');	
 }
 
-function iniate_chess_clock(){
-	console.log('iniate chess clock');
+function initiate_chess_clock(){
+	console.log('initiate chess clock');
 	chess_clock['player1_div'] = document.getElementById("player1_div");
 	chess_clock['player2_div'] = document.getElementById("player2_div");
 	var now = new Date().getTime();
@@ -1439,6 +1465,66 @@ function start_chess_clock(){
 			display_chess_clock('player2');
 		}		
 	}, 500)
+}
+
+function Position(x, y){
+	this.x = x;
+	this.y = y;
+	this.occupant = '';//this will the string of the id of the occupant
+}
+
+function Dude(){
+	
+}
+
+function initiate_bekaari(){
+	//get the canvas element and ctx
+	bekaari['canvas'] = document.getElementById("bekaari_canvas");
+	bekaari['ctx'] = bekaari['canvas'].getContext("2d");
+
+	//calculate the width and height of field based on canvas size and desired size of position
+	bekaari['field'] = [];
+	bekaari['position_radius'] = 100;
+	bekaari['width'] = bekaari['canvas'].width / bekaari['position_radius'];
+	bekaari['height'] = bekaari['canvas'].height / bekaari['position_radius'];
+	
+	//initialize the field matrix
+	for(var x = 0; x<bekaari['width']; x++) {
+		bekaari['field'][x] = [];
+		for(var y = 0; y<bekaari['height']; y++){
+			bekaari['field'][x][y] = new Position(x, y);
+		}
+	}
+	
+	//controller stuff?
+	//key press?
+	//first do draw;
+}
+
+function stop_bekaari(){
+	console.log('stop_bekaari');
+	clearInterval(intervals['bekaari_draw_interval']);
+	clearInterval(intervals['bekaari_step_interval']);
+}
+
+function start_bekaari(){
+	console.log('start_bekaari');
+	intervals['bekaari_draw_interval'] = setInterval(function(){
+		bekaari['ctx'].clearRect(0, 0, bekaari['canvas'].width, bekaari['canvas'].height);
+		//draw grid
+		for(var x = 0; x<bekaari['width']; x++){
+			bekaari['ctx'].moveTo(x*bekaari['position_radius'], 0);
+			bekaari['ctx'].lineTo(x*bekaari['position_radius'], bekaari['canvas'].height);
+			// console.log(x*bekaari['position_radius']);
+		}
+		for(var y = 0; y<bekaari['height']; y++){
+			bekaari['ctx'].moveTo(0, y*bekaari['position_radius']);
+			bekaari['ctx'].lineTo(bekaari['canvas'].width, y*bekaari['position_radius']);
+		}
+		bekaari['ctx'].strokeStyle = "grey";
+		bekaari['ctx'].stroke();
+	},17);
+	intervals['bekaari_step_interval'] = setInterval(function(){}, 17);
 }
 
 function stop_dark_squares(){
