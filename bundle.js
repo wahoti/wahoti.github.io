@@ -1480,6 +1480,8 @@ function Dude(){
 
 function initiate_bekaari(){
 	//get the canvas element and ctx
+	bekaari['grid_canvas'] = document.getElementById("bekaari_grid_canvas");
+	bekaari['grid_ctx'] = bekaari['grid_canvas'].getContext("2d");
 	bekaari['canvas'] = document.getElementById("bekaari_canvas");
 	bekaari['ctx'] = bekaari['canvas'].getContext("2d");
 
@@ -1496,7 +1498,21 @@ function initiate_bekaari(){
 			bekaari['field'][x][y] = new Position(x, y);
 		}
 	}
+
+	//draw grid
+	for(var x = 0; x<=bekaari['width']; x++){
+		bekaari['grid_ctx'].moveTo(x*bekaari['position_radius'], 0);
+		bekaari['grid_ctx'].lineTo(x*bekaari['position_radius'], bekaari['grid_canvas'].height);
+	}
+	for(var y = 0; y<=bekaari['height']; y++){
+		bekaari['grid_ctx'].moveTo(0, y*bekaari['position_radius']);
+		bekaari['grid_ctx'].lineTo(bekaari['grid_canvas'].width, y*bekaari['position_radius']);
+	}
+	bekaari['grid_ctx'].strokeStyle = "grey";
+	bekaari['grid_ctx'].stroke();
 	
+	bekaari['ctx'].fillStyle="#ffffff";
+	bekaari['ctx'].fillRect(0,0,95,95);
 	//controller stuff?
 	//key press?
 	//first do draw;
@@ -1511,19 +1527,6 @@ function stop_bekaari(){
 function start_bekaari(){
 	console.log('start_bekaari');
 	intervals['bekaari_draw_interval'] = setInterval(function(){
-		bekaari['ctx'].clearRect(0, 0, bekaari['canvas'].width, bekaari['canvas'].height);
-		//draw grid
-		for(var x = 0; x<bekaari['width']; x++){
-			bekaari['ctx'].moveTo(x*bekaari['position_radius'], 0);
-			bekaari['ctx'].lineTo(x*bekaari['position_radius'], bekaari['canvas'].height);
-			// console.log(x*bekaari['position_radius']);
-		}
-		for(var y = 0; y<bekaari['height']; y++){
-			bekaari['ctx'].moveTo(0, y*bekaari['position_radius']);
-			bekaari['ctx'].lineTo(bekaari['canvas'].width, y*bekaari['position_radius']);
-		}
-		bekaari['ctx'].strokeStyle = "grey";
-		bekaari['ctx'].stroke();
 	},17);
 	intervals['bekaari_step_interval'] = setInterval(function(){}, 17);
 }

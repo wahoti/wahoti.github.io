@@ -245,13 +245,35 @@
 			cursor: pointer;
 		}
 		/*BEKAARI*/
-		canvas#bekaari_canvas {
+		canvas#bekaari_grid_canvas {
 			background-color: #333333;
-			display: block;
-			margin: 15px auto;
 			border:1px solid #000000;
 			width: 1000px;
 			height: 500px;
+			z-index: 0;
+			position: absolute;
+			left: 50%;
+			margin-left: -500px;
+			top: 50%;
+			margin-top: -275px;
+		}
+		canvas#bekaari_canvas {
+			border:1px solid #000000;
+			width: 1000px;
+			height: 500px;
+			z-index: 1;
+			position: absolute;
+			left: 50%;
+			margin-left: -500px;
+			top: 50%;
+			margin-top: -275px;
+		}
+		div#bekaari_canvas_wrapper {
+			position: relative;
+			margin: auto;
+			height: 100%;
+			width: 100%;
+			border:1px solid #aa00aa;
 		}
 		
 	</style>
@@ -336,7 +358,10 @@
 		<div id="chess_clock_reset" class="chess_clock_div">Reset</div>
 	</div>
 	<div id="Bekaari" class="tabcontent">
+		<div id="bekaari_canvas_wrapper">
 		<canvas id="bekaari_canvas" width="2000" height="1000" ></canvas>
+		<canvas id="bekaari_grid_canvas" width="2000" height="1000" ></canvas>
+		</div>
 	</div>
 	<script src="js/three.min.js"></script>
 	<script src="js/wahotiScript.js"></script>
