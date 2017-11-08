@@ -145,6 +145,12 @@ var keydown = function(c){
 			case 68://d
 				bekaari['selected'][0] += 1;
 				break;
+			case 32://space
+				bekaari_select();
+				break;
+			case 16://shift
+				bekaari_shift();
+				break;
 			default:
 		}
 	}
@@ -1495,12 +1501,49 @@ function Dude(){
 	
 }
 
+var dude_list = {
+	wall_dude: object = {
+		description: 'hello',
+	},
+};
+
+function place_dude(){
+	console.log('place dude');
+}
+
+function bekaari_shift(){
+	switch(bekaari['game_mode']){
+		case 'game_start':
+			break;
+		case 'deployment':
+			
+			break;
+		default:
+	}
+}
+
+function bekaari_select(){
+	switch(bekaari['game_mode']){
+		case 'game_start':
+			break;
+		case 'deployment':
+			place_dude();
+			break;
+		default:
+	}
+}
+
 function bekaari_new(){
 	console.log('bekaari_new');
+	bekaari['dudes'] = {};
+	bekaari['game_mode'] = 'deployment';
+	document.getElementById("bekaari_mode").innerHTML = 'Deployment';
 }
 
 function bekaari_start(){
 	console.log('bekaari_start');
+	bekaari['game_mode'] = 'game_start';
+	document.getElementById("bekaari_mode").innerHTML = 'Game Start';
 }
 
 function initiate_bekaari(){
@@ -1520,8 +1563,10 @@ function initiate_bekaari(){
 	bekaari['selected'] = [2, 2];
 	bekaari['gamepads'] = {};
 	bekaari['game_mode'] = 'deployment';
-	bekaari['menu_open'] = false;
 	bekaari['dudes'] = {};
+	bekaari['deployment'] = {};
+	bekaari['deployment'].selected = 'wall_dude';
+	
 	
 	//initialize the field matrix
 	for(var x = 0; x<bekaari['width']; x++) {
@@ -1618,6 +1663,14 @@ function start_bekaari(){
 		});
 	}, 17);
 	intervals['bekaari_second_interval'] = setInterval(function(){
+		// document.getElementById('bekaari_infobox').innerHTML = '';
+		var info = ''
+		if(bekaari['game_mode'] == 'deployment'){
+			// document.getElementById('bekaari_infobox').innterHTML += dude_list[bekaari['deployment'].selected].description;
+			// console.log(dude_list[bekaari['deployment'].selected].description);
+			info += dude_list[bekaari['deployment'].selected].description;
+		}
+		document.getElementById('bekaari_infobox').innerHTML = info;
 		document.getElementById('gamepad_p_bekaari').innerHTML = 'Gamepads Connected: ' + Object.keys(bekaari['gamepads']).length;
 		_.forEach(navigator.getGamepads(), function(gamepad){
 			if(gamepad){

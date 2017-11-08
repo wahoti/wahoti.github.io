@@ -302,7 +302,42 @@
 		div#bekaari_start:hover {
 			background-color: #ddd;
 		}
-		
+		div#bekaari_infobox{
+			word-wrap: break-word;
+			background-color: #333333;
+			font-size: 30%;
+			color: #ffffff;
+			width: 10%;
+			border:1px solid #000000;
+			display: inline-block;
+			margin: 0px auto;
+			height: 200px;
+			width: 130px;
+			position: fixed;
+			right: 0px;
+			top: 50%;
+			margin-top: -100px;
+		}
+		div#bekaari_gamepad_infobox{
+			font-size: 30%;
+			width: 10%;
+			display: inline-block;
+			margin: 0px auto;
+			border:1px solid #000000;
+			position: fixed;
+			bottom: 15px;
+			right: 0px;
+		}
+		div#bekaari_mode{
+			font-size: 10px;
+			width: 10%;
+			display: inline-block;
+			margin: 0px auto;
+			border:1px solid #000000;
+			position: fixed;
+			bottom: 0px;
+			right: 0px;
+		}
 	</style>
 	</head>
 	<body>
@@ -386,16 +421,18 @@
 	</div>
 	<div id="Bekaari" class="tabcontent">
 		<div id="bekaari_canvas_wrapper">
-		<canvas id="bekaari_canvas" width="2000" height="1000" ></canvas>
-		<canvas id="bekaari_grid_canvas" width="2000" height="1000" ></canvas>
-		</div>
-		<div id="gamepad_infobox">
-		<p id="gamepad_p_bekaari">Gamepads Connected: 0</p>
+			<canvas id="bekaari_canvas" width="2000" height="1000" ></canvas>
+			<canvas id="bekaari_grid_canvas" width="2000" height="1000" ></canvas>
 		</div>
 		<div id="bekaari_menu">
-		<div id="bekaari_new">New</div>
-		<div id="bekaari_start">Start</div>
+			<div id="bekaari_new">New</div>
+			<div id="bekaari_start">Start</div>
 		</div>
+		<div id="bekaari_gamepad_infobox">
+			<p id="gamepad_p_bekaari">Gamepads Connected: 0</p>
+		</div>
+		<div id="bekaari_mode">Deployment</div>
+		<div id="bekaari_infobox"></div>
 	</div>
 	<script src="js/three.min.js"></script>
 	<script src="js/wahotiScript.js"></script>
