@@ -151,6 +151,9 @@ var keydown = function(c){
 			case 16://shift
 				bekaari_shift();
 				break;
+			case 191://forward slash
+				bekaari_color_shift();
+				break;
 			default:
 		}
 	}
@@ -1502,10 +1505,20 @@ function Dude(){
 }
 
 var dude_list = {
+	archer: object = {
+		description: 'archer: long range, low mobility, weak up close.',
+		tag: 'Ar',		
+	},
+	knight: object = {
+		description: 'knight: high mobility.',
+		tag: 'Kn',
+	},
 	wall_dude: object = {
-		description: 'hello',
+		description: 'wall_dude: makes walls.',
+		tag: 'WD',
 	},
 };
+var dude_list_keys = Object.keys(dude_list);
 
 function place_dude(){
 	console.log('place dude');
@@ -1516,10 +1529,29 @@ function bekaari_shift(){
 		case 'game_start':
 			break;
 		case 'deployment':
-			
+			var index = dude_list_keys.indexOf(bekaari['deployment'].selected);
+			var new_index = 0;
+			if((index+1) < dude_list_keys.length) new_index = index+1;
+			bekaari['deployment'].selected = dude_list_keys[new_index];
+			document.getElementById('bekaari_infobox').innerHTML = dude_list[bekaari['deployment'].selected].description;
 			break;
 		default:
 	}
+}
+
+color_list = ['#FFFFFF', '#00FF00', '#FF0000', '#00FFFF']
+function bekaari_color_shift(){
+	switch(bekaari['game_mode']){
+		case 'game_start':
+			break;
+		case 'deployment':
+			var index = color_list.indexOf(bekaari['deployment'].color);
+			var new_index = 0;
+			if((index+1) < color_list.length) new_index = index+1;
+			bekaari['deployment'].color = color_list[new_index];
+			break;
+		default:
+	}	
 }
 
 function bekaari_select(){
@@ -1566,6 +1598,7 @@ function initiate_bekaari(){
 	bekaari['dudes'] = {};
 	bekaari['deployment'] = {};
 	bekaari['deployment'].selected = 'wall_dude';
+	bekaari['deployment'].color = '#FFFFFF';
 	
 	
 	//initialize the field matrix
@@ -1621,6 +1654,21 @@ function start_bekaari(){
 			bekaari['position_radius'],
 			bekaari['position_radius']
 		);
+		switch(bekaari['game_mode']){
+			case 'deployment':
+				//console.log(dude_list[bekaari['deployment'].selected].tag);
+				bekaari['ctx'].font = '40pt Calibri';
+				bekaari['ctx'].fillStyle = bekaari['deployment'].color;
+				bekaari['ctx'].fillText(
+					dude_list[bekaari['deployment'].selected].tag,
+					bekaari['selected'][0]*bekaari['position_radius'],
+					((bekaari['selected'][1]+1)*bekaari['position_radius']) - 15
+				);
+				break;
+			case 'game_start':
+				break;
+			default:
+		}
 	},17);
 	intervals['bekaari_step_interval'] = setInterval(function(){
 		_.forEach(bekaari['gamepads'], function(gamepad){
@@ -1664,13 +1712,11 @@ function start_bekaari(){
 	}, 17);
 	intervals['bekaari_second_interval'] = setInterval(function(){
 		// document.getElementById('bekaari_infobox').innerHTML = '';
-		var info = ''
-		if(bekaari['game_mode'] == 'deployment'){
-			// document.getElementById('bekaari_infobox').innterHTML += dude_list[bekaari['deployment'].selected].description;
-			// console.log(dude_list[bekaari['deployment'].selected].description);
-			info += dude_list[bekaari['deployment'].selected].description;
-		}
-		document.getElementById('bekaari_infobox').innerHTML = info;
+		// var info = ''
+		// if(bekaari['game_mode'] == 'deployment'){
+			// info += dude_list[bekaari['deployment'].selected].description;
+		// }
+		// document.getElementById('bekaari_infobox').innerHTML = info;
 		document.getElementById('gamepad_p_bekaari').innerHTML = 'Gamepads Connected: ' + Object.keys(bekaari['gamepads']).length;
 		_.forEach(navigator.getGamepads(), function(gamepad){
 			if(gamepad){
