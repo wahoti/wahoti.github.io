@@ -253,7 +253,7 @@
 			z-index: 0;
 			position: absolute;
 			left: 50%;
-			margin-left: -500px;
+			margin-left: -580px;
 			top: 50%;
 			margin-top: -275px;
 		}
@@ -264,7 +264,7 @@
 			z-index: 1;
 			position: absolute;
 			left: 50%;
-			margin-left: -500px;
+			margin-left: -580px;
 			top: 50%;
 			margin-top: -275px;
 		}
@@ -274,26 +274,80 @@
 			height: 100%;
 			width: 100%;
 		}
-		div#bekaari_menu {
-			font-size: 15px;
-			display: inline-block;
-			margin: 0px auto;
-			position: fixed;
-			top: 40px;
-			left: 0px;
+		div#bekaari_infobox{
+			border:1px solid #000000;
+			background-color: #333333;
+			
+			color: grey;
+			word-wrap: break-word;
+			font-size: 20px;
+			
+			height: 500px;
+			width: 160px;
+			
+			position: absolute;
+			top: 50%;
+			margin-top: -275px;
+			
+			left: 50%;
+			margin-left: 440px;
+		}
+		div#bekaari_gamepad_infobox{
+			border:1px solid grey;
+			font-size: 10px;
+			color: grey;
+			
+			height: 12px;
+			width: 160px;
+			
+			position: absolute;
+			
+			bottom: 50px;
+			
+			right: 0px;
+		}
+		div#bekaari_mode{
+			border:1px solid grey;
+			font-size: 10px;
+			color: grey;
+			
+			height: 12px;
+			width: 160px;
+			
+			position: absolute;
+			
+			bottom: 38px;
+			
+			right: 0px;
 		}
 		div#bekaari_new {
-			background-color: #333333;
+			border:1px solid grey;
+			font-size: 10px;
 			color: grey;
-			border-radius: 15px 50px 30px;
-			border: 1px solid grey;
+			
+			height: 12px;
+			width: 60px;
+			
+			position: absolute;
+			
+			bottom: 50px;
+			
+			right: 160px;
 			cursor: pointer;
 		}
 		div#bekaari_start {
-			background-color: #333333;
+			border:1px solid grey;
+			font-size: 10px;
 			color: grey;
-			border-radius: 15px 50px 30px;
-			border: 1px solid grey;
+			
+			height: 12px;
+			width: 60px;
+			
+			position: absolute;
+			
+			bottom: 38px;
+			
+			right: 160px;
 			cursor: pointer;
 		}
 		div#bekaari_new:hover {
@@ -301,42 +355,6 @@
 		}
 		div#bekaari_start:hover {
 			background-color: #ddd;
-		}
-		div#bekaari_infobox{
-			word-wrap: break-word;
-			background-color: #333333;
-			font-size: 30%;
-			color: #ffffff;
-			width: 10%;
-			border:1px solid #000000;
-			display: inline-block;
-			margin: 0px auto;
-			height: 200px;
-			width: 130px;
-			position: fixed;
-			right: 0px;
-			top: 50%;
-			margin-top: -100px;
-		}
-		div#bekaari_gamepad_infobox{
-			font-size: 30%;
-			width: 10%;
-			display: inline-block;
-			margin: 0px auto;
-			border:1px solid #000000;
-			position: fixed;
-			bottom: 15px;
-			right: 0px;
-		}
-		div#bekaari_mode{
-			font-size: 10px;
-			width: 10%;
-			display: inline-block;
-			margin: 0px auto;
-			border:1px solid #000000;
-			position: fixed;
-			bottom: 0px;
-			right: 0px;
 		}
 	</style>
 	</head>
@@ -423,16 +441,14 @@
 		<div id="bekaari_canvas_wrapper">
 			<canvas id="bekaari_canvas" width="2000" height="1000" ></canvas>
 			<canvas id="bekaari_grid_canvas" width="2000" height="1000" ></canvas>
-		</div>
-		<div id="bekaari_menu">
+			<div id="bekaari_gamepad_infobox">
+				<p id="gamepad_p_bekaari">Gamepads Connected: 0</p>
+			</div>
+			<div id="bekaari_mode">Deployment</div>
+			<div id="bekaari_infobox"></div>
 			<div id="bekaari_new">New</div>
 			<div id="bekaari_start">Start</div>
 		</div>
-		<div id="bekaari_gamepad_infobox">
-			<p id="gamepad_p_bekaari">Gamepads Connected: 0</p>
-		</div>
-		<div id="bekaari_mode">Deployment</div>
-		<div id="bekaari_infobox"></div>
 	</div>
 	<script src="js/three.min.js"></script>
 	<script src="js/wahotiScript.js"></script>
