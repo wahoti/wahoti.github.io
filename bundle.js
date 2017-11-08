@@ -131,6 +131,23 @@ function Square(id, is_agent, step_function, collide_function, end_function, siz
 
 var keydown = function(c){
 	var key = c.keyCode;
+	if(last_tab == 'Bekaari'){
+		switch(key){
+			case 87://w
+				bekaari['selected'][1] -= 1;
+				break;
+			case 83://s
+				bekaari['selected'][1] += 1;
+				break;
+			case 65://a
+				bekaari['selected'][0] -= 1;
+				break;
+			case 68://d
+				bekaari['selected'][0] += 1;
+				break;
+			default:
+		}
+	}
 	if(last_tab == 'Chess Clock'){
 		switch(key){
 			case 32://space
@@ -1487,9 +1504,11 @@ function initiate_bekaari(){
 
 	//calculate the width and height of field based on canvas size and desired size of position
 	bekaari['field'] = [];
-	bekaari['position_radius'] = 100;
+	bekaari['position_radius'] = 80;
 	bekaari['width'] = bekaari['canvas'].width / bekaari['position_radius'];
 	bekaari['height'] = bekaari['canvas'].height / bekaari['position_radius'];
+	bekaari['selected'] = [2, 2];
+	bekaari['gamepads'] = {};
 	
 	//initialize the field matrix
 	for(var x = 0; x<bekaari['width']; x++) {
@@ -1498,7 +1517,18 @@ function initiate_bekaari(){
 			bekaari['field'][x][y] = new Position(x, y);
 		}
 	}
-
+	bekaari['width_ratio'] = 2;
+	bekaari['height_ratio'] = 2;
+	bekaari['canvas'].addEventListener("mousedown", function(c){
+		coord = [(c.clientX - bekaari['canvas'].offsetLeft) * bekaari['width_ratio'], (c.clientY - bekaari['canvas'].offsetTop - 40) * bekaari['height_ratio']];
+		if(c.which == 1){
+			//bekaari['selected']][0] = coord;
+			bekaari['selected'] = [Math.floor(coord[0]/bekaari['position_radius']), Math.floor(coord[1]/bekaari['position_radius'])];
+		}
+		if(c.which == 3){
+		}
+	}, false);
+	
 	//draw grid
 	for(var x = 0; x<=bekaari['width']; x++){
 		bekaari['grid_ctx'].moveTo(x*bekaari['position_radius'], 0);
@@ -1510,9 +1540,6 @@ function initiate_bekaari(){
 	}
 	bekaari['grid_ctx'].strokeStyle = "grey";
 	bekaari['grid_ctx'].stroke();
-	
-	bekaari['ctx'].fillStyle="#ffffff";
-	bekaari['ctx'].fillRect(0,0,95,95);
 	//controller stuff?
 	//key press?
 	//first do draw;
@@ -1522,13 +1549,69 @@ function stop_bekaari(){
 	console.log('stop_bekaari');
 	clearInterval(intervals['bekaari_draw_interval']);
 	clearInterval(intervals['bekaari_step_interval']);
+	clearInterval(intervals['bekaari_second_interval']);
 }
 
 function start_bekaari(){
 	console.log('start_bekaari');
 	intervals['bekaari_draw_interval'] = setInterval(function(){
+		bekaari['ctx'].clearRect(0, 0, bekaari['canvas'].width, bekaari['canvas'].height);
+		bekaari['ctx'].strokeStyle="#ffffff";
+		bekaari['ctx'].strokeRect(
+			bekaari['selected'][0]*bekaari['position_radius'],
+			bekaari['selected'][1]*bekaari['position_radius'],
+			bekaari['position_radius'],
+			bekaari['position_radius']
+		);
 	},17);
-	intervals['bekaari_step_interval'] = setInterval(function(){}, 17);
+	intervals['bekaari_step_interval'] = setInterval(function(){
+		_.forEach(bekaari['gamepads'], function(gamepad){
+			var index = gamepad.gamepad_index;
+			var gamepad = navigator.getGamepads()[index];
+			if(gamepad){
+				if(gamepad.buttons[12].pressed && bekaari['gamepads'][index].up == false){
+					bekaari['gamepads'][index].up = true;
+					bekaari['selected'][1] -= 1;
+				}
+				else if(!gamepad.buttons[12].pressed) bekaari['gamepads'][index].up = false;
+				if(gamepad.buttons[13].pressed && bekaari['gamepads'][index].down == false){
+					bekaari['gamepads'][index].down = true;
+					bekaari['selected'][1] += 1;
+				}
+				else if(!gamepad.buttons[13].pressed) bekaari['gamepads'][index].down = false;
+				if(gamepad.buttons[14].pressed && bekaari['gamepads'][index].left == false){
+					bekaari['gamepads'][index].left = true;
+					bekaari['selected'][0] -= 1;
+				}
+				else if(!gamepad.buttons[14].pressed) bekaari['gamepads'][index].left = false;
+				if(gamepad.buttons[15].pressed && bekaari['gamepads'][index].right == false){
+					bekaari['gamepads'][index].right = true;
+					bekaari['selected'][0] += 1;
+				}
+				else if(!gamepad.buttons[15].pressed) bekaari['gamepads'][index].right = false;
+			}
+		});
+	}, 17);
+	intervals['bekaari_second_interval'] = setInterval(function(){
+		console.log(Object.keys(bekaari['gamepads']).length);
+		document.getElementById('gamepad_p_bekaari').innerHTML = 'Gamepads Connected: ' + Object.keys(bekaari['gamepads']).length;
+		_.forEach(navigator.getGamepads(), function(gamepad){
+			if(gamepad){
+				if(!gamepad.id.includes('Unknown')){
+					var playa = _.filter(bekaari['gamepads'], {'gamepad_index': gamepad.index});
+					if(!playa.length){
+						console.log('gamepad detected');
+						bekaari['gamepads'][gamepad.index] = {};
+						bekaari['gamepads'][gamepad.index].gamepad_index = gamepad.index;
+						bekaari['gamepads'][gamepad.index].up = false;
+						bekaari['gamepads'][gamepad.index].down = false
+						bekaari['gamepads'][gamepad.index].left = false
+						bekaari['gamepads'][gamepad.index].right = false
+					}
+				}
+			}
+		})
+	}, 1000);
 }
 
 function stop_dark_squares(){
