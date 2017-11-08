@@ -1795,7 +1795,7 @@ function start_dark_squares(){
 		// //navigator.getGamepads()[e.gamepad.index]
 		// console.log(navigator.getGamepads());
 		// console.log(players);
-		document.getElementById('gamepad_p').innerHTML = 'Gamepads Connected: ' + Object.keys(players).length;
+		document.getElementById('gamepad_p').innerHTML = 'Gamepads Connected: ' + (Object.keys(players).length-1);
 		_.forEach(navigator.getGamepads(), function(gamepad){
 			if(gamepad){
 				if(!gamepad.id.includes('Unknown')){
