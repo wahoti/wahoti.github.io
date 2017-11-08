@@ -183,9 +183,9 @@
 		div#infobox{
 			font-size: 30%;
 			width: 10%;
+			border:1px solid #000000;
 			display: inline-block;
 			margin: 0px auto;
-			border:1px solid #000000;
 			position: fixed;
 			bottom: 0px;
 			right: 0px;
@@ -273,6 +273,34 @@
 			margin: auto;
 			height: 100%;
 			width: 100%;
+		}
+		div#bekaari_menu {
+			font-size: 15px;
+			display: inline-block;
+			margin: 0px auto;
+			position: fixed;
+			top: 40px;
+			left: 0px;
+		}
+		div#bekaari_new {
+			background-color: #333333;
+			color: grey;
+			border-radius: 15px 50px 30px;
+			border: 1px solid grey;
+			cursor: pointer;
+		}
+		div#bekaari_start {
+			background-color: #333333;
+			color: grey;
+			border-radius: 15px 50px 30px;
+			border: 1px solid grey;
+			cursor: pointer;
+		}
+		div#bekaari_new:hover {
+			background-color: #ddd;
+		}
+		div#bekaari_start:hover {
+			background-color: #ddd;
 		}
 		
 	</style>
@@ -363,6 +391,10 @@
 		</div>
 		<div id="gamepad_infobox">
 		<p id="gamepad_p_bekaari">Gamepads Connected: 0</p>
+		</div>
+		<div id="bekaari_menu">
+		<div id="bekaari_new">New</div>
+		<div id="bekaari_start">Start</div>
 		</div>
 	</div>
 	<script src="js/three.min.js"></script>

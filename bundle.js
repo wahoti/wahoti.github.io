@@ -1495,12 +1495,22 @@ function Dude(){
 	
 }
 
+function bekaari_new(){
+	console.log('bekaari_new');
+}
+
+function bekaari_start(){
+	console.log('bekaari_start');
+}
+
 function initiate_bekaari(){
 	//get the canvas element and ctx
 	bekaari['grid_canvas'] = document.getElementById("bekaari_grid_canvas");
 	bekaari['grid_ctx'] = bekaari['grid_canvas'].getContext("2d");
 	bekaari['canvas'] = document.getElementById("bekaari_canvas");
 	bekaari['ctx'] = bekaari['canvas'].getContext("2d");
+	document.getElementById("bekaari_new").onclick = bekaari_new;
+	document.getElementById("bekaari_start").onclick = bekaari_start;
 
 	//calculate the width and height of field based on canvas size and desired size of position
 	bekaari['field'] = [];
@@ -1509,6 +1519,9 @@ function initiate_bekaari(){
 	bekaari['height'] = bekaari['canvas'].height / bekaari['position_radius'];
 	bekaari['selected'] = [2, 2];
 	bekaari['gamepads'] = {};
+	bekaari['game_mode'] = 'deployment';
+	bekaari['menu_open'] = false;
+	bekaari['dudes'] = {};
 	
 	//initialize the field matrix
 	for(var x = 0; x<bekaari['width']; x++) {
@@ -1569,6 +1582,18 @@ function start_bekaari(){
 			var index = gamepad.gamepad_index;
 			var gamepad = navigator.getGamepads()[index];
 			if(gamepad){
+				if(gamepad.buttons[4].pressed && bekaari['gamepads'][index].l1 == false){
+					bekaari['gamepads'][index].l1 = true;
+					bekaari['selected'][0] = 0;
+				}
+				else if(!gamepad.buttons[4].pressed) bekaari['gamepads'][index].l1 = false;
+				
+				if(gamepad.buttons[5].pressed && bekaari['gamepads'][index].r1 == false){
+					bekaari['gamepads'][index].r1 = true;
+					bekaari['selected'][0] = bekaari['width'] - 1;
+				}
+				else if(!gamepad.buttons[5].pressed) bekaari['gamepads'][index].r1 = false;
+				
 				if(gamepad.buttons[12].pressed && bekaari['gamepads'][index].up == false){
 					bekaari['gamepads'][index].up = true;
 					bekaari['selected'][1] -= 1;
@@ -1593,7 +1618,6 @@ function start_bekaari(){
 		});
 	}, 17);
 	intervals['bekaari_second_interval'] = setInterval(function(){
-		console.log(Object.keys(bekaari['gamepads']).length);
 		document.getElementById('gamepad_p_bekaari').innerHTML = 'Gamepads Connected: ' + Object.keys(bekaari['gamepads']).length;
 		_.forEach(navigator.getGamepads(), function(gamepad){
 			if(gamepad){
@@ -1604,9 +1628,12 @@ function start_bekaari(){
 						bekaari['gamepads'][gamepad.index] = {};
 						bekaari['gamepads'][gamepad.index].gamepad_index = gamepad.index;
 						bekaari['gamepads'][gamepad.index].up = false;
-						bekaari['gamepads'][gamepad.index].down = false
-						bekaari['gamepads'][gamepad.index].left = false
-						bekaari['gamepads'][gamepad.index].right = false
+						bekaari['gamepads'][gamepad.index].down = false;
+						bekaari['gamepads'][gamepad.index].left = false;
+						bekaari['gamepads'][gamepad.index].right = false;
+						bekaari['gamepads'][gamepad.index].cross = false;
+						bekaari['gamepads'][gamepad.index].r1 = false;
+						bekaari['gamepads'][gamepad.index].l1 = false;
 					}
 				}
 			}
