@@ -149,7 +149,6 @@ var keydown = function(c){
 				bekaari_select();
 				break;
 			case 16://shift
-				bekaari_shift();
 				break;
 			case 190://, >
 				bekaari_color_shift_forward();
@@ -1504,20 +1503,65 @@ function start_chess_clock(){
 }
 
 var dude_list = {
-	archer: object = {
-		description: 'archer: long range, low mobility, weak up close.',
-		tag: 'Ar',		
-	},
-	knight: object = {
-		description: 'knight: high mobility.',
-		tag: 'Kn',
-	},
-	wall_dude: object = {
-		description: 'wall_dude: makes walls.',
-		tag: 'WD',
+	rook: object = {
+		description: 'moves on columns and rows.',
+		tag: 'Rk',
+		mobility: false,
+		movement_patterns: [
+			[0, -1, 1, 7],
+			[1, 0, 1, 7],
+			[0, 1, 1, 7],
+			[-1, 0, 1, 7]
+		],
+		custom_movement_pattern: function(position){
+			return [];
+		},
+		attack_patterns: [
+			[0, -1, 1, 7],
+			[1, 0, 1, 7],
+			[0, 1, 1, 7],
+			[-1, 0, 1, 7]
+		],
+		custom_attack_pattern: function(position){
+			return [];
+		},
 	},
 };
 var dude_list_keys = Object.keys(dude_list);
+
+function get_positions(dude, position){
+	//pattern = [x,y,min,max]
+	return dude_list[dude].custom_movement_pattern(position).concat(
+		_.flatten(_.map(dude_list[dude].movement_patterns, function(pattern, index, collection){
+			// console.log(pattern, index, collection);
+			var positions = [];
+			for(var i = pattern[2]; i <= pattern[3]; i++){
+			// console.log(position[0]+(pattern[0] * i), position[1]+(pattern[1] * i));
+				var new_position = [position[0]+(pattern[0] * i), position[1]+(pattern[1] * i)];
+				if(get_occupant_position(new_position)){
+					console.log(i);
+					i = pattern[3] + 1;
+					break;
+				}
+				else{
+					positions.push(new_position);
+				}
+			}
+			return positions;
+		}))
+	);
+}
+
+function get_atack_positions(dude, position){
+	return [];
+}
+
+
+function Pattern(x, y, min, max){
+	this.direction = [x, y];
+	this.min = min;
+	this.max = max;
+}
 
 function Position(x, y){
 	this.x = x;
@@ -1609,6 +1653,27 @@ function bekaari_color_shift_backward(){
 function bekaari_select(){
 	switch(bekaari['game_mode']){
 		case 'game_start':
+			switch(bekaari['game_start'].mode){
+				case 'idle':
+					//todo set selected correctly
+					bekaari['game_start'].mode = 'moving';
+					bekaari['game_start'].selected = 'wall_dude';
+					bekaari['game_start'].selected_position = [0,0];
+					bekaari['game_start'].selected_id = '';
+					var occupant = get_occupant();
+					if(occupant){
+						console.log(occupant.type);
+						console.log(get_positions(occupant.type, bekaari['selected']));
+					}
+					break;
+				case 'moving':
+					bekaari['game_start'].mode = 'activating';
+					break;
+				case 'activating':
+					bekaari['game_start'].mode = 'idle';
+					break;
+				default:
+			}
 			break;
 		case 'deployment':
 			place_dude();
@@ -1628,6 +1693,7 @@ function bekaari_new(){
 function bekaari_start(){
 	console.log('bekaari_start');
 	bekaari['game_mode'] = 'game_start';
+	bekaari['game_start'].mode = 'idle';
 	document.getElementById("bekaari_mode").innerHTML = 'Game Start';
 	bekaari['game_mode_infobox'].innerHTML = 'Game Start';
 	//var box document.getElementById('bekaari_infobox').innerHTML = dude_list[bekaari['deployment'].selected].description;
@@ -1653,8 +1719,13 @@ function initiate_bekaari(){
 	bekaari['game_mode'] = 'deployment';
 	bekaari['dudes'] = {};
 	bekaari['deployment'] = {};
-	bekaari['deployment'].selected = 'wall_dude';
+	bekaari['deployment'].selected = 'rook';
 	bekaari['deployment'].color = '#FFFFFF';
+	bekaari['game_start'] = {};
+	bekaari['game_start'].mode = 'idle';
+	bekaari['game_start'].selected = 'wall_dude';
+	bekaari['game_start'].selected_position = [0,0];
+	bekaari['game_start'].selected_id = '';
 	bekaari['dudes'] = {};
 	bekaari['infobox'] = document.getElementById('bekaari_infobox');
 	bekaari['game_mode_infobox'] = document.getElementById("bekaari_mode");
@@ -1695,6 +1766,26 @@ function initiate_bekaari(){
 	//first do draw;
 }
 
+function position_valid(position){
+	if(
+		(position[0] < 0) ||
+		(position [0] >= bekaari['width']) ||
+		(position[1] < 0) ||
+		(position [1] >= bekaari['height'])
+	) return false;
+	else return true;
+}
+
+function get_occupant_position(position){
+	console.log(position, position_valid(position));
+	if(position_valid(position)) return bekaari['dudes'][bekaari['field'][position[0]][position[1]].occupant];
+	else return false;
+}
+
+function get_occupant_selected(){
+	return  bekaari['dudes'][bekaari['field'][bekaari['selected'][0]][bekaari['selected'][1]].occupant];
+}
+
 function stop_bekaari(){
 	console.log('stop_bekaari');
 	clearInterval(intervals['bekaari_draw_interval']);
@@ -1705,8 +1796,8 @@ function stop_bekaari(){
 function start_bekaari(){
 	console.log('start_bekaari');
 	intervals['bekaari_draw_interval'] = setInterval(function(){
-		//draw selected
 		bekaari['ctx'].clearRect(0, 0, bekaari['canvas'].width, bekaari['canvas'].height);
+		//draw selected
 		bekaari['ctx'].strokeStyle="#ffffff";
 		bekaari['ctx'].strokeRect(
 			bekaari['selected'][0]*bekaari['position_radius'],
@@ -1734,6 +1825,36 @@ function start_bekaari(){
 				bekaari['infobox'].innerHTML = info;
 				break;
 			case 'game_start':
+				var info = '';
+				switch(bekaari['game_start'].mode){
+					case 'idle':
+						var occupant = get_occupant_selected();
+						if(occupant){
+							_.forEach(get_positions(occupant.type, bekaari['selected']), function(position){
+								bekaari['ctx'].strokeStyle="#ff00009";
+								bekaari['ctx'].strokeRect(
+									position[0]*bekaari['position_radius'],
+									position[1]*bekaari['position_radius'],
+									bekaari['position_radius'],
+									bekaari['position_radius']
+								);
+							});
+						}
+						info += "idle:<br/><br/>";
+						break;
+					case 'moving':
+						info += "moving:<br/><br/>";
+						break;
+					case 'activating':
+						info += "activating:<br/><br/>";
+						break;
+					default:
+				}
+				var occupant = get_occupant_selected();
+				if(occupant){
+					info += dude_list[occupant.type].description;
+				}
+				bekaari['infobox'].innerHTML = info;
 				break;
 			default:
 		}
