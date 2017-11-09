@@ -1777,7 +1777,6 @@ function position_valid(position){
 }
 
 function get_occupant_position(position){
-	console.log(position, position_valid(position));
 	if(position_valid(position)) return bekaari['dudes'][bekaari['field'][position[0]][position[1]].occupant];
 	else return false;
 }
