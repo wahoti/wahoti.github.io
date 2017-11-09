@@ -162,6 +162,12 @@ var keydown = function(c){
 			case 219://. <
 				bekaari_shift_backward();
 				break;
+			case 79://O
+				bekaari_new();
+				break;
+			case 80://P
+				bekaari_start();
+				break;
 			default:
 		}
 	}
@@ -1499,7 +1505,7 @@ function start_chess_clock(){
 
 var dude_list = {
 	rook: object = {
-		description: 'moves on columns and rows.',
+		description: 'rook:<br/>moves/attacks on columns and rows.',
 		tag: 'Rk',
 		mobility: false,
 		movement_patterns: [
@@ -1516,6 +1522,29 @@ var dude_list = {
 			[1, 0, 1, 7],
 			[0, 1, 1, 7],
 			[-1, 0, 1, 7]
+		],
+		custom_attack_pattern: function(position){
+			return [];
+		},
+	},
+	Pawn: object = {
+		description: 'pawn:<br/>moves on columns and rows. attacks on columns and rows.',
+		tag: 'p',
+		mobility: false,
+		movement_patterns: [
+			[0, -1, 1, 1],
+			[1, 0, 1, 1],
+			[0, 1, 1, 1],
+			[-1, 0, 1, 1]
+		],
+		custom_movement_pattern: function(position){
+			return [];
+		},
+		attack_patterns: [
+			[1, -1, 1, 1],
+			[1, 1, 1, 1],
+			[-1, -1, 1, 1],
+			[-1, 1, 1, 1]
 		],
 		custom_attack_pattern: function(position){
 			return [];
@@ -1851,7 +1880,7 @@ function start_bekaari(){
 								);
 							});
 							_.forEach(get_atack_positions(occupant.type, bekaari['selected']), function(position){
-								bekaari['ctx'].setLineDash([10,bekaari['position_radius']-20, 10, 0]);
+								bekaari['ctx'].setLineDash([20,bekaari['position_radius']-40, 20, 0]);
 								bekaari['ctx'].lineWidth=3;
 								bekaari['ctx'].strokeStyle= occupant.color;
 								bekaari['ctx'].strokeRect(
