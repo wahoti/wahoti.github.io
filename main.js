@@ -457,7 +457,6 @@ var actions = {
 	freeze: object = {
 		cost: 1,
 		collide: function(thing){
-			console.log('freeze collide')
 			if(!(this.collisions.indexOf(thing.id) >= 0)){				
 				if(thing.is_agent){
 					thing.phase = 'frozen';
@@ -621,7 +620,6 @@ var actions = {
 			}
 		},
 		go: function(player, coord){
-			console.log('SWORD GO', coord);
 			if(player.weapons['sword']){ things[player.weapons['sword']].end(); }
 
 			var direction = new victor(coord[0] - player.pos.x, coord[1] - player.pos.y);
@@ -851,7 +849,6 @@ var agents = {
 								this.phase_time = (((distance - 60) / this.dodge_speed) > 0) ? ((distance - 60) / this.dodge_speed) : 0;
 								//this.phase_time = distance / this.dodge_speed;
 								this.phase_speed = this.dodge_speed;
-								console.log(distance, this.phase_speed, this.phase_time);
 							}
 						}
 					}
@@ -984,7 +981,6 @@ var agents = {
 								this.phase_time = (((distance - 60) / this.dodge_speed) > 0) ? ((distance - 60) / this.dodge_speed) : 0;
 								//this.phase_time = distance / this.dodge_speed;
 								this.phase_speed = this.dodge_speed;
-								console.log(distance, this.phase_speed, this.phase_time);
 							}
 						}
 					}
@@ -1200,7 +1196,6 @@ function random_teleport(square) {
 }
 
 function hit(thing, damage){
-	console.log('hit');
 	if(thing.is_agent){
 		if((thing.phase != "dodging") && (thing.phase != "dead")){
 			thing.health -= damage;
@@ -1532,13 +1527,10 @@ function get_positions(dude, position){
 	//pattern = [x,y,min,max]
 	return dude_list[dude].custom_movement_pattern(position).concat(
 		_.flatten(_.map(dude_list[dude].movement_patterns, function(pattern, index, collection){
-			// console.log(pattern, index, collection);
 			var positions = [];
 			for(var i = pattern[2]; i <= pattern[3]; i++){
-			// console.log(position[0]+(pattern[0] * i), position[1]+(pattern[1] * i));
 				var new_position = [position[0]+(pattern[0] * i), position[1]+(pattern[1] * i)];
 				if(get_occupant_position(new_position)){
-					console.log(i);
 					i = pattern[3] + 1;
 					break;
 				}
@@ -1552,7 +1544,24 @@ function get_positions(dude, position){
 }
 
 function get_atack_positions(dude, position){
-	return [];
+	//pattern = [x,y,min,max]
+	return dude_list[dude].custom_attack_pattern(position).concat(
+		_.flatten(_.map(dude_list[dude].attack_patterns, function(pattern, index, collection){
+			var positions = [];
+			for(var i = pattern[2]; i <= pattern[3]; i++){
+				var new_position = [position[0]+(pattern[0] * i), position[1]+(pattern[1] * i)];
+				if(get_occupant_position(new_position)){
+					positions.push(new_position);
+					i = pattern[3] + 1;
+					break;
+				}
+				else{
+					positions.push(new_position);
+				}
+			}
+			return positions;
+		}))
+	);
 }
 
 
@@ -1661,8 +1670,8 @@ function bekaari_select(){
 					bekaari['game_start'].selected_id = '';
 					var occupant = get_occupant();
 					if(occupant){
-						console.log(occupant.type);
-						console.log(get_positions(occupant.type, bekaari['selected']));
+						// console.log(occupant.type);
+						// console.log(get_positions(occupant.type, bekaari['selected']));
 					}
 					break;
 				case 'moving':
@@ -1728,7 +1737,10 @@ function initiate_bekaari(){
 	bekaari['dudes'] = {};
 	bekaari['infobox'] = document.getElementById('bekaari_infobox');
 	bekaari['game_mode_infobox'] = document.getElementById("bekaari_mode");
-	
+	// bekaari['gradient'] = bekaari['ctx'].createLinearGradient(0, 0, 170, 0);
+	// bekaari['gradient'].addColorStop("0", "magenta");
+	// bekaari['gradient'].addColorStop("0.5", "blue");
+	// bekaari['gradient'].addColorStop("1.0", "red");
 	
 	//initialize the field matrix
 	for(var x = 0; x<bekaari['width']; x++) {
@@ -1805,7 +1817,6 @@ function start_bekaari(){
 		);
 		switch(bekaari['game_mode']){
 			case 'deployment':
-				//console.log(dude_list[bekaari['deployment'].selected].tag);
 				//draw the dude tag
 				bekaari['ctx'].font = '40pt Calibri';
 				bekaari['ctx'].fillStyle = bekaari['deployment'].color;
@@ -1816,7 +1827,6 @@ function start_bekaari(){
 				);
 				
 				//draw the description
-				// document.getElementById('bekaari_infobox').innerHTML = dude_list[bekaari['deployment'].selected].description;
 				var info = '';
 				info += "[ ] (L1 R1) switch dude<br /><br />< > (L2 R2) switch color<br /><br />space (X) deploy<br /><br />Selected:<br />"
 				info += dude_list[bekaari['deployment'].selected].description;
@@ -1829,7 +1839,20 @@ function start_bekaari(){
 						var occupant = get_occupant_selected();
 						if(occupant){
 							_.forEach(get_positions(occupant.type, bekaari['selected']), function(position){
-								bekaari['ctx'].strokeStyle="#ff00009";
+								bekaari['ctx'].setLineDash([]);
+								bekaari['ctx'].lineWidth=1;
+								bekaari['ctx'].strokeStyle="#FFFFFF";
+								bekaari['ctx'].strokeRect(
+									position[0]*bekaari['position_radius'],
+									position[1]*bekaari['position_radius'],
+									bekaari['position_radius'],
+									bekaari['position_radius']
+								);
+							});
+							_.forEach(get_atack_positions(occupant.type, bekaari['selected']), function(position){
+								bekaari['ctx'].setLineDash([10,bekaari['position_radius']-20, 10, 0]);
+								bekaari['ctx'].lineWidth=3;
+								bekaari['ctx'].strokeStyle= occupant.color;
 								bekaari['ctx'].strokeRect(
 									position[0]*bekaari['position_radius'],
 									position[1]*bekaari['position_radius'],
@@ -1906,12 +1929,6 @@ function start_bekaari(){
 		});
 	}, 17);
 	intervals['bekaari_second_interval'] = setInterval(function(){
-		// document.getElementById('bekaari_infobox').innerHTML = '';
-		// var info = ''
-		// if(bekaari['game_mode'] == 'deployment'){
-			// info += dude_list[bekaari['deployment'].selected].description;
-		// }
-		// document.getElementById('bekaari_infobox').innerHTML = info;
 		document.getElementById('gamepad_p_bekaari').innerHTML = 'Gamepads Connected: ' + Object.keys(bekaari['gamepads']).length;
 		_.forEach(navigator.getGamepads(), function(gamepad){
 			if(gamepad){
@@ -1989,29 +2006,16 @@ function start_dark_squares(){
 
 	intervals['dark_squares_second_interval'] = setInterval(function(){
 		// //navigator.getGamepads()[e.gamepad.index]
-		// console.log(navigator.getGamepads());
-		// console.log(players);
 		document.getElementById('gamepad_p').innerHTML = 'Gamepads Connected: ' + (Object.keys(players).length-1);
 		_.forEach(navigator.getGamepads(), function(gamepad){
 			if(gamepad){
 				if(!gamepad.id.includes('Unknown')){
-					//var assigned = _.every(players, {'gamepad_index': gamepad.index})
 					var playa = _.filter(players, {'gamepad_index': gamepad.index});
-					//console.log(playa, !playa.length);
 					if(!playa.length){
 						console.log('assigning gamepad to player');
 						var id = create_player(shortid.generate());
 						things[id].gamepad_index = gamepad.index;
 					}
-				
-				
-				
-					// console.log(gamepad.index, gamepad.id);
-					// _.forEach(gamepad.buttons, function(button){
-						// if(button.pressed){
-							// console.log('\t', button.pressed);
-						// }
-					// });
 				}
 			}
 		});
