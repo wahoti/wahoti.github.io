@@ -4,6 +4,10 @@ var victor = require('victor');
 var _ = require('lodash');
 var domready = require("domready");
 var shortid = require('shortid');
+// var Futures = require('futures');
+var async = require('async');
+// var sequence = Futures.sequence();
+var sequence = async.series();
 
 function test_main() {
 	console.log('test_main success! \t document.baseURI: ' + document.baseURI);
@@ -1526,8 +1530,8 @@ var dude_list = {
 			return [];
 		},
 	},
-	Pawn: object = {
-		description: 'pawn:<br/>moves on columns and rows. attacks on columns and rows.',
+	pawn: object = {
+		description: 'pawn:<br/>moves on columns and rows. attacks on diagonals.',
 		tag: 'p',
 		mobility: false,
 		movement_patterns: [
@@ -1615,10 +1619,6 @@ function Dude(id, position, type, color){
 	this.color = color;
 }
 
-function remove_dude(){
-	//how want do this?
-}
-
 function place_dude(){
 	if(bekaari['field'][bekaari['selected'][0]][bekaari['selected'][1]].occupant == null){
 		var id = shortid.generate();
@@ -1687,24 +1687,42 @@ function bekaari_color_shift_backward(){
 	}	
 }
 
+function bekaari_init_matrix(){
+	//initialize the field matrix
+	for(var x = 0; x<bekaari['width']; x++) {
+		bekaari['field'][x] = [];
+		for(var y = 0; y<bekaari['height']; y++){
+			bekaari['field'][x][y] = new Position(x, y);
+		}
+	}
+}
+
 function bekaari_select(){
 	switch(bekaari['game_mode']){
 		case 'game_start':
 			switch(bekaari['game_start'].mode){
 				case 'idle':
-					//todo set selected correctly
-					bekaari['game_start'].mode = 'moving';
-					bekaari['game_start'].selected = 'wall_dude';
-					bekaari['game_start'].selected_position = [0,0];
-					bekaari['game_start'].selected_id = '';
-					var occupant = get_occupant();
+					var occupant = get_occupant_selected();
 					if(occupant){
-						// console.log(occupant.type);
-						// console.log(get_positions(occupant.type, bekaari['selected']));
+						bekaari['game_start'].selected_id = occupant.id;
+						bekaari['game_start'].selected_position[0] = bekaari['selected'][0];
+						bekaari['game_start'].selected_position[1] = bekaari['selected'][1];
+						bekaari['game_start'].mode = 'moving';
+						bekaari['game_start'].selected_positions = _.uniqBy(
+							get_positions(occupant.type, occupant.position).concat(get_atack_positions(occupant.type, occupant.position)),
+							function(arr){
+								return arr[0].toString() + arr[1].toString();
+							}
+						);
 					}
 					break;
 				case 'moving':
-					bekaari['game_start'].mode = 'activating';
+					_.forEach(bekaari['game_start'].selected_positions, function(position){
+						if((position[0] == bekaari['selected'][0]) && (position[1] == bekaari['selected'][1])){
+							move_dude(bekaari['game_start'].selected_id, bekaari['game_start'].selected_position,  position);
+							bekaari['game_start'].mode = 'idle';
+						}
+					});
 					break;
 				case 'activating':
 					bekaari['game_start'].mode = 'idle';
@@ -1723,7 +1741,7 @@ function bekaari_new(){
 	console.log('bekaari_new');
 	bekaari['dudes'] = {};
 	bekaari['game_mode'] = 'deployment';
-	// document.getElementById("bekaari_mode").innerHTML = 'Deployment';
+	bekaari_init_matrix();
 	bekaari['game_mode_infobox'].innerHTML = 'Deployment';
 }
 
@@ -1760,24 +1778,13 @@ function initiate_bekaari(){
 	bekaari['deployment'].color = '#FFFFFF';
 	bekaari['game_start'] = {};
 	bekaari['game_start'].mode = 'idle';
-	bekaari['game_start'].selected = 'wall_dude';
-	bekaari['game_start'].selected_position = [0,0];
 	bekaari['game_start'].selected_id = '';
-	bekaari['dudes'] = {};
+	bekaari['game_start'].selected_positions = [];
+	bekaari['game_start'].selected_position = [0,0];
 	bekaari['infobox'] = document.getElementById('bekaari_infobox');
 	bekaari['game_mode_infobox'] = document.getElementById("bekaari_mode");
-	// bekaari['gradient'] = bekaari['ctx'].createLinearGradient(0, 0, 170, 0);
-	// bekaari['gradient'].addColorStop("0", "magenta");
-	// bekaari['gradient'].addColorStop("0.5", "blue");
-	// bekaari['gradient'].addColorStop("1.0", "red");
 	
-	//initialize the field matrix
-	for(var x = 0; x<bekaari['width']; x++) {
-		bekaari['field'][x] = [];
-		for(var y = 0; y<bekaari['height']; y++){
-			bekaari['field'][x][y] = new Position(x, y);
-		}
-	}
+	bekaari_init_matrix();
 	bekaari['width_ratio'] = 2;
 	bekaari['height_ratio'] = 2;
 	bekaari['canvas'].addEventListener("mousedown", function(c){
@@ -1806,6 +1813,36 @@ function initiate_bekaari(){
 	//first do draw;
 }
 
+function capture_dude(dude_id){
+	delete bekaari['dudes'][dude_id];
+}
+
+function move_dude(dude_id, old_position, position){
+	if(bekaari['dudes'][dude_id]){
+		bekaari['dudes'][dude_id].position[0] = position[0];
+		bekaari['dudes'][dude_id].position[1] = position[1];
+	}
+	else{
+		console.log('dudes[dude_id] undefined???');
+	}
+	async.series([
+		function(callback) {
+			// do some stuff ...
+			var occupant = get_occupant_position(position);
+			if(occupant){
+				capture_dude(occupant.id);
+			}
+			callback(null, 'one');
+		},
+		function(callback) {
+			// do some more stuff ...
+			bekaari['field'][old_position[0]][old_position[1]].occupant = '';
+			bekaari['field'][position[0]][position[1]].occupant = dude_id;
+			callback(null, 'two');
+		}
+	]);
+}
+
 function position_valid(position){
 	if(
 		(position[0] < 0) ||
@@ -1825,6 +1862,33 @@ function get_occupant_selected(){
 	return  bekaari['dudes'][bekaari['field'][bekaari['selected'][0]][bekaari['selected'][1]].occupant];
 }
 
+function draw_patterns(dude){;
+	if(dude){
+		_.forEach(get_positions(dude.type, dude.position), function(position){
+			bekaari['ctx'].setLineDash([]);
+			bekaari['ctx'].lineWidth=1;
+			bekaari['ctx'].strokeStyle="#FFFFFF";
+			bekaari['ctx'].strokeRect(
+				position[0]*bekaari['position_radius'],
+				position[1]*bekaari['position_radius'],
+				bekaari['position_radius'],
+				bekaari['position_radius']
+			);
+		});
+		_.forEach(get_atack_positions(dude.type, dude.position), function(position){
+			bekaari['ctx'].setLineDash([20,bekaari['position_radius']-40, 20, 0]);
+			bekaari['ctx'].lineWidth=3;
+			bekaari['ctx'].strokeStyle= dude.color;
+			bekaari['ctx'].strokeRect(
+				position[0]*bekaari['position_radius'],
+				position[1]*bekaari['position_radius'],
+				bekaari['position_radius'],
+				bekaari['position_radius']
+			);
+		});
+	}
+}
+
 function stop_bekaari(){
 	console.log('stop_bekaari');
 	clearInterval(intervals['bekaari_draw_interval']);
@@ -1836,14 +1900,6 @@ function start_bekaari(){
 	console.log('start_bekaari');
 	intervals['bekaari_draw_interval'] = setInterval(function(){
 		bekaari['ctx'].clearRect(0, 0, bekaari['canvas'].width, bekaari['canvas'].height);
-		//draw selected
-		bekaari['ctx'].strokeStyle="#ffffff";
-		bekaari['ctx'].strokeRect(
-			bekaari['selected'][0]*bekaari['position_radius'],
-			bekaari['selected'][1]*bekaari['position_radius'],
-			bekaari['position_radius'],
-			bekaari['position_radius']
-		);
 		switch(bekaari['game_mode']){
 			case 'deployment':
 				//draw the dude tag
@@ -1867,32 +1923,14 @@ function start_bekaari(){
 					case 'idle':
 						var occupant = get_occupant_selected();
 						if(occupant){
-							_.forEach(get_positions(occupant.type, bekaari['selected']), function(position){
-								bekaari['ctx'].setLineDash([]);
-								bekaari['ctx'].lineWidth=1;
-								bekaari['ctx'].strokeStyle="#FFFFFF";
-								bekaari['ctx'].strokeRect(
-									position[0]*bekaari['position_radius'],
-									position[1]*bekaari['position_radius'],
-									bekaari['position_radius'],
-									bekaari['position_radius']
-								);
-							});
-							_.forEach(get_atack_positions(occupant.type, bekaari['selected']), function(position){
-								bekaari['ctx'].setLineDash([20,bekaari['position_radius']-40, 20, 0]);
-								bekaari['ctx'].lineWidth=3;
-								bekaari['ctx'].strokeStyle= occupant.color;
-								bekaari['ctx'].strokeRect(
-									position[0]*bekaari['position_radius'],
-									position[1]*bekaari['position_radius'],
-									bekaari['position_radius'],
-									bekaari['position_radius']
-								);
-							});
+							draw_patterns(occupant)
+							info += dude_list[occupant.type].description;
 						}
 						info += "idle:<br/><br/>";
 						break;
 					case 'moving':
+						draw_patterns(get_occupant_position(bekaari['game_start'].selected_position));
+						bekaari['']
 						info += "moving:<br/><br/>";
 						break;
 					case 'activating':
@@ -1900,14 +1938,20 @@ function start_bekaari(){
 						break;
 					default:
 				}
-				var occupant = get_occupant_selected();
-				if(occupant){
-					info += dude_list[occupant.type].description;
-				}
 				bekaari['infobox'].innerHTML = info;
 				break;
 			default:
 		}
+		//draw selected
+		bekaari['ctx'].strokeStyle="#ffffff";
+		bekaari['ctx'].setLineDash([]);
+		bekaari['ctx'].strokeRect(
+			bekaari['selected'][0]*bekaari['position_radius'],
+			bekaari['selected'][1]*bekaari['position_radius'],
+			bekaari['position_radius'],
+			bekaari['position_radius']
+		);
+		//draw dude tag
 		_.forEach(bekaari['dudes'], function(dude){
 			bekaari['ctx'].fillStyle = dude.color;
 			bekaari['ctx'].fillText(
