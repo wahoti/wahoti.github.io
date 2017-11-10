@@ -1743,6 +1743,29 @@ var dude_list = {
 			return [];
 		},
 	},
+	bishop: object = {
+		description: 'rook:<br/>moves/attacks on diagonals.',
+		tag: 'Bh',
+		mobility: false,
+		movement_patterns: [
+			[1, -1, 1, 7],
+			[1, 1, 1, 7],
+			[-1, -1, 1, 7],
+			[-1, 1, 1, 7]
+		],
+		custom_movement_pattern: function(position){
+			return [];
+		},
+		attack_patterns: [
+			[1, -1, 1, 7],
+			[1, 1, 1, 7],
+			[-1, -1, 1, 7],
+			[-1, 1, 1, 7]
+		],
+		custom_attack_pattern: function(position){
+			return [];
+		},
+	},
 };
 var dude_list_keys = Object.keys(dude_list);
 
@@ -2016,11 +2039,26 @@ function initiate_bekaari(){
 		coord = [(c.clientX - bekaari['canvas'].offsetLeft) * bekaari['width_ratio'], (c.clientY - bekaari['canvas'].offsetTop - 40) * bekaari['height_ratio']];
 		if(c.which == 1){
 			//bekaari['selected']][0] = coord;
-			bekaari['selected'] = [Math.floor(coord[0]/bekaari['position_radius']), Math.floor(coord[1]/bekaari['position_radius'])];
+			// bekaari['selected'] = [Math.floor(coord[0]/bekaari['position_radius']), Math.floor(coord[1]/bekaari['position_radius'])];
+			bekaari_select();
 		}
 		if(c.which == 3){
+			bekaari_color_shift_forward();
 		}
 	}, false);
+	bekaari['canvas'].addEventListener("mousewheel", function(c){
+		if(c.deltaY > 0){
+			bekaari_shift_forward();
+		}
+		else if(c.deltaY < 0){
+			bekaari_shift_backward();
+		}
+	}, false);
+	bekaari['canvas'].addEventListener('mousemove',function(c){
+		coord = [(c.clientX - bekaari['canvas'].offsetLeft) * bekaari['width_ratio'], (c.clientY - bekaari['canvas'].offsetTop - 40) * bekaari['height_ratio']];
+		bekaari['selected'][0] = Math.floor(coord[0]/bekaari['position_radius']);
+		bekaari['selected'][1] = Math.floor(coord[1]/bekaari['position_radius']);
+	},false);
 	
 	//draw grid
 	for(var x = 0; x<=bekaari['width']; x++){
