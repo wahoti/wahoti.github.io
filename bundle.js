@@ -1766,6 +1766,101 @@ var dude_list = {
 			return [];
 		},
 	},
+	queen: object = {
+		description: 'quen:<br/>moves/attacks in all directions.',
+		tag: 'Qn',
+		mobility: false,
+		movement_patterns: [
+			[1, -1, 1, 7],
+			[1, 1, 1, 7],
+			[-1, -1, 1, 7],
+			[-1, 1, 1, 7],
+			[0, -1, 1, 7],
+			[1, 0, 1, 7],
+			[0, 1, 1, 7],
+			[-1, 0, 1, 7]
+		],
+		custom_movement_pattern: function(position){
+			return [];
+		},
+		attack_patterns: [
+			[1, -1, 1, 7],
+			[1, 1, 1, 7],
+			[-1, -1, 1, 7],
+			[-1, 1, 1, 7],
+			[0, -1, 1, 7],
+			[1, 0, 1, 7],
+			[0, 1, 1, 7],
+			[-1, 0, 1, 7]
+		],
+		custom_attack_pattern: function(position){
+			return [];
+		},
+	},
+	king: object = {
+		description: 'king:<br/>moves/attacks in all directions.',
+		tag: 'Kg',
+		mobility: false,
+		movement_patterns: [
+			[1, -1, 1, 1],
+			[1, 1, 1, 1],
+			[-1, -1, 1, 1],
+			[-1, 1, 1, 1],
+			[0, -1, 1, 1],
+			[1, 0, 1, 1],
+			[0, 1, 1, 1],
+			[-1, 0, 1, 1]
+		],
+		custom_movement_pattern: function(position){
+			return [];
+		},
+		attack_patterns: [
+			[1, -1, 1, 1],
+			[1, 1, 1, 1],
+			[-1, -1, 1, 1],
+			[-1, 1, 1, 1],
+			[0, -1, 1, 1],
+			[1, 0, 1, 1],
+			[0, 1, 1, 1],
+			[-1, 0, 1, 1]
+		],
+		custom_attack_pattern: function(position){
+			return [];
+		},
+	},
+	knight: object = {
+		description: 'knight:<br/>moves/attacks in an L patter - can move over intervening dudes.',
+		tag: 'Kt',
+		mobility: false,
+		movement_patterns: [
+		],
+		custom_movement_pattern: function(position){
+			var positions = [];
+			positions.push([position[0]+2,position[1]+1]);
+			positions.push([position[0]+2,position[1]-1]);
+			positions.push([position[0]-2,position[1]+1]);
+			positions.push([position[0]-2,position[1]-1]);
+			positions.push([position[0]+1,position[1]+2]);
+			positions.push([position[0]+1,position[1]-2]);
+			positions.push([position[0]-1,position[1]+2]);
+			positions.push([position[0]-1,position[1]-2]);
+			return positions;
+		},
+		attack_patterns: [
+		],
+		custom_attack_pattern: function(position){
+			var positions = [];
+			positions.push([position[0]+2,position[1]+1]);
+			positions.push([position[0]+2,position[1]-1]);
+			positions.push([position[0]-2,position[1]+1]);
+			positions.push([position[0]-2,position[1]-1]);
+			positions.push([position[0]+1,position[1]+2]);
+			positions.push([position[0]+1,position[1]-2]);
+			positions.push([position[0]-1,position[1]+2]);
+			positions.push([position[0]-1,position[1]-2]);
+			return positions;
+		},
+	},
 };
 var dude_list_keys = Object.keys(dude_list);
 
@@ -2176,7 +2271,7 @@ function start_bekaari(){
 				
 				//draw the description
 				var info = '';
-				info += "[ ] (L1 R1) switch dude<br /><br />< > (L2 R2) switch color<br /><br />space (X) deploy<br /><br />Selected:<br />"
+				info += "mouse-wheel [ ] (L1 R1) switch dude<br /><br />right-click < > (L2 R2) switch color<br /><br />left-click space (X) deploy<br /><br />Selected:<br />"
 				info += dude_list[bekaari['deployment'].selected].description;
 				bekaari['infobox'].innerHTML = info;
 				break;
@@ -2184,12 +2279,12 @@ function start_bekaari(){
 				var info = '';
 				switch(bekaari['game_start'].mode){
 					case 'idle':
+						info += "idle:<br/><br/>";
 						var occupant = get_occupant_selected();
 						if(occupant){
 							draw_patterns(occupant)
 							info += dude_list[occupant.type].description;
 						}
-						info += "idle:<br/><br/>";
 						break;
 					case 'moving':
 						draw_patterns(get_occupant_position(bekaari['game_start'].selected_position));
