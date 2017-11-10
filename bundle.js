@@ -1983,6 +1983,7 @@ function initiate_bekaari(){
 	bekaari['ctx'] = bekaari['canvas'].getContext("2d");
 	document.getElementById("bekaari_new").onclick = bekaari_new;
 	document.getElementById("bekaari_start").onclick = bekaari_start;
+	document.getElementById("bekaari_restart").onclick = bekaari_restart;
 
 	//calculate the width and height of field based on canvas size and desired size of position
 	bekaari['field'] = [];
