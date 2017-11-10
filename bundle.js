@@ -1744,7 +1744,7 @@ var dude_list = {
 		},
 	},
 	bishop: object = {
-		description: 'rook:<br/>moves/attacks on diagonals.',
+		description: 'bishop:<br/>moves/attacks on diagonals.',
 		tag: 'Bh',
 		mobility: false,
 		movement_patterns: [
