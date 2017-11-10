@@ -1697,6 +1697,32 @@ function start_chess_clock(){
 }
 
 var dude_list = {
+	obstacle: object = {
+		description: "obstacle:<br/> can't move can't be captured",
+		tag: '  #',
+		mobility: false,
+		movement_patterns: [],
+		custom_movement_pattern: function(position){
+			return [];
+		},
+		attack_patterns: [],
+		custom_attack_pattern: function(position){
+			return [];
+		},
+	},
+	wall: object = {
+		description: "wall:<br/> can't move can be captured",
+		tag: ' ---',
+		mobility: false,
+		movement_patterns: [],
+		custom_movement_pattern: function(position){
+			return [];
+		},
+		attack_patterns: [],
+		custom_attack_pattern: function(position){
+			return [];
+		},
+	},
 	rook: object = {
 		description: 'rook:<br/>moves/attacks on columns and rows.',
 		tag: 'Rk',
@@ -1736,6 +1762,78 @@ var dude_list = {
 		attack_patterns: [
 			[1, -1, 1, 1],
 			[1, 1, 1, 1],
+			[-1, -1, 1, 1],
+			[-1, 1, 1, 1]
+		],
+		custom_attack_pattern: function(position){
+			return [];
+		},
+	},
+	pawn_S: object = {
+		description: 'pawn:<br/>moves on columns and rows. attacks on diagonals.',
+		tag: 'ps',
+		mobility: false,
+		movement_patterns: [
+			[0, 1, 1, 1]
+		],
+		custom_movement_pattern: function(position){
+			return [];
+		},
+		attack_patterns: [
+			[1, 1, 1, 1],
+			[-1, 1, 1, 1]
+		],
+		custom_attack_pattern: function(position){
+			return [];
+		},
+	},
+	pawn_N: object = {
+		description: 'pawn:<br/>moves on columns and rows. attacks on diagonals.',
+		tag: 'pn',
+		mobility: false,
+		movement_patterns: [
+			[0, -1, 1, 1]
+		],
+		custom_movement_pattern: function(position){
+			return [];
+		},
+		attack_patterns: [
+			[1, -1, 1, 1],
+			[-1, -1, 1, 1]
+		],
+		custom_attack_pattern: function(position){
+			return [];
+		},
+	},
+	pawn_E: object = {
+		description: 'pawn:<br/>moves on columns and rows. attacks on diagonals.',
+		tag: 'pe',
+		mobility: false,
+		movement_patterns: [
+			[1, 0, 1, 1]
+		],
+		custom_movement_pattern: function(position){
+			return [];
+		},
+		attack_patterns: [
+			[1, -1, 1, 1],
+			[1, 1, 1, 1]
+		],
+		custom_attack_pattern: function(position){
+			return [];
+		},
+	},
+	pawn_W: object = {
+		description: 'pawn:<br/>moves on columns and rows. attacks on diagonals.',
+		tag: 'pw',
+		mobility: false,
+		movement_patterns: [
+			[-1, 0, 1, 1]
+		],
+		custom_movement_pattern: function(position){
+			return [];
+		},
+		attack_patterns: [
 			[-1, -1, 1, 1],
 			[-1, 1, 1, 1]
 		],
@@ -1861,6 +1959,7 @@ var dude_list = {
 			return positions;
 		},
 	},
+
 };
 var dude_list_keys = Object.keys(dude_list);
 
@@ -1891,10 +1990,14 @@ function get_atack_positions(dude, position){
 			var positions = [];
 			for(var i = pattern[2]; i <= pattern[3]; i++){
 				var new_position = [position[0]+(pattern[0] * i), position[1]+(pattern[1] * i)];
-				if(get_occupant_position(new_position)){
-					positions.push(new_position);
+				var occupant = get_occupant_position(new_position);
+				if(occupant){
+					if(occupant.type != 'obstacle'){
+						positions.push(new_position);
+					}
 					i = pattern[3] + 1;
 					break;
+					
 				}
 				else{
 					positions.push(new_position);
@@ -1995,16 +2098,6 @@ function bekaari_color_shift_backward(){
 	}	
 }
 
-function bekaari_init_matrix(){
-	//initialize the field matrix
-	for(var x = 0; x<bekaari['width']; x++) {
-		bekaari['field'][x] = [];
-		for(var y = 0; y<bekaari['height']; y++){
-			bekaari['field'][x][y] = new Position(x, y);
-		}
-	}
-}
-
 function bekaari_new_matrix(matrix){
 	bekaari[matrix] = [];
 	for(var x=0; x<bekaari['width']; x++) {
@@ -2055,6 +2148,10 @@ function bekaari_select(){
 	}
 }
 
+function get_chess_map(){
+	
+}
+
 function set_map(field, new_field, dudes, new_dudes){
 	bekaari_new_matrix(field);
 	for(var x=0; x<bekaari['width']; x++){
@@ -2080,7 +2177,6 @@ function bekaari_new(){
 	console.log('bekaari_new');
 	bekaari['dudes'] = {};
 	bekaari['game_mode'] = 'deployment';
-	// bekaari_init_matrix();
 	bekaari_new_matrix('field');
 	bekaari['game_mode_infobox'].innerHTML = 'Deployment';
 }
@@ -2127,7 +2223,6 @@ function initiate_bekaari(){
 	
 	bekaari_new_matrix('field');
 	bekaari_new_matrix('save_field');
-	// bekaari_init_matrix();
 	bekaari['width_ratio'] = 2;
 	bekaari['height_ratio'] = 2;
 	bekaari['canvas'].addEventListener("mousedown", function(c){
@@ -2176,29 +2271,39 @@ function capture_dude(dude_id){
 }
 
 function move_dude(dude_id, old_position, position){
-	if(bekaari['dudes'][dude_id]){
-		bekaari['dudes'][dude_id].position[0] = position[0];
-		bekaari['dudes'][dude_id].position[1] = position[1];
-	}
-	else{
-		console.log('dudes[dude_id] undefined???');
-	}
 	async.series([
 		function(callback) {
 			// do some stuff ...
 			var occupant = get_occupant_position(position);
 			if(occupant){
-				capture_dude(occupant.id);
+				if(occupant.type != 'obstacle'){
+					capture_dude(occupant.id);
+					callback(null, true);
+				}
+				else{
+					callback(null, false);
+				}
 			}
-			callback(null, 'one');
-		},
-		function(callback) {
-			// do some more stuff ...
+			else{
+				callback(null, true);
+			}
+		}
+	], function(err, result){
+		if(result[0]){
+			if(bekaari['dudes'][dude_id]){
+				bekaari['dudes'][dude_id].position[0] = position[0];
+				bekaari['dudes'][dude_id].position[1] = position[1];
+			}
+			else{
+				console.log('dudes[dude_id] undefined???');
+			}
 			bekaari['field'][old_position[0]][old_position[1]].occupant = '';
 			bekaari['field'][position[0]][position[1]].occupant = dude_id;
-			callback(null, 'two');
 		}
-	]);
+		else {
+		}
+		
+	});
 }
 
 function position_valid(position){
