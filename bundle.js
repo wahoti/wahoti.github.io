@@ -358,6 +358,9 @@ var keydown = function(c){
 			case 80://P
 				bekaari_start();
 				break;
+			case 73://L
+				bekaari_restart();
+				break;
 			default:
 		}
 	}
@@ -1884,6 +1887,16 @@ function bekaari_init_matrix(){
 	}
 }
 
+function bekaari_new_matrix(matrix){
+	bekaari[matrix] = [];
+	for(var x=0; x<bekaari['width']; x++) {
+		bekaari[matrix][x] = [];
+		for(var y=0; y<bekaari['height']; y++){
+			bekaari[matrix][x][y] = new Position(x, y);
+		}
+	}
+}
+
 function bekaari_select(){
 	switch(bekaari['game_mode']){
 		case 'game_start':
@@ -1924,22 +1937,42 @@ function bekaari_select(){
 	}
 }
 
+function set_map(field, new_field, dudes, new_dudes){
+	bekaari_new_matrix(field);
+	for(var x=0; x<bekaari['width']; x++){
+		for(var y=0; y<bekaari['height']; y++){
+			bekaari[field][x][y].occupant = new_field[x][y].occupant;
+		}
+	}
+	bekaari[dudes] = {};
+	_.forEach(new_dudes, function(dude){
+		bekaari[dudes][dude.id] = new Dude(dude.id, dude.position, dude.type, dude.color);
+	});
+}
+
+function bekaari_restart(){
+	console.log('bekaari_restart');
+	set_map('field', bekaari['save_field'], 'dudes', bekaari['save_dudes']);
+	bekaari['game_mode'] = 'game_start';
+	bekaari['game_start'].mode = 'idle';
+	bekaari['game_mode_infobox'].innerHTML = 'Game Start';
+}
+
 function bekaari_new(){
 	console.log('bekaari_new');
 	bekaari['dudes'] = {};
 	bekaari['game_mode'] = 'deployment';
-	bekaari_init_matrix();
+	// bekaari_init_matrix();
+	bekaari_new_matrix('field');
 	bekaari['game_mode_infobox'].innerHTML = 'Deployment';
 }
 
 function bekaari_start(){
 	console.log('bekaari_start');
+	set_map('save_field', bekaari['field'], 'save_dudes', bekaari['dudes']);
 	bekaari['game_mode'] = 'game_start';
 	bekaari['game_start'].mode = 'idle';
-	document.getElementById("bekaari_mode").innerHTML = 'Game Start';
 	bekaari['game_mode_infobox'].innerHTML = 'Game Start';
-	//var box document.getElementById('bekaari_infobox').innerHTML = dude_list[bekaari['deployment'].selected].description;
-	// bekaari['infobox'].innerHTML = 
 }
 
 function initiate_bekaari(){
@@ -1953,6 +1986,7 @@ function initiate_bekaari(){
 
 	//calculate the width and height of field based on canvas size and desired size of position
 	bekaari['field'] = [];
+	bekaari['save_field'] = [];
 	bekaari['position_radius'] = 80;//note: this will be half? 
 	bekaari['width'] = bekaari['canvas'].width / bekaari['position_radius'];
 	bekaari['height'] = bekaari['canvas'].height / bekaari['position_radius'];
@@ -1960,6 +1994,7 @@ function initiate_bekaari(){
 	bekaari['gamepads'] = {};
 	bekaari['game_mode'] = 'deployment';
 	bekaari['dudes'] = {};
+	bekaari['save_dudes'] = {};
 	bekaari['deployment'] = {};
 	bekaari['deployment'].selected = 'rook';
 	bekaari['deployment'].color = '#FFFFFF';
@@ -1971,7 +2006,9 @@ function initiate_bekaari(){
 	bekaari['infobox'] = document.getElementById('bekaari_infobox');
 	bekaari['game_mode_infobox'] = document.getElementById("bekaari_mode");
 	
-	bekaari_init_matrix();
+	bekaari_new_matrix('field');
+	bekaari_new_matrix('save_field');
+	// bekaari_init_matrix();
 	bekaari['width_ratio'] = 2;
 	bekaari['height_ratio'] = 2;
 	bekaari['canvas'].addEventListener("mousedown", function(c){
