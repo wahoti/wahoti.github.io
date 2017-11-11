@@ -339,6 +339,7 @@ var keydown = function(c){
 				bekaari_select();
 				break;
 			case 16://shift
+				next_map();
 				break;
 			case 190://, >
 				bekaari_color_shift_forward();
@@ -2030,6 +2031,14 @@ function Dude(id, position, type, color){
 	this.color = color;
 }
 
+function place_dude_with(dude_type, dudes, position, field, color){
+	if(bekaari[field][position[0]][position[1]].occupant == null){
+		var id = shortid.generate();
+		bekaari[dudes][id] = new Dude(id, position, dude_type, color);
+		bekaari[field][position[0]][position[1]].occupant = id;
+	}
+}
+
 function place_dude(){
 	if(bekaari['field'][bekaari['selected'][0]][bekaari['selected'][1]].occupant == null){
 		var id = shortid.generate();
@@ -2148,8 +2157,74 @@ function bekaari_select(){
 	}
 }
 
-function get_chess_map(){
+function initiate_chess_map(){
+	var field = 'chess_field';
+	var dudes = 'chess_dudes';
 	
+	bekaari_new_matrix(field);
+	bekaari[dudes] = {};
+	
+	var wall_color = '#AAAAAA';
+	var rows_1 = [0,1,10,11];
+	_.forEach(rows_1, function(y){
+		for(var x=0; x<bekaari['width']; x++){
+			place_dude_with('obstacle', dudes, [x, y], field, wall_color);
+		}
+	});
+	var rows_2 = [2,3,4,5,6,7,8,9];
+	_.forEach(rows_2, function(y){
+		for(var a=0; a<8; a++){
+			place_dude_with('obstacle', dudes, [a, y], field, wall_color);
+		}
+		for(var b=16; b<bekaari['width']; b++){
+			place_dude_with('obstacle', dudes, [b, y], field, wall_color);
+		}
+	});
+	
+	var W_color = '#FFFFFF';
+	var E_color = '#FF00FF';
+	place_dude_with('rook', dudes, [8, 2], field, W_color);
+	place_dude_with('rook', dudes, [8, 9], field, W_color);
+	place_dude_with('rook', dudes, [15, 2], field, E_color);
+	place_dude_with('rook', dudes, [15, 9], field, E_color);
+	
+	place_dude_with('knight', dudes, [8, 3], field, W_color);
+	place_dude_with('knight', dudes, [8, 8], field, W_color);
+	place_dude_with('knight', dudes, [15, 3], field, E_color);
+	place_dude_with('knight', dudes, [15, 8], field, E_color);
+	
+	place_dude_with('bishop', dudes, [8, 4], field, W_color);
+	place_dude_with('bishop', dudes, [8, 7], field, W_color);
+	place_dude_with('bishop', dudes, [15, 4], field, E_color);
+	place_dude_with('bishop', dudes, [15, 7], field, E_color);
+	
+	place_dude_with('king', dudes, [8, 5], field, W_color);
+	place_dude_with('queen', dudes, [8, 6], field, W_color);
+	place_dude_with('king', dudes, [15, 5], field, E_color);
+	place_dude_with('queen', dudes, [15, 6], field, E_color);
+	
+	for(var c=2; c<10; c++){
+		place_dude_with('pawn_E', dudes, [9, c], field, W_color);
+		place_dude_with('pawn_W', dudes, [14, c], field, E_color);
+	}
+}
+
+function next_map(){
+	console.log('next_map');
+	var index = bekaari['maps'].indexOf(bekaari['map']);
+	var new_index = bekaari['maps'].length-1;
+	if((index-1) >= 0) new_index = index-1;
+	bekaari['map'] = bekaari['maps'][new_index];
+	if(bekaari['maps'][new_index] == ''){
+		bekaari_new();
+	}
+	else{
+		var new_field = bekaari['maps'][new_index] + 'field';
+		var new_dudes = bekaari['maps'][new_index] + 'dudes';
+		console.log(new_field, new_dudes);
+		// console.log(bekaari[new_field], bekaari[new_dudes]);
+		set_map('field', bekaari[new_field], 'dudes', bekaari[new_dudes]);
+	}
 }
 
 function set_map(field, new_field, dudes, new_dudes){
@@ -2198,7 +2273,8 @@ function initiate_bekaari(){
 	document.getElementById("bekaari_new").onclick = bekaari_new;
 	document.getElementById("bekaari_start").onclick = bekaari_start;
 	document.getElementById("bekaari_restart").onclick = bekaari_restart;
-
+	document.getElementById("bekaari_map").onclick = next_map;
+	
 	//calculate the width and height of field based on canvas size and desired size of position
 	bekaari['field'] = [];
 	bekaari['save_field'] = [];
@@ -2221,8 +2297,12 @@ function initiate_bekaari(){
 	bekaari['infobox'] = document.getElementById('bekaari_infobox');
 	bekaari['game_mode_infobox'] = document.getElementById("bekaari_mode");
 	
+	bekaari['map'] = '';
+	bekaari['maps'] = ['chess_',''];
+	
 	bekaari_new_matrix('field');
 	bekaari_new_matrix('save_field');
+	initiate_chess_map();
 	bekaari['width_ratio'] = 2;
 	bekaari['height_ratio'] = 2;
 	bekaari['canvas'].addEventListener("mousedown", function(c){
