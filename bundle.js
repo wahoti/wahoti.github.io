@@ -1984,7 +1984,7 @@ function get_positions(dude, position){
 	);
 }
 
-function get_atack_positions(dude, position){
+function get_attack_positions(dude, position){
 	//pattern = [x,y,min,max]
 	return dude_list[dude].custom_attack_pattern(position).concat(
 		_.flatten(_.map(dude_list[dude].attack_patterns, function(pattern, index, collection){
@@ -2020,6 +2020,7 @@ function Position(x, y){
 	this.x = x;
 	this.y = y;
 	this.occupant = null;//this will the string of the id of the occupant
+	this.color = null;
 }
 
 function Dude(id, position, type, color){
@@ -2041,8 +2042,14 @@ function place_dude_with(dude_type, dudes, position, field, color){
 
 function place_dude(){
 	if(bekaari['field'][bekaari['selected'][0]][bekaari['selected'][1]].occupant == null){
+		var color = bekaari['deployment'].color;
+		_.forEach(bekaari['deployment_zone'], function(zone){
+			if((zone[0] == bekaari['selected'][0]) && (zone[1] == bekaari['selected'][1])){
+				color = zone[2];
+			}
+		});
 		var id = shortid.generate();
-		bekaari['dudes'][id] = new Dude(id, bekaari['selected'], bekaari['deployment'].selected, bekaari['deployment'].color);
+		bekaari['dudes'][id] = new Dude(id, bekaari['selected'], bekaari['deployment'].selected, color);
 		bekaari['field'][bekaari['selected'][0]][bekaari['selected'][1]].occupant = id;
 	}
 }
@@ -2129,7 +2136,7 @@ function bekaari_select(){
 						bekaari['game_start'].selected_position[1] = bekaari['selected'][1];
 						bekaari['game_start'].mode = 'moving';
 						bekaari['game_start'].selected_positions = _.uniqBy(
-							get_positions(occupant.type, occupant.position).concat(get_atack_positions(occupant.type, occupant.position)),
+							get_positions(occupant.type, occupant.position).concat(get_attack_positions(occupant.type, occupant.position)),
 							function(arr){
 								return arr[0].toString() + arr[1].toString();
 							}
@@ -2157,12 +2164,39 @@ function bekaari_select(){
 	}
 }
 
+function initiate_first_map(){
+	var field = 'first_field';
+	var dudes = 'first_dudes';
+	var deployment_zone = 'first_deployment_zone';
+	bekaari_new_matrix(field);
+	bekaari[dudes] = {};
+	bekaari[deployment_zone] = [];
+	var W_color = '#FF0000';
+	var E_color = '#FF00FF';
+	var obstacle_color = '#AAAAAA'
+	_.forEach([[5,1,3,3], [9,9,3,1], [14,4,5,2]], function(point){
+		for(var x=point[0]; x<(point[0]+point[2]);x++){
+			for(var y=point[1]; y<(point[1]+point[3]); y++){
+				place_dude_with('obstacle', dudes, [x, y], field, obstacle_color);	
+			}
+		}
+	});
+	for(var i=2; i<10; i++){
+		bekaari[deployment_zone].push([0, i, W_color]);
+		bekaari[deployment_zone].push([1, i, W_color]);
+		bekaari[deployment_zone].push([bekaari['width']-2, i, E_color]);
+		bekaari[deployment_zone].push([bekaari['width']-1, i, E_color]);
+	}
+}
+
 function initiate_chess_map(){
 	var field = 'chess_field';
 	var dudes = 'chess_dudes';
+	var deployment_zone = 'chess_deployment_zone';
 	
 	bekaari_new_matrix(field);
 	bekaari[dudes] = {};
+	bekaari[deployment_zone] = [];
 	
 	var wall_color = '#AAAAAA';
 	var rows_1 = [0,1,10,11];
@@ -2221,10 +2255,14 @@ function next_map(){
 	else{
 		var new_field = bekaari['maps'][new_index] + 'field';
 		var new_dudes = bekaari['maps'][new_index] + 'dudes';
-		console.log(new_field, new_dudes);
-		// console.log(bekaari[new_field], bekaari[new_dudes]);
+		var new_deployment_zone = bekaari['maps'][new_index] + 'deployment_zone';
 		set_map('field', bekaari[new_field], 'dudes', bekaari[new_dudes]);
+		set_deployment_zone('deployment_zone', new_deployment_zone);
 	}
+}
+
+function set_deployment_zone(zone, new_zone){
+	bekaari[zone] = bekaari[new_zone];
 }
 
 function set_map(field, new_field, dudes, new_dudes){
@@ -2276,6 +2314,7 @@ function initiate_bekaari(){
 	document.getElementById("bekaari_map").onclick = next_map;
 	
 	//calculate the width and height of field based on canvas size and desired size of position
+	bekaari['deployment_zone'] = [];
 	bekaari['field'] = [];
 	bekaari['save_field'] = [];
 	bekaari['position_radius'] = 80;//note: this will be half? 
@@ -2298,11 +2337,13 @@ function initiate_bekaari(){
 	bekaari['game_mode_infobox'] = document.getElementById("bekaari_mode");
 	
 	bekaari['map'] = '';
-	bekaari['maps'] = ['chess_',''];
+	bekaari['maps'] = ['', 'chess_', 'first_'];
 	
 	bekaari_new_matrix('field');
 	bekaari_new_matrix('save_field');
 	initiate_chess_map();
+	initiate_first_map();
+	next_map();
 	bekaari['width_ratio'] = 2;
 	bekaari['height_ratio'] = 2;
 	bekaari['canvas'].addEventListener("mousedown", function(c){
@@ -2405,6 +2446,20 @@ function get_occupant_selected(){
 	return  bekaari['dudes'][bekaari['field'][bekaari['selected'][0]][bekaari['selected'][1]].occupant];
 }
 
+function draw_deployment_zones(){
+	bekaari['ctx'].setLineDash([]);
+	_.forEach(bekaari['deployment_zone'], function(zone){
+		bekaari['ctx'].strokeStyle = zone[2];
+		bekaari['ctx'].strokeRect(
+			zone[0]*bekaari['position_radius'],
+			zone[1]*bekaari['position_radius'],
+			bekaari['position_radius'],
+			bekaari['position_radius']
+		);
+		
+	});
+}
+
 function draw_patterns(dude){;
 	if(dude){
 		_.forEach(get_positions(dude.type, dude.position), function(position){
@@ -2418,7 +2473,7 @@ function draw_patterns(dude){;
 				bekaari['position_radius']
 			);
 		});
-		_.forEach(get_atack_positions(dude.type, dude.position), function(position){
+		_.forEach(get_attack_positions(dude.type, dude.position), function(position){
 			bekaari['ctx'].setLineDash([20,bekaari['position_radius']-40, 20, 0]);
 			bekaari['ctx'].lineWidth=3;
 			bekaari['ctx'].strokeStyle= dude.color;
@@ -2445,6 +2500,8 @@ function start_bekaari(){
 		bekaari['ctx'].clearRect(0, 0, bekaari['canvas'].width, bekaari['canvas'].height);
 		switch(bekaari['game_mode']){
 			case 'deployment':
+				//draw deployment zones
+				draw_deployment_zones();
 				//draw the dude tag
 				bekaari['ctx'].font = '40pt Calibri';
 				bekaari['ctx'].fillStyle = bekaari['deployment'].color;
