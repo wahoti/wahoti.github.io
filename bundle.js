@@ -1698,6 +1698,26 @@ function start_chess_clock(){
 }
 
 var dude_list = {
+	attack: object = {
+		description: "attack:<br/> used for visuals",
+		tag: 'XX',
+		mobility: false,
+		movement_patterns: [],
+		custom_movement_pattern: function(position){
+			return [];
+		},
+		attack_patterns: [],
+		custom_attack_pattern: function(position){
+			return [];
+		},
+		action_patterns: [],
+		custom_action_pattern: function(position){
+			return [];
+		},
+		action: function(position){
+			
+		},
+	},
 	obstacle: object = {
 		description: "obstacle:<br/> can't move can't be captured",
 		tag: '  #',
@@ -1718,11 +1738,11 @@ var dude_list = {
 			
 		},
 	},
-	wall_dude: object = {
-		description: "wall_dude:<br/>makes walls.",
-		tag: 'WD',
-		sprite: 'my_pixelized_dude',
-		sprite_width: 50,
+	axe_dude: object = {
+		description: "axe_dude:<br/>swings axe.",
+		tag: 'AX',
+		sprite: 'gascoigne',
+		sprite_width: 57,
 		sprite_height: 80,
 		mobility: false,
 		movement_patterns: [
@@ -1737,6 +1757,87 @@ var dude_list = {
 		],
 		custom_movement_pattern: function(position){
 			return [];
+		},
+		attack_patterns: [],
+		custom_attack_pattern: function(position){
+			return [];
+		},
+		action_patterns: [
+			[1,0,1,1],
+			[-1,0,1,1],
+			[0,1,1,1],
+			[0,-1,1,1]
+		],
+		custom_action_pattern: function(position){
+			return [];
+		},
+		action: function(target_position, dude_position){
+			var x_direction = target_position[0] - dude_position[0];
+			var y_direction = target_position[1] - dude_position[1];
+			
+			switch(x_direction){
+				case 0:
+					var start_x = dude_position[0] - 1;
+					var end_x = start_x+2;
+					break;
+				case 1:
+					var start_x = dude_position[0] + 1;
+					var end_x = start_x;
+					break;
+				case -1:
+					var start_x = dude_position[0] - 1;
+					var end_x = start_x;
+				default:
+					break;
+			}
+			switch(y_direction){
+				case 0:
+					var start_y = dude_position[1] - 1;
+					var end_y = start_y+2;
+					break;
+				case 1:
+					var start_y = dude_position[1] + 1;
+					var end_y = start_y;
+					break;
+				case -1:
+					var start_y = dude_position[1] - 1;
+					var end_y = start_y;
+				default:
+					break;
+			}
+			
+			var ids = [];
+			for(var x=start_x; x<=end_x; x++){
+				for(var y=start_y; y<=end_y; y++){
+					ids.push(place_dude_capture('attack', 'dudes', [x,y], 'field', '#ff0000'));
+				}
+			}
+			setTimeout(function(){
+				_.forEach(ids, function(id){
+					remove_dude(id);
+				});
+			}, 500);
+		},
+	},
+	wall_dude: object = {
+		description: "wall_dude:<br/>makes walls.",
+		tag: 'WD',
+		sprite: 'my_pixelized_dude',
+		sprite_width: 50,
+		sprite_height: 80,
+		mobility: false,
+		movement_patterns: [],
+		custom_movement_pattern: function(position){
+			var positions = [];
+			positions.push([position[0]+2,position[1]+1]);
+			positions.push([position[0]+2,position[1]-1]);
+			positions.push([position[0]-2,position[1]+1]);
+			positions.push([position[0]-2,position[1]-1]);
+			positions.push([position[0]+1,position[1]+2]);
+			positions.push([position[0]+1,position[1]-2]);
+			positions.push([position[0]-1,position[1]+2]);
+			positions.push([position[0]-1,position[1]-2]);
+			return positions;
 		},
 		attack_patterns: [],
 		custom_attack_pattern: function(position){
@@ -1979,9 +2080,6 @@ var dude_list = {
 	bishop: object = {
 		description: 'bishop:<br/>moves/attacks on diagonals.',
 		tag: 'Bh',
-		sprite: 'gascoigne',
-		sprite_width: 57,
-		sprite_height: 80,
 		mobility: false,		
 		movement_patterns: [
 			[1, -1, 1, 7],
@@ -2184,6 +2282,7 @@ function get_action_positions(dude, position){
 				var occupant = get_occupant_position(new_position);
 				if(occupant){
 					i = pattern[3] + 1;
+					positions.push(new_position);
 					break;
 					
 				}
@@ -2229,11 +2328,46 @@ function Dude(id, position, type, color){
 	this.color = color;
 }
 
-function place_dude_with(dude_type, dudes, position, field, color){
-	if(!bekaari[field][position[0]][position[1]].occupant){
+function place_dude_capture(dude_type, dudes, position, field, color){
+	if(bekaari[field][position[0]][position[1]]){
+		var occupant = get_occupant_position(position);
 		var id = shortid.generate();
-		bekaari[dudes][id] = new Dude(id, position, dude_type, color);
-		bekaari[field][position[0]][position[1]].occupant = id;
+		if(occupant){
+			if(occupant.type != 'obstacle'){
+				capture_dude(occupant.id);
+				bekaari[dudes][id] = new Dude(id, position, dude_type, color);
+				bekaari[field][position[0]][position[1]].occupant = id;
+				return id;
+			}
+		}
+		else{
+			bekaari[dudes][id] = new Dude(id, position, dude_type, color);
+			bekaari[field][position[0]][position[1]].occupant = id;
+			return id;
+		}
+		
+	}
+	else{
+		console.log('position doesnt exist!', position);
+	}
+}
+
+function place_dude_with(dude_type, dudes, position, field, color){
+	// if(
+		// (position[0] >= 0) &&
+		// (position[0] < bekaari['width']) &&
+		// (position[1] >= 0) &&
+		// (position[1] < bekaari['height'])
+	// ){
+	if(bekaari[field][position[0]][position[1]]){
+		if(!bekaari[field][position[0]][position[1]].occupant){
+			var id = shortid.generate();
+			bekaari[dudes][id] = new Dude(id, position, dude_type, color);
+			bekaari[field][position[0]][position[1]].occupant = id;
+		}
+	}
+	else{
+		console.log('position doesnt exist!', position);
 	}
 }
 
@@ -2332,8 +2466,17 @@ function bekaari_select(){
 						bekaari['game_start'].selected_position[0] = bekaari['selected'][0];
 						bekaari['game_start'].selected_position[1] = bekaari['selected'][1];
 						bekaari['game_start'].selected_type = occupant.type;
-						bekaari['game_start'].mode = 'moving';
 						bekaari['game_start'].selected_positions = get_all_positions(occupant.type, occupant.position);
+						if(bekaari['game_start'].selected_positions.length > 0){
+							bekaari['game_start'].mode = 'moving';
+						}
+						else if(get_action_positions(bekaari['game_start'].selected_type, occupant.position).length > 0){
+							bekaari['game_start'].selected_positions = get_action_positions(bekaari['game_start'].selected_type, bekaari['selected']);
+							bekaari['game_start'].mode = 'activating';
+						}
+						else{
+							bekaari['game_start'].mode = 'idle';
+						}
 					}
 					break;
 				case 'moving':
@@ -2342,8 +2485,15 @@ function bekaari_select(){
 							move_dude(bekaari['game_start'].selected_id, bekaari['game_start'].selected_position,  position);
 							bekaari['game_start'].selected_position[0] = bekaari['selected'][0];
 							bekaari['game_start'].selected_position[1] = bekaari['selected'][1];
-							bekaari['game_start'].mode = 'activating';
 							bekaari['game_start'].selected_positions = get_action_positions(bekaari['game_start'].selected_type, bekaari['selected']);
+							if(bekaari['game_start'].selected_positions.length > 0){							
+								bekaari['game_start'].mode = 'activating';
+								
+							}
+							else{
+								bekaari['game_start'].mode = 'idle';
+							}
+						
 						}
 					});
 					break;
@@ -2365,6 +2515,45 @@ function bekaari_select(){
 			break;
 		default:
 	}
+}
+
+function initiate_second_map(){
+	var field = 'second_field';
+	var dudes = 'second_dudes';
+	var deployment_zone = 'second_deployment_zone';
+	bekaari_new_matrix(field);
+	bekaari[dudes] = {};
+	bekaari[deployment_zone] = [];
+	var W_color = '#FF0000';
+	var E_color = '#FF00FF';
+	var obstacle_color = '#AAAAAA'
+	_.forEach([], function(point){
+		for(var x=point[0]; x<(point[0]+point[2]);x++){
+			for(var y=point[1]; y<(point[1]+point[3]); y++){
+				place_dude_with('obstacle', dudes, [x, y], field, obstacle_color);	
+			}
+		}
+	});
+	for(var a=0; a<bekaari['height']; a++){
+		place_dude_with('obstacle', dudes, [0, a], field, obstacle_color);	
+		place_dude_with('obstacle', dudes, [1, a], field, obstacle_color);	
+		place_dude_with('obstacle', dudes, [2, a], field, obstacle_color);	
+		place_dude_with('obstacle', dudes, [bekaari['width']-1, a], field, obstacle_color);	
+		place_dude_with('obstacle', dudes, [bekaari['width']-2, a], field, obstacle_color);	
+		place_dude_with('obstacle', dudes, [bekaari['width']-3, a], field, obstacle_color);	
+	}
+	for(var b=3; b<bekaari['width']-3; b++){
+		place_dude_with('obstacle', dudes, [b, 0], field, obstacle_color);	
+		place_dude_with('obstacle', dudes, [b, 1], field, obstacle_color);
+		place_dude_with('obstacle', dudes, [b, bekaari['height']-1], field, obstacle_color);	
+		place_dude_with('obstacle', dudes, [b, bekaari['height']-2], field, obstacle_color);	
+	}
+	for(var i=2; i<10; i++){
+		bekaari[deployment_zone].push([3, i, W_color]);
+		bekaari[deployment_zone].push([4, i, W_color]);
+		bekaari[deployment_zone].push([bekaari['width']-5, i, E_color]);
+		bekaari[deployment_zone].push([bekaari['width']-4, i, E_color]);
+	}	
 }
 
 function initiate_first_map(){
@@ -2522,8 +2711,8 @@ function initiate_bekaari(){
 	bekaari['field'] = [];
 	bekaari['save_field'] = [];
 	bekaari['position_radius'] = 80;//note: this will be half? 
-	bekaari['width'] = bekaari['canvas'].width / bekaari['position_radius'];
-	bekaari['height'] = bekaari['canvas'].height / bekaari['position_radius'];
+	bekaari['width'] = Math.floor(bekaari['canvas'].width / bekaari['position_radius']);
+	bekaari['height'] = Math.floor(bekaari['canvas'].height / bekaari['position_radius']);
 	bekaari['selected'] = [2, 2];
 	bekaari['gamepads'] = {};
 	bekaari['game_mode'] = 'deployment';
@@ -2541,12 +2730,13 @@ function initiate_bekaari(){
 	bekaari['game_mode_infobox'] = document.getElementById("bekaari_mode");
 	
 	bekaari['map'] = '';
-	bekaari['maps'] = ['', 'chess_', 'first_'];
+	bekaari['maps'] = ['', 'chess_', 'first_', 'second_'];
 	
 	bekaari_new_matrix('field');
 	bekaari_new_matrix('save_field');
 	initiate_chess_map();
 	initiate_first_map();
+	initiate_second_map();
 	next_map();
 	bekaari['width_ratio'] = 2;
 	bekaari['height_ratio'] = 2;
@@ -2589,6 +2779,12 @@ function initiate_bekaari(){
 	//controller stuff?
 	//key press?
 	//first do draw;
+}
+
+function remove_dude(id){
+	var position = bekaari['dudes'][id].position;
+	bekaari['field'][position[0]][position[1]].occupant = '';
+	capture_dude(id);
 }
 
 function capture_dude(dude_id){
