@@ -1540,6 +1540,9 @@ var dude_list = {
 	rook: object = {
 		description: 'rook:<br/>moves/attacks on columns and rows.',
 		tag: 'Rk',
+		sprite: 'my_pixelized_dude',
+		sprite_width: 50,
+		sprite_height: 80,
 		mobility: false,
 		movement_patterns: [
 			[0, -1, 1, 7],
@@ -1658,7 +1661,10 @@ var dude_list = {
 	bishop: object = {
 		description: 'bishop:<br/>moves/attacks on diagonals.',
 		tag: 'Bh',
-		mobility: false,
+		sprite: 'gascoigne',
+		sprite_width: 57,
+		sprite_height: 80,
+		mobility: false,		
 		movement_patterns: [
 			[1, -1, 1, 7],
 			[1, 1, 1, 7],
@@ -2125,6 +2131,7 @@ function initiate_bekaari(){
 	document.getElementById("bekaari_start").onclick = bekaari_start;
 	document.getElementById("bekaari_restart").onclick = bekaari_restart;
 	document.getElementById("bekaari_map").onclick = next_map;
+	bekaari['ctx'].font = '40pt Calibri';
 	
 	//calculate the width and height of field based on canvas size and desired size of position
 	bekaari['deployment_zone'] = [];
@@ -2316,13 +2323,24 @@ function start_bekaari(){
 				//draw deployment zones
 				draw_deployment_zones();
 				//draw the dude tag
-				bekaari['ctx'].font = '40pt Calibri';
-				bekaari['ctx'].fillStyle = bekaari['deployment'].color;
-				bekaari['ctx'].fillText(
-					dude_list[bekaari['deployment'].selected].tag,
-					bekaari['selected'][0]*bekaari['position_radius'],
-					((bekaari['selected'][1]+1)*bekaari['position_radius']) - 15
-				);
+				var dude_type = bekaari['deployment'].selected;
+				if(dude_list[dude_type].sprite){
+					bekaari['ctx'].drawImage(
+						document.getElementById(dude_list[dude_type].sprite),
+						bekaari['selected'][0]*bekaari['position_radius'],
+						((bekaari['selected'][1])*bekaari['position_radius']),
+						dude_list[dude_type].sprite_width,
+						dude_list[dude_type].sprite_height
+					);
+				}
+				else{
+					bekaari['ctx'].fillStyle = bekaari['deployment'].color;
+					bekaari['ctx'].fillText(
+						dude_list[dude_type].tag,
+						bekaari['selected'][0]*bekaari['position_radius'],
+						((bekaari['selected'][1]+1)*bekaari['position_radius']) - 15
+					);
+				}
 				
 				//draw the description
 				var info = '';
@@ -2366,12 +2384,23 @@ function start_bekaari(){
 		);
 		//draw dude tag
 		_.forEach(bekaari['dudes'], function(dude){
-			bekaari['ctx'].fillStyle = dude.color;
-			bekaari['ctx'].fillText(
-				dude_list[dude.type].tag,
-				dude.position[0]*bekaari['position_radius'],
-				((dude.position[1]+1)*bekaari['position_radius']) - 15
-			);
+			if(dude_list[dude.type].sprite){
+				bekaari['ctx'].drawImage(
+					document.getElementById(dude_list[dude.type].sprite),
+					dude.position[0]*bekaari['position_radius'],
+					((dude.position[1])*bekaari['position_radius']),
+					dude_list[dude.type].sprite_width,
+					dude_list[dude.type].sprite_height
+				);
+			}
+			else{
+				bekaari['ctx'].fillStyle = dude.color;
+				bekaari['ctx'].fillText(
+					dude_list[dude.type].tag,
+					dude.position[0]*bekaari['position_radius'],
+					((dude.position[1]+1)*bekaari['position_radius']) - 15
+				);
+			}
 		});
 	},17);
 	intervals['bekaari_step_interval'] = setInterval(function(){

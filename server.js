@@ -37,6 +37,14 @@ app.get('/res/backgroundpic.jpg', function(req,res) {
 	res.sendFile(__dirname + '/res/backgroundpic.jpg');
 });
 
+app.get('/res/my_pixelized_dude.png', function(req,res) {
+	res.sendFile(__dirname + '/res/my_pixelized_dude.png');
+});
+
+app.get('/res/gascoigne.png', function(req,res) {
+	res.sendFile(__dirname + '/res/gascoigne.png');
+});
+
 app.get('/res/symphony.png', function(req,res) {
 	res.sendFile(__dirname + '/res/symphony.png');
 });
