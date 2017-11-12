@@ -2467,6 +2467,36 @@ function draw_deployment_zones(){
 	});
 }
 
+function draw_dude(dude){
+	bekaari['ctx'].fillStyle = dude.color;
+	if(dude_list[dude.type].sprite){
+		var x = dude.position[0] * bekaari['position_radius'];
+		var y = dude.position[1] * bekaari['position_radius'];
+		bekaari['ctx'].globalAlpha = 0.2;
+		bekaari['ctx'].fillRect(
+			x,
+			y,
+			bekaari['position_radius'],
+			bekaari['position_radius']
+		);
+		bekaari['ctx'].globalAlpha = 1.0;
+		bekaari['ctx'].drawImage(
+			document.getElementById(dude_list[dude.type].sprite),
+			dude.position[0]*bekaari['position_radius'],
+			((dude.position[1])*bekaari['position_radius']),
+			dude_list[dude.type].sprite_width,
+			dude_list[dude.type].sprite_height
+		);
+	}
+	else{
+		bekaari['ctx'].fillText(
+			dude_list[dude.type].tag,
+			dude.position[0]*bekaari['position_radius'],
+			((dude.position[1]+1)*bekaari['position_radius']) - 15
+		);
+	}
+}
+
 function draw_patterns(dude){;
 	if(dude){
 		_.forEach(get_positions(dude.type, dude.position), function(position){
@@ -2510,24 +2540,11 @@ function start_bekaari(){
 				//draw deployment zones
 				draw_deployment_zones();
 				//draw the dude tag
-				var dude_type = bekaari['deployment'].selected;
-				if(dude_list[dude_type].sprite){
-					bekaari['ctx'].drawImage(
-						document.getElementById(dude_list[dude_type].sprite),
-						bekaari['selected'][0]*bekaari['position_radius'],
-						((bekaari['selected'][1])*bekaari['position_radius']),
-						dude_list[dude_type].sprite_width,
-						dude_list[dude_type].sprite_height
-					);
-				}
-				else{
-					bekaari['ctx'].fillStyle = bekaari['deployment'].color;
-					bekaari['ctx'].fillText(
-						dude_list[dude_type].tag,
-						bekaari['selected'][0]*bekaari['position_radius'],
-						((bekaari['selected'][1]+1)*bekaari['position_radius']) - 15
-					);
-				}
+				draw_dude({
+					position: [bekaari['selected'][0], bekaari['selected'][1]],
+					color: bekaari['deployment'].color,
+					type: bekaari['deployment'].selected
+				});
 				
 				//draw the description
 				var info = '';
@@ -2571,23 +2588,7 @@ function start_bekaari(){
 		);
 		//draw dude tag
 		_.forEach(bekaari['dudes'], function(dude){
-			if(dude_list[dude.type].sprite){
-				bekaari['ctx'].drawImage(
-					document.getElementById(dude_list[dude.type].sprite),
-					dude.position[0]*bekaari['position_radius'],
-					((dude.position[1])*bekaari['position_radius']),
-					dude_list[dude.type].sprite_width,
-					dude_list[dude.type].sprite_height
-				);
-			}
-			else{
-				bekaari['ctx'].fillStyle = dude.color;
-				bekaari['ctx'].fillText(
-					dude_list[dude.type].tag,
-					dude.position[0]*bekaari['position_radius'],
-					((dude.position[1]+1)*bekaari['position_radius']) - 15
-				);
-			}
+			draw_dude(dude);
 		});
 	},17);
 	intervals['bekaari_step_interval'] = setInterval(function(){
