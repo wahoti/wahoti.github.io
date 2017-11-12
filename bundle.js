@@ -1710,6 +1710,88 @@ var dude_list = {
 		custom_attack_pattern: function(position){
 			return [];
 		},
+		action_patterns: [],
+		custom_action_pattern: function(position){
+			return [];
+		},
+		action: function(position){
+			
+		},
+	},
+	wall_dude: object = {
+		description: "wall_dude:<br/>makes walls.",
+		tag: 'WD',
+		sprite: 'my_pixelized_dude',
+		sprite_width: 50,
+		sprite_height: 80,
+		mobility: false,
+		movement_patterns: [
+			[1, -1, 1, 2],
+			[1, 1, 1, 2],
+			[-1, -1, 1, 2],
+			[-1, 1, 1, 2],
+			[0, -1, 1, 2],
+			[1, 0, 1, 2],
+			[0, 1, 1, 2],
+			[-1, 0, 1, 2]
+		],
+		custom_movement_pattern: function(position){
+			return [];
+		},
+		attack_patterns: [],
+		custom_attack_pattern: function(position){
+			return [];
+		},
+		action_patterns: [
+			[1,0,1,1],
+			[-1,0,1,1],
+			[0,1,1,1],
+			[0,-1,1,1]
+		],
+		custom_action_pattern: function(position){
+			return [];
+		},
+		action: function(target_position, dude_position){
+			var x_direction = target_position[0] - dude_position[0];
+			var y_direction = target_position[1] - dude_position[1];
+			
+			switch(x_direction){
+				case 0:
+					var start_x = dude_position[0] - 1;
+					var end_x = start_x+2;
+					break;
+				case 1:
+					var start_x = dude_position[0] + 1;
+					var end_x = start_x+1;
+					break;
+				case -1:
+					var start_x = dude_position[0] - 2;
+					var end_x = start_x+1;
+				default:
+					break;
+			}
+			switch(y_direction){
+				case 0:
+					var start_y = dude_position[1] - 1;
+					var end_y = start_y+2;
+					break;
+				case 1:
+					var start_y = dude_position[1] + 1;
+					var end_y = start_y+1;
+					break;
+				case -1:
+					var start_y = dude_position[1] - 2;
+					var end_y = start_y+1;
+				default:
+					break;
+			}
+			
+			for(var x=start_x; x<=end_x; x++){
+				for(var y=start_y; y<=end_y; y++){
+					place_dude_with('wall', 'dudes', [x,y], 'field', '#aaaaaa');
+				}
+			}
+		},
 	},
 	wall: object = {
 		description: "wall:<br/> can't move can be captured",
@@ -1723,11 +1805,18 @@ var dude_list = {
 		custom_attack_pattern: function(position){
 			return [];
 		},
+		action_patterns: [],
+		custom_action_pattern: function(position){
+			return [];
+		},
+		action: function(position){
+			
+		}
 	},
 	rook: object = {
 		description: 'rook:<br/>moves/attacks on columns and rows.',
 		tag: 'Rk',
-		sprite: 'my_pixelized_dude',
+		sprite: false,
 		sprite_width: 50,
 		sprite_height: 80,
 		mobility: false,
@@ -1749,6 +1838,13 @@ var dude_list = {
 		custom_attack_pattern: function(position){
 			return [];
 		},
+		action_patterns: [],
+		custom_action_pattern: function(position){
+			return [];
+		},
+		action: function(position){
+			
+		}
 	},
 	pawn: object = {
 		description: 'pawn:<br/>moves on columns and rows. attacks on diagonals.',
@@ -1772,6 +1868,13 @@ var dude_list = {
 		custom_attack_pattern: function(position){
 			return [];
 		},
+		action_patterns: [],
+		custom_action_pattern: function(position){
+			return [];
+		},
+		action: function(position){
+			
+		}
 	},
 	pawn_S: object = {
 		description: 'pawn:<br/>moves on columns and rows. attacks on diagonals.',
@@ -1790,6 +1893,13 @@ var dude_list = {
 		custom_attack_pattern: function(position){
 			return [];
 		},
+		action_patterns: [],
+		custom_action_pattern: function(position){
+			return [];
+		},
+		action: function(position){
+			
+		}
 	},
 	pawn_N: object = {
 		description: 'pawn:<br/>moves on columns and rows. attacks on diagonals.',
@@ -1808,6 +1918,13 @@ var dude_list = {
 		custom_attack_pattern: function(position){
 			return [];
 		},
+		action_patterns: [],
+		custom_action_pattern: function(position){
+			return [];
+		},
+		action: function(position){
+			
+		}
 	},
 	pawn_E: object = {
 		description: 'pawn:<br/>moves on columns and rows. attacks on diagonals.',
@@ -1826,6 +1943,13 @@ var dude_list = {
 		custom_attack_pattern: function(position){
 			return [];
 		},
+		action_patterns: [],
+		custom_action_pattern: function(position){
+			return [];
+		},
+		action: function(position){
+			
+		},
 	},
 	pawn_W: object = {
 		description: 'pawn:<br/>moves on columns and rows. attacks on diagonals.',
@@ -1843,6 +1967,13 @@ var dude_list = {
 		],
 		custom_attack_pattern: function(position){
 			return [];
+		},
+		action_patterns: [],
+		custom_action_pattern: function(position){
+			return [];
+		},
+		action: function(position){
+			
 		},
 	},
 	bishop: object = {
@@ -1869,6 +2000,13 @@ var dude_list = {
 		],
 		custom_attack_pattern: function(position){
 			return [];
+		},
+		action_patterns: [],
+		custom_action_pattern: function(position){
+			return [];
+		},
+		action: function(position){
+			
 		},
 	},
 	queen: object = {
@@ -1901,6 +2039,13 @@ var dude_list = {
 		custom_attack_pattern: function(position){
 			return [];
 		},
+		action_patterns: [],
+		custom_action_pattern: function(position){
+			return [];
+		},
+		action: function(position){
+			
+		},
 	},
 	king: object = {
 		description: 'king:<br/>moves/attacks in all directions.',
@@ -1931,6 +2076,13 @@ var dude_list = {
 		],
 		custom_attack_pattern: function(position){
 			return [];
+		},
+		action_patterns: [],
+		custom_action_pattern: function(position){
+			return [];
+		},
+		action: function(position){
+			
 		},
 	},
 	knight: object = {
@@ -1964,6 +2116,13 @@ var dude_list = {
 			positions.push([position[0]-1,position[1]+2]);
 			positions.push([position[0]-1,position[1]-2]);
 			return positions;
+		},
+		action_patterns: [],
+		custom_action_pattern: function(position){
+			return [];
+		},
+		action: function(position){
+			
 		},
 	},
 
@@ -2015,6 +2174,38 @@ function get_attack_positions(dude, position){
 	);
 }
 
+function get_action_positions(dude, position){
+	//pattern = [x,y,min,max]
+	return dude_list[dude].custom_action_pattern(position).concat(
+		_.flatten(_.map(dude_list[dude].action_patterns, function(pattern, index, collection){
+			var positions = [];
+			for(var i = pattern[2]; i <= pattern[3]; i++){
+				var new_position = [position[0]+(pattern[0] * i), position[1]+(pattern[1] * i)];
+				var occupant = get_occupant_position(new_position);
+				if(occupant){
+					i = pattern[3] + 1;
+					break;
+					
+				}
+				else{
+					positions.push(new_position);
+				}
+			}
+			return positions;
+		}))
+	);
+}
+
+function get_all_positions(type, position){
+	return _.uniqBy(
+		get_positions(type, position).concat(
+			get_attack_positions(type, position)
+		),
+		function(arr){
+			return arr[0].toString() + arr[1].toString();
+		}
+	);
+}
 
 function Pattern(x, y, min, max){
 	this.direction = [x, y];
@@ -2039,7 +2230,7 @@ function Dude(id, position, type, color){
 }
 
 function place_dude_with(dude_type, dudes, position, field, color){
-	if(bekaari[field][position[0]][position[1]].occupant == null){
+	if(!bekaari[field][position[0]][position[1]].occupant){
 		var id = shortid.generate();
 		bekaari[dudes][id] = new Dude(id, position, dude_type, color);
 		bekaari[field][position[0]][position[1]].occupant = id;
@@ -2140,25 +2331,31 @@ function bekaari_select(){
 						bekaari['game_start'].selected_id = occupant.id;
 						bekaari['game_start'].selected_position[0] = bekaari['selected'][0];
 						bekaari['game_start'].selected_position[1] = bekaari['selected'][1];
+						bekaari['game_start'].selected_type = occupant.type;
 						bekaari['game_start'].mode = 'moving';
-						bekaari['game_start'].selected_positions = _.uniqBy(
-							get_positions(occupant.type, occupant.position).concat(get_attack_positions(occupant.type, occupant.position)),
-							function(arr){
-								return arr[0].toString() + arr[1].toString();
-							}
-						);
+						bekaari['game_start'].selected_positions = get_all_positions(occupant.type, occupant.position);
 					}
 					break;
 				case 'moving':
 					_.forEach(bekaari['game_start'].selected_positions, function(position){
 						if((position[0] == bekaari['selected'][0]) && (position[1] == bekaari['selected'][1])){
 							move_dude(bekaari['game_start'].selected_id, bekaari['game_start'].selected_position,  position);
-							bekaari['game_start'].mode = 'idle';
+							bekaari['game_start'].selected_position[0] = bekaari['selected'][0];
+							bekaari['game_start'].selected_position[1] = bekaari['selected'][1];
+							bekaari['game_start'].mode = 'activating';
+							bekaari['game_start'].selected_positions = get_action_positions(bekaari['game_start'].selected_type, bekaari['selected']);
 						}
 					});
 					break;
 				case 'activating':
-					bekaari['game_start'].mode = 'idle';
+					var activating_dude = bekaari['dudes'][bekaari['game_start'].selected_id];
+					_.forEach(bekaari['game_start'].selected_positions, function(position){
+						if((position[0] == bekaari['selected'][0]) && (position[1] == bekaari['selected'][1])){
+							dude_list[activating_dude.type].action(position, bekaari['game_start'].selected_position);
+							bekaari['game_start'].mode = 'idle';
+						}
+					});
+					// bekaari['game_start'].mode = 'idle';
 					break;
 				default:
 			}
@@ -2425,7 +2622,7 @@ function move_dude(dude_id, old_position, position){
 			else{
 				console.log('dudes[dude_id] undefined???');
 			}
-			bekaari['field'][old_position[0]][old_position[1]].occupant = '';
+			bekaari['field'][old_position[0]][old_position[1]].occupant = false;
 			bekaari['field'][position[0]][position[1]].occupant = dude_id;
 		}
 		else {
@@ -2502,7 +2699,7 @@ function draw_patterns(dude){;
 		_.forEach(get_positions(dude.type, dude.position), function(position){
 			bekaari['ctx'].setLineDash([]);
 			bekaari['ctx'].lineWidth=1;
-			bekaari['ctx'].strokeStyle="#FFFFFF";
+			bekaari['ctx'].strokeStyle=dude.color;
 			bekaari['ctx'].strokeRect(
 				position[0]*bekaari['position_radius'],
 				position[1]*bekaari['position_radius'],
@@ -2521,6 +2718,22 @@ function draw_patterns(dude){;
 				bekaari['position_radius']
 			);
 		});
+	}
+}
+
+function draw_action_pattern(dude){
+	if(dude){
+		_.forEach(get_action_positions(dude.type, dude.position), function(position){
+			bekaari['ctx'].setLineDash([]);
+			bekaari['ctx'].lineWidth=1;
+			bekaari['ctx'].strokeStyle=dude.color;
+			bekaari['ctx'].strokeRect(
+				position[0]*bekaari['position_radius'],
+				position[1]*bekaari['position_radius'],
+				bekaari['position_radius'],
+				bekaari['position_radius']
+			)
+		})
 	}
 }
 
@@ -2565,10 +2778,10 @@ function start_bekaari(){
 						break;
 					case 'moving':
 						draw_patterns(get_occupant_position(bekaari['game_start'].selected_position));
-						bekaari['']
 						info += "moving:<br/><br/>";
 						break;
 					case 'activating':
+						draw_action_pattern(get_occupant_position(bekaari['game_start'].selected_position));
 						info += "activating:<br/><br/>";
 						break;
 					default:
