@@ -1515,6 +1515,7 @@ var dude_list = {
 		description: "attack:<br/> used for visuals",
 		tag: 'XX',
 		mobility: false,
+		is_piece: true,
 		movement_patterns: [],
 		custom_movement_pattern: function(position){
 			return [];
@@ -1535,6 +1536,7 @@ var dude_list = {
 		description: "obstacle:<br/> can't move can't be captured",
 		tag: '  #',
 		mobility: false,
+		is_piece: false,
 		movement_patterns: [],
 		custom_movement_pattern: function(position){
 			return [];
@@ -1557,7 +1559,8 @@ var dude_list = {
 		sprite: 'gascoigne',
 		sprite_width: 57,
 		sprite_height: 80,
-		mobility: false,
+		mobility: true,
+		is_piece: true,
 		movement_patterns: [
 			[0, -1, 1, 2],
 			[1, 0, 1, 2],
@@ -1635,6 +1638,7 @@ var dude_list = {
 		sprite_width: 50,
 		sprite_height: 80,
 		mobility: false,
+		is_piece: true,
 		movement_patterns: [],
 		custom_movement_pattern: function(position){
 			var positions = [];
@@ -1728,6 +1732,7 @@ var dude_list = {
 		sprite_width: 57,
 		sprite_height: 80,
 		mobility: false,
+		is_piece: true,
 		movement_patterns: [
 			[1, -1, 1, 2],
 			[1, 1, 1, 2],
@@ -1782,6 +1787,7 @@ var dude_list = {
 		description: "wall:<br/> can't move can be captured",
 		tag: ' ---',
 		mobility: false,
+		is_piece: false,
 		movement_patterns: [],
 		custom_movement_pattern: function(position){
 			return [];
@@ -1805,6 +1811,7 @@ var dude_list = {
 		sprite_width: 50,
 		sprite_height: 80,
 		mobility: false,
+		is_piece: true,
 		movement_patterns: [
 			[0, -1, 1, 7],
 			[1, 0, 1, 7],
@@ -1835,6 +1842,7 @@ var dude_list = {
 		description: 'pawn:<br/>moves on columns and rows. attacks on diagonals.',
 		tag: 'p',
 		mobility: false,
+		is_piece: true,
 		movement_patterns: [
 			[0, -1, 1, 1],
 			[1, 0, 1, 1],
@@ -1865,6 +1873,7 @@ var dude_list = {
 		description: 'pawn:<br/>moves on columns and rows. attacks on diagonals.',
 		tag: 'ps',
 		mobility: false,
+		is_piece: true,
 		movement_patterns: [
 			[0, 1, 1, 1]
 		],
@@ -1890,6 +1899,7 @@ var dude_list = {
 		description: 'pawn:<br/>moves on columns and rows. attacks on diagonals.',
 		tag: 'pn',
 		mobility: false,
+		is_piece: true,
 		movement_patterns: [
 			[0, -1, 1, 1]
 		],
@@ -1915,6 +1925,7 @@ var dude_list = {
 		description: 'pawn:<br/>moves on columns and rows. attacks on diagonals.',
 		tag: 'pe',
 		mobility: false,
+		is_piece: true,
 		movement_patterns: [
 			[1, 0, 1, 1]
 		],
@@ -1940,6 +1951,7 @@ var dude_list = {
 		description: 'pawn:<br/>moves on columns and rows. attacks on diagonals.',
 		tag: 'pw',
 		mobility: false,
+		is_piece: true,
 		movement_patterns: [
 			[-1, 0, 1, 1]
 		],
@@ -1964,7 +1976,8 @@ var dude_list = {
 	bishop: object = {
 		description: 'bishop:<br/>moves/attacks on diagonals.',
 		tag: 'Bh',
-		mobility: false,		
+		mobility: false,
+		is_piece: true,		
 		movement_patterns: [
 			[1, -1, 1, 7],
 			[1, 1, 1, 7],
@@ -1995,6 +2008,7 @@ var dude_list = {
 		description: 'quen:<br/>moves/attacks in all directions.',
 		tag: 'Qn',
 		mobility: false,
+		is_piece: true,
 		movement_patterns: [
 			[1, -1, 1, 7],
 			[1, 1, 1, 7],
@@ -2033,6 +2047,7 @@ var dude_list = {
 		description: 'king:<br/>moves/attacks in all directions.',
 		tag: 'Kg',
 		mobility: false,
+		is_piece: true,
 		movement_patterns: [
 			[1, -1, 1, 1],
 			[1, 1, 1, 1],
@@ -2071,6 +2086,7 @@ var dude_list = {
 		description: 'knight:<br/>moves/attacks in an L patter - can move over intervening dudes.',
 		tag: 'Kt',
 		mobility: false,
+		is_piece: true,
 		movement_patterns: [
 		],
 		custom_movement_pattern: function(position){
@@ -2222,6 +2238,7 @@ function Dude(id, position, type, color){
 	this.position[1] = position[1];
 	this.type = type;
 	this.color = color;
+	this.activated = false;
 }
 
 function place_dude_capture(dude_type, dudes, position, field, color){
@@ -2315,7 +2332,7 @@ function bekaari_shift_backward(){
 	}
 }
 
-color_list = ['#FFFFFF', '#00FF00', '#FF0000', '#00FFFF']
+color_list = ['#00FF00', '#FF0000', '#00FFFF', '#FF00FF']
 function bekaari_color_shift_forward(){
 	switch(bekaari['game_mode']){
 		case 'game_start':
@@ -2353,6 +2370,21 @@ function bekaari_new_matrix(matrix){
 	}
 }
 
+function activate_dude(dude_id){
+	console.log('activate_dude');
+	if(_.filter(bekaari['dudes'], function(dude){
+		return !dude.activated && dude_list[dude.type].is_piece;
+	}).length < 1){
+		console.log('all_dudes_activated');
+		_.forEach(bekaari['dudes'], function(dude){
+			bekaari['dudes'][dude.id].activated = false;
+		});	
+	}
+	else{
+		bekaari['dudes'][dude_id].activated = true;
+	}
+}
+
 function bekaari_select(){
 	switch(bekaari['game_mode']){
 		case 'game_start':
@@ -2374,6 +2406,7 @@ function bekaari_select(){
 						}
 						else{
 							bekaari['game_start'].mode = 'idle';
+							activate_dude(bekaari['game_start'].selected_id);
 						}
 					}
 					break;
@@ -2389,6 +2422,7 @@ function bekaari_select(){
 							}
 							else{
 								bekaari['game_start'].mode = 'idle';
+								activate_dude(bekaari['game_start'].selected_id);
 							}
 						
 						}
@@ -2400,9 +2434,9 @@ function bekaari_select(){
 						if((position[0] == bekaari['selected'][0]) && (position[1] == bekaari['selected'][1])){
 							dude_list[activating_dude.type].action(position, bekaari['game_start'].selected_position);
 							bekaari['game_start'].mode = 'idle';
+							activate_dude(bekaari['game_start'].selected_id);
 						}
 					});
-					// bekaari['game_start'].mode = 'idle';
 					break;
 				default:
 			}
@@ -2762,8 +2796,19 @@ function draw_deployment_zones(){
 	});
 }
 
+function shadeColor2(color, percent) {   
+    var f=parseInt(color.slice(1),16),t=percent<0?0:255,p=percent<0?percent*-1:percent,R=f>>16,G=f>>8&0x00FF,B=f&0x0000FF;
+    return "#"+(0x1000000+(Math.round((t-R)*p)+R)*0x10000+(Math.round((t-G)*p)+G)*0x100+(Math.round((t-B)*p)+B)).toString(16).slice(1);
+}
+
 function draw_dude(dude){
-	bekaari['ctx'].fillStyle = dude.color;
+	if((bekaari['game_mode'] == 'game_start') && (dude.activated)){
+		bekaari['ctx'].fillStyle = shadeColor2(dude.color, .50);
+	}
+	else{
+		bekaari['ctx'].fillStyle = dude.color;	
+	}
+
 	if(dude_list[dude.type].sprite){
 		var x = dude.position[0] * bekaari['position_radius'];
 		var y = dude.position[1] * bekaari['position_radius'];
