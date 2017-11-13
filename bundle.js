@@ -3164,6 +3164,130 @@ function draw_action_pattern(dude){
 	}
 }
 
+function do_gamepad(index, buttIndex, butt){
+	//on_hold
+	// if(butt.pressed && bekaari['gamepads'][index].buttons[buttIndex].pressed){
+		// bekaari['gamepads'][index].buttons[buttIndex].pressed_count += 1;
+		// if(bekaari['gamepads'][index].buttons[buttIndex].pressed_count >= bekaari['gamepads'][index].buttons[buttIndex].hold_trigger){
+			
+		// }
+		// bekaari['gamepads'][index].buttons[buttIndex].pressed_count
+		
+	// }
+	
+	//on_press
+	if(butt.pressed && !bekaari['gamepads'][index].buttons[buttIndex].pressed){
+		console.log('press');
+		bekaari['gamepads'][index].buttons[buttIndex].pressed = true;
+		switch(buttIndex){
+			case 0://cross
+				bekaari_select();
+				break;
+			case 1://circle
+				break;
+			case 2://square
+				bekaari['gamepads'][index].skip = true;
+				break;
+			case 3://triangle
+				bekaari_color_shift_forward();
+				break;
+			case 4://L1
+				bekaari_shift_backward();
+				break;
+			case 5://R1
+				bekaari_shift_forward();
+				break;
+			case 6://L2
+				bekaari_color_shift_backward();
+				break;
+			case 7://R2
+				bekaari_color_shift_forward();
+				break;								
+			case 8://share
+				bekaari_restart();
+				break;							
+			case 9://options
+				bekaari_start();
+				break;							
+			case 10://L3
+				break;							
+			case 11://R3
+				break;							
+			case 12://up
+				if(bekaari['gamepads'][index].skip) bekaari['selected'][1] -= 3;
+				else{
+					bekaari['selected'][1] -= 1;
+				}
+				break;							
+			case 13://down
+				if(bekaari['gamepads'][index].skip) bekaari['selected'][1] += 3;
+				else bekaari['selected'][1] += 1;
+				break;
+			case 14://left
+				if(bekaari['gamepads'][index].skip) bekaari['selected'][0] -= 3;
+				else bekaari['selected'][0] -= 1;
+				break;
+			case 15://right
+				if(bekaari['gamepads'][index].skip) bekaari['selected'][0] += 3;
+				else bekaari['selected'][0] += 1;
+				break;
+			case 16://playstation button
+				bekaari_new();
+				break;
+			case 17://keypad
+				next_map();
+				break;								
+			default:
+		}		
+	}	
+	else if(!butt.pressed && bekaari['gamepads'][index].buttons[buttIndex].pressed){
+		//on release
+		console.log('release');
+		bekaari['gamepads'][index].buttons[buttIndex].pressed = false;
+		switch(buttIndex){
+			case 0://cross
+				break;
+			case 1://circle
+				break;
+			case 2://square
+				bekaari['gamepads'][index].skip = false;
+				break;
+			case 3://triangle
+				break;
+			case 4://L1
+				break;
+			case 5://R1
+				break;
+			case 6://L2
+				break;
+			case 7://R2
+				break;								
+			case 8://share
+				break;							
+			case 9://options
+				break;							
+			case 10://L3
+				break;							
+			case 11://R3
+				break;							
+			case 12://up
+				break;							
+			case 13://down
+				break;
+			case 14://left
+				break;
+			case 15://right
+				break;
+			case 16://playstation button
+				break;
+			case 17://keypad
+				break;								
+			default:
+		}		
+		
+	}
+}
+
 function stop_bekaari(){
 	console.log('stop_bekaari');
 	clearInterval(intervals['bekaari_draw_interval']);
@@ -3243,41 +3367,14 @@ function start_bekaari(){
 			var index = gamepad.gamepad_index;
 			var gamepad = navigator.getGamepads()[index];
 			if(gamepad){
-				if(gamepad.buttons[4].pressed && bekaari['gamepads'][index].l1 == false){
-					bekaari['gamepads'][index].l1 = true;
-					bekaari['selected'][0] = 0;
-				}
-				else if(!gamepad.buttons[4].pressed) bekaari['gamepads'][index].l1 = false;
-				
-				if(gamepad.buttons[5].pressed && bekaari['gamepads'][index].r1 == false){
-					bekaari['gamepads'][index].r1 = true;
-					bekaari['selected'][0] = bekaari['width'] - 1;
-				}
-				else if(!gamepad.buttons[5].pressed) bekaari['gamepads'][index].r1 = false;
-				
-				if(gamepad.buttons[12].pressed && bekaari['gamepads'][index].up == false){
-					bekaari['gamepads'][index].up = true;
-					bekaari['selected'][1] -= 1;
-				}
-				else if(!gamepad.buttons[12].pressed) bekaari['gamepads'][index].up = false;
-				if(gamepad.buttons[13].pressed && bekaari['gamepads'][index].down == false){
-					bekaari['gamepads'][index].down = true;
-					bekaari['selected'][1] += 1;
-				}
-				else if(!gamepad.buttons[13].pressed) bekaari['gamepads'][index].down = false;
-				if(gamepad.buttons[14].pressed && bekaari['gamepads'][index].left == false){
-					bekaari['gamepads'][index].left = true;
-					bekaari['selected'][0] -= 1;
-				}
-				else if(!gamepad.buttons[14].pressed) bekaari['gamepads'][index].left = false;
-				if(gamepad.buttons[15].pressed && bekaari['gamepads'][index].right == false){
-					bekaari['gamepads'][index].right = true;
-					bekaari['selected'][0] += 1;
-				}
-				else if(!gamepad.buttons[15].pressed) bekaari['gamepads'][index].right = false;
+				_.forEach(gamepad.buttons, function(butt){
+					var buttIndex = gamepad.buttons.indexOf(butt);
+					do_gamepad(index, buttIndex, butt)
+					// if(butt.pressed) console.log(gamepad.buttons.indexOf(butt));
+				});
 			}
 		});
-	}, 17);
+	}, 50);
 	intervals['bekaari_second_interval'] = setInterval(function(){
 		document.getElementById('gamepad_p_bekaari').innerHTML = 'Gamepads Connected: ' + Object.keys(bekaari['gamepads']).length;
 		_.forEach(navigator.getGamepads(), function(gamepad){
@@ -3286,15 +3383,16 @@ function start_bekaari(){
 					var playa = _.filter(bekaari['gamepads'], {'gamepad_index': gamepad.index});
 					if(!playa.length){
 						console.log('gamepad detected');
-						bekaari['gamepads'][gamepad.index] = {};
-						bekaari['gamepads'][gamepad.index].gamepad_index = gamepad.index;
-						bekaari['gamepads'][gamepad.index].up = false;
-						bekaari['gamepads'][gamepad.index].down = false;
-						bekaari['gamepads'][gamepad.index].left = false;
-						bekaari['gamepads'][gamepad.index].right = false;
-						bekaari['gamepads'][gamepad.index].cross = false;
-						bekaari['gamepads'][gamepad.index].r1 = false;
-						bekaari['gamepads'][gamepad.index].l1 = false;
+						bekaari['gamepads'][gamepad.index] = {
+							gamepad_index: gamepad.index,
+							buttons: [],
+							skip: false,
+						};
+						_.forEach([0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17], function(i){
+								bekaari['gamepads'][gamepad.index].buttons[i] = {
+									pressed: false,
+								}
+						});
 					}
 				}
 			}
