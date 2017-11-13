@@ -2559,6 +2559,7 @@ function bekaari_new_matrix(matrix){
 
 function activate_dude(dude_id){
 	console.log('activate_dude');
+	bekaari['dudes'][dude_id].activated = true;
 	if(_.filter(bekaari['dudes'], function(dude){
 		return !dude.activated && dude_list[dude.type].is_piece;
 	}).length < 1){
@@ -2566,9 +2567,6 @@ function activate_dude(dude_id){
 		_.forEach(bekaari['dudes'], function(dude){
 			bekaari['dudes'][dude.id].activated = false;
 		});	
-	}
-	else{
-		bekaari['dudes'][dude_id].activated = true;
 	}
 }
 
@@ -2990,7 +2988,7 @@ function shadeColor2(color, percent) {
 
 function draw_dude(dude){
 	if((bekaari['game_mode'] == 'game_start') && (dude.activated)){
-		bekaari['ctx'].fillStyle = shadeColor2(dude.color, .50);
+		bekaari['ctx'].fillStyle = shadeColor2(dude.color, .80);
 	}
 	else{
 		bekaari['ctx'].fillStyle = dude.color;	
