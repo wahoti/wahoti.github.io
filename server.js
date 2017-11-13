@@ -57,6 +57,26 @@ app.get('/res/odin.png', function(req,res) {
 	res.sendFile(__dirname + '/res/odin.png');
 });
 
+app.get('/res/king.png', function(req,res) {
+	res.sendFile(__dirname + '/res/king.png');
+});
+
+app.get('/res/queen.png', function(req,res) {
+	res.sendFile(__dirname + '/res/queen.png');
+});
+
+app.get('/res/rook.png', function(req,res) {
+	res.sendFile(__dirname + '/res/rook.png');
+});
+
+app.get('/res/knight.png', function(req,res) {
+	res.sendFile(__dirname + '/res/knight.png');
+});
+
+app.get('/res/bishop.png', function(req,res) {
+	res.sendFile(__dirname + '/res/bishop.png');
+});
+
 app.get('/res/symphony.png', function(req,res) {
 	res.sendFile(__dirname + '/res/symphony.png');
 });

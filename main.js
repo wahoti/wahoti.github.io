@@ -145,6 +145,18 @@ var keydown = function(c){
 			case 65://a
 				bekaari['selected'][0] -= 1;
 				break;
+			case 39://d
+				bekaari['selected'][0] += 1;
+				break;
+			case 38://w
+				bekaari['selected'][1] -= 1;
+				break;
+			case 40://s
+				bekaari['selected'][1] += 1;
+				break;
+			case 37://a
+				bekaari['selected'][0] -= 1;
+				break;
 			case 68://d
 				bekaari['selected'][0] += 1;
 				break;
@@ -152,7 +164,6 @@ var keydown = function(c){
 				bekaari_select();
 				break;
 			case 16://shift
-				next_map();
 				break;
 			case 190://, >
 				bekaari_color_shift_forward();
@@ -174,6 +185,12 @@ var keydown = function(c){
 				break;
 			case 73://L
 				bekaari_restart();
+				break;
+			case 77://M
+				next_map();
+				break;
+			case 75://K
+				bekaari_cancel();
 				break;
 			default:
 		}
@@ -1906,8 +1923,8 @@ var dude_list = {
 	rook: object = {
 		description: 'rook:<br/>moves/attacks on columns and rows.',
 		tag: 'Rk',
-		sprite: false,
-		sprite_width: 50,
+		sprite: 'rook',
+		sprite_width: 69,
 		sprite_height: 80,
 		mobility: false,
 		is_piece: true,
@@ -2075,6 +2092,9 @@ var dude_list = {
 	bishop: object = {
 		description: 'bishop:<br/>moves/attacks on diagonals.',
 		tag: 'Bh',
+		sprite: 'bishop',
+		sprite_width: 77,
+		sprite_height: 80,
 		mobility: false,
 		is_piece: true,		
 		movement_patterns: [
@@ -2106,6 +2126,9 @@ var dude_list = {
 	queen: object = {
 		description: 'quen:<br/>moves/attacks in all directions.',
 		tag: 'Qn',
+		sprite: 'queen',
+		sprite_width: 80,
+		sprite_height: 75,		
 		mobility: false,
 		is_piece: true,
 		movement_patterns: [
@@ -2145,6 +2168,7 @@ var dude_list = {
 	king: object = {
 		description: 'king:<br/>moves/attacks in all directions.',
 		tag: 'Kg',
+		sprite: 'king',
 		mobility: false,
 		is_piece: true,
 		movement_patterns: [
@@ -2184,6 +2208,9 @@ var dude_list = {
 	knight: object = {
 		description: 'knight:<br/>moves/attacks in an L patter - can move over intervening dudes.',
 		tag: 'Kt',
+		sprite: 'knight',
+		sprite_width: 55,
+		sprite_height: 80,
 		mobility: false,
 		is_piece: true,
 		movement_patterns: [
@@ -2482,6 +2509,16 @@ function activate_dude(dude_id){
 	}
 }
 
+function bekaari_cancel(){
+	switch(bekaari['game_mode']){
+		case 'game_start':
+			bekaari['game_start'].mode = 'idle';
+			activate_dude(bekaari['game_start'].selected_id);
+			break;
+		default:
+	}
+}
+
 function bekaari_select(){
 	switch(bekaari['game_mode']){
 		case 'game_start':
@@ -2703,7 +2740,7 @@ function bekaari_restart(){
 	set_map('field', bekaari['save_field'], 'dudes', bekaari['save_dudes']);
 	bekaari['game_mode'] = 'game_start';
 	bekaari['game_start'].mode = 'idle';
-	bekaari['game_mode_infobox'].innerHTML = 'Game Start';
+	bekaari['game_mode_infobox'].innerHTML = 'mode: Game Start';
 }
 
 function bekaari_new(){
@@ -2711,7 +2748,7 @@ function bekaari_new(){
 	bekaari['dudes'] = {};
 	bekaari['game_mode'] = 'deployment';
 	bekaari_new_matrix('field');
-	bekaari['game_mode_infobox'].innerHTML = 'Deployment';
+	bekaari['game_mode_infobox'].innerHTML = 'mode: Deployment';
 }
 
 function bekaari_start(){
@@ -2719,7 +2756,7 @@ function bekaari_start(){
 	set_map('save_field', bekaari['field'], 'save_dudes', bekaari['dudes']);
 	bekaari['game_mode'] = 'game_start';
 	bekaari['game_start'].mode = 'idle';
-	bekaari['game_mode_infobox'].innerHTML = 'Game Start';
+	bekaari['game_mode_infobox'].innerHTML = 'mode: Game Start';
 }
 
 function initiate_bekaari(){
@@ -2766,6 +2803,7 @@ function initiate_bekaari(){
 	initiate_first_map();
 	initiate_second_map();
 	next_map();
+	bekaari_color_shift_forward();
 	bekaari['width_ratio'] = 2;
 	bekaari['height_ratio'] = 2;
 	bekaari['canvas'].addEventListener("mousedown", function(c){
@@ -2917,13 +2955,22 @@ function draw_dude(dude){
 			bekaari['position_radius']
 		);
 		bekaari['ctx'].globalAlpha = 1.0;
-		bekaari['ctx'].drawImage(
+		if(dude_list[dude.type].sprite_width){
+			bekaari['ctx'].drawImage(
+				document.getElementById(dude_list[dude.type].sprite),
+				dude.position[0]*bekaari['position_radius'],
+				((dude.position[1])*bekaari['position_radius']),
+				dude_list[dude.type].sprite_width,
+				dude_list[dude.type].sprite_height
+			);
+		}
+		else{
+			bekaari['ctx'].drawImage(
 			document.getElementById(dude_list[dude.type].sprite),
-			dude.position[0]*bekaari['position_radius'],
-			((dude.position[1])*bekaari['position_radius']),
-			dude_list[dude.type].sprite_width,
-			dude_list[dude.type].sprite_height
-		);
+				dude.position[0]*bekaari['position_radius'],
+				((dude.position[1])*bekaari['position_radius'])
+			);		
+		}
 	}
 	else{
 		bekaari['ctx'].fillText(
@@ -2997,6 +3044,7 @@ function do_gamepad(index, buttIndex, butt){
 				bekaari_select();
 				break;
 			case 1://circle
+				bekaari_cancel();
 				break;
 			case 2://square
 				bekaari['gamepads'][index].skip = true;
@@ -3125,7 +3173,7 @@ function start_bekaari(){
 				
 				//draw the description
 				var info = '';
-				info += "mouse-wheel [ ] (L1 R1) switch dude<br /><br />right-click < > (L2 R2) switch color<br /><br />left-click space (X) deploy<br /><br />Selected:<br />"
+				info += "switch_dude: mouse-wheel, [ ], L1 R1<br /><br />switch_color: right-click, < >, L2 R2<br /><br />deploy_dude: left-click, space, X<br /><br />Selected:<br />"
 				info += dude_list[bekaari['deployment'].selected].description;
 				bekaari['infobox'].innerHTML = info;
 				
@@ -3140,20 +3188,20 @@ function start_bekaari(){
 				var info = '';
 				switch(bekaari['game_start'].mode){
 					case 'idle':
-						info += "idle:<br/><br/>";
+						info += "idle:<br/><br/>select:<br/>left-click, space, X<br/><br/>cancel:<br/>k,O<br/><br/>";
 						var occupant = get_occupant_selected();
 						if(occupant){
 							draw_patterns(occupant, true);
-							info += dude_list[occupant.type].description;
+							info += 'Selected:<br/>' + dude_list[occupant.type].description;
 						}
 						break;
 					case 'moving':
 						draw_patterns(get_occupant_position(bekaari['game_start'].selected_position), false);
-						info += "moving:<br/><br/>";
+						info += "moving:<br/><br/>select:<br/>left-click, space, X<br/><br/>cancel:<br/>k,O<br/><br/>";
 						break;
 					case 'activating':
 						draw_action_pattern(get_occupant_position(bekaari['game_start'].selected_position));
-						info += "activating:<br/><br/>";
+						info += "activating:<br/><br/>select:<br/>left-click, space, X<br/><br/>cancel:<br/>k,O<br/><br/>";
 						break;
 					default:
 				}
