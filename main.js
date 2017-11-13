@@ -1559,10 +1559,6 @@ var dude_list = {
 		sprite_height: 80,
 		mobility: false,
 		movement_patterns: [
-			[1, -1, 1, 2],
-			[1, 1, 1, 2],
-			[-1, -1, 1, 2],
-			[-1, 1, 1, 2],
 			[0, -1, 1, 2],
 			[1, 0, 1, 2],
 			[0, 1, 1, 2],
@@ -1654,6 +1650,100 @@ var dude_list = {
 		},
 		attack_patterns: [],
 		custom_attack_pattern: function(position){
+			var positions = [];
+			positions.push([position[0]+2,position[1]+1]);
+			positions.push([position[0]+2,position[1]-1]);
+			positions.push([position[0]-2,position[1]+1]);
+			positions.push([position[0]-2,position[1]-1]);
+			positions.push([position[0]+1,position[1]+2]);
+			positions.push([position[0]+1,position[1]-2]);
+			positions.push([position[0]-1,position[1]+2]);
+			positions.push([position[0]-1,position[1]-2]);
+			return positions;
+		},
+		action_patterns: [
+			[1,0,1,1],
+			[-1,0,1,1],
+			[0,1,1,1],
+			[0,-1,1,1]
+		],
+		custom_action_pattern: function(position){
+			return [position];
+		},
+		action: function(target_position, dude_position){
+			if(target_position == dude_position){
+				for(var x=dude_position[0]-1; x<=dude_position[0]+1; x++){
+					for(var y=dude_position[1]-1; y<=dude_position[1]+1; y++){
+						place_dude_with('wall', 'dudes', [x,y], 'field', '#aaaaaa');
+					}
+				}
+			}
+			else{
+				var x_direction = target_position[0] - dude_position[0];
+				var y_direction = target_position[1] - dude_position[1];
+				
+				switch(x_direction){
+					case 0:
+						var start_x = dude_position[0] - 1;
+						var end_x = start_x+2;
+						break;
+					case 1:
+						var start_x = dude_position[0] + 1;
+						var end_x = start_x+1;
+						break;
+					case -1:
+						var start_x = dude_position[0] - 2;
+						var end_x = start_x+1;
+					default:
+						break;
+				}
+				switch(y_direction){
+					case 0:
+						var start_y = dude_position[1] - 1;
+						var end_y = start_y+2;
+						break;
+					case 1:
+						var start_y = dude_position[1] + 1;
+						var end_y = start_y+1;
+						break;
+					case -1:
+						var start_y = dude_position[1] - 2;
+						var end_y = start_y+1;
+					default:
+						break;
+				}
+				
+				for(var x=start_x; x<=end_x; x++){
+					for(var y=start_y; y<=end_y; y++){
+						place_dude_with('wall', 'dudes', [x,y], 'field', '#aaaaaa');
+					}
+				}
+			}
+		},
+	},
+	necromancer: object = {
+		description: "necromancer:<br/>makes pawns.",
+		tag: 'NM',
+		sprite: 'necromancer',
+		sprite_width: 57,
+		sprite_height: 80,
+		mobility: false,
+		movement_patterns: [
+			[1, -1, 1, 2],
+			[1, 1, 1, 2],
+			[-1, -1, 1, 2],
+			[-1, 1, 1, 2]
+		],
+		custom_movement_pattern: function(position){
+			return [];
+		},
+		attack_patterns: [
+			[1, -1, 1, 2],
+			[1, 1, 1, 2],
+			[-1, -1, 1, 2],
+			[-1, 1, 1, 2]
+		],
+		custom_attack_pattern: function(position){
 			return [];
 		},
 		action_patterns: [
@@ -1668,41 +1758,22 @@ var dude_list = {
 		action: function(target_position, dude_position){
 			var x_direction = target_position[0] - dude_position[0];
 			var y_direction = target_position[1] - dude_position[1];
-			
-			switch(x_direction){
-				case 0:
-					var start_x = dude_position[0] - 1;
-					var end_x = start_x+2;
-					break;
-				case 1:
-					var start_x = dude_position[0] + 1;
-					var end_x = start_x+1;
-					break;
-				case -1:
-					var start_x = dude_position[0] - 2;
-					var end_x = start_x+1;
-				default:
-					break;
+			var color = bekaari['dudes'][bekaari['game_start'].selected_id].color;
+				
+			if(x_direction == 0){
+				if(y_direction > 0){
+					place_dude_with('pawn_S', 'dudes', target_position, 'field', color);
+				}
+				else{
+					place_dude_with('pawn_N', 'dudes', target_position, 'field', color);
+				}
 			}
-			switch(y_direction){
-				case 0:
-					var start_y = dude_position[1] - 1;
-					var end_y = start_y+2;
-					break;
-				case 1:
-					var start_y = dude_position[1] + 1;
-					var end_y = start_y+1;
-					break;
-				case -1:
-					var start_y = dude_position[1] - 2;
-					var end_y = start_y+1;
-				default:
-					break;
-			}
-			
-			for(var x=start_x; x<=end_x; x++){
-				for(var y=start_y; y<=end_y; y++){
-					place_dude_with('wall', 'dudes', [x,y], 'field', '#aaaaaa');
+			else if(y_direction == 0){
+				if(x_direction > 0){
+					place_dude_with('pawn_E', 'dudes', target_position, 'field', color);
+				}
+				else{
+					place_dude_with('pawn_W', 'dudes', target_position, 'field', color);
 				}
 			}
 		},
@@ -2042,7 +2113,10 @@ var dude_list_keys = Object.keys(dude_list);
 
 function get_positions(dude, position){
 	//pattern = [x,y,min,max]
-	return dude_list[dude].custom_movement_pattern(position).concat(
+	return _.filter(dude_list[dude].custom_movement_pattern(position), function(pos){
+		return !get_occupant_position(pos);
+	}
+		).concat(
 		_.flatten(_.map(dude_list[dude].movement_patterns, function(pattern, index, collection){
 			var positions = [];
 			for(var i = pattern[2]; i <= pattern[3]; i++){
@@ -2060,9 +2134,18 @@ function get_positions(dude, position){
 	);
 }
 
-function get_attack_positions(dude, position){
+function get_attack_positions(dude, position, display){
 	//pattern = [x,y,min,max]
-	return dude_list[dude].custom_attack_pattern(position).concat(
+	return _.filter(dude_list[dude].custom_attack_pattern(position), function(pos){
+			var occupant = get_occupant_position(pos);
+			if(occupant){
+				return occupant.type != 'obstacle';
+			}
+			else{
+				return (display == true);
+			}
+		})
+		.concat(
 		_.flatten(_.map(dude_list[dude].attack_patterns, function(pattern, index, collection){
 			var positions = [];
 			for(var i = pattern[2]; i <= pattern[3]; i++){
@@ -2077,7 +2160,7 @@ function get_attack_positions(dude, position){
 					
 				}
 				else{
-					positions.push(new_position);
+					if(display) positions.push(new_position)
 				}
 			}
 			return positions;
@@ -2108,10 +2191,10 @@ function get_action_positions(dude, position){
 	);
 }
 
-function get_all_positions(type, position){
+function get_all_positions(type, position, display){
 	return _.uniqBy(
 		get_positions(type, position).concat(
-			get_attack_positions(type, position)
+			get_attack_positions(type, position, display)
 		),
 		function(arr){
 			return arr[0].toString() + arr[1].toString();
@@ -2185,16 +2268,18 @@ function place_dude_with(dude_type, dudes, position, field, color){
 }
 
 function place_dude(){
-	if(bekaari['field'][bekaari['selected'][0]][bekaari['selected'][1]].occupant == null){
-		var color = bekaari['deployment'].color;
-		_.forEach(bekaari['deployment_zone'], function(zone){
-			if((zone[0] == bekaari['selected'][0]) && (zone[1] == bekaari['selected'][1])){
-				color = zone[2];
-			}
-		});
-		var id = shortid.generate();
-		bekaari['dudes'][id] = new Dude(id, bekaari['selected'], bekaari['deployment'].selected, color);
-		bekaari['field'][bekaari['selected'][0]][bekaari['selected'][1]].occupant = id;
+	if(bekaari['field'][bekaari['selected'][0]][bekaari['selected'][1]]){
+		if(bekaari['field'][bekaari['selected'][0]][bekaari['selected'][1]].occupant == null){
+			var color = bekaari['deployment'].color;
+			_.forEach(bekaari['deployment_zone'], function(zone){
+				if((zone[0] == bekaari['selected'][0]) && (zone[1] == bekaari['selected'][1])){
+					color = zone[2];
+				}
+			});
+			var id = shortid.generate();
+			bekaari['dudes'][id] = new Dude(id, bekaari['selected'], bekaari['deployment'].selected, color);
+			bekaari['field'][bekaari['selected'][0]][bekaari['selected'][1]].occupant = id;
+		}
 	}
 }
 
@@ -2279,7 +2364,7 @@ function bekaari_select(){
 						bekaari['game_start'].selected_position[0] = bekaari['selected'][0];
 						bekaari['game_start'].selected_position[1] = bekaari['selected'][1];
 						bekaari['game_start'].selected_type = occupant.type;
-						bekaari['game_start'].selected_positions = get_all_positions(occupant.type, occupant.position);
+						bekaari['game_start'].selected_positions = get_all_positions(occupant.type, occupant.position, false);
 						if(bekaari['game_start'].selected_positions.length > 0){
 							bekaari['game_start'].mode = 'moving';
 						}
@@ -2301,7 +2386,6 @@ function bekaari_select(){
 							bekaari['game_start'].selected_positions = get_action_positions(bekaari['game_start'].selected_type, bekaari['selected']);
 							if(bekaari['game_start'].selected_positions.length > 0){							
 								bekaari['game_start'].mode = 'activating';
-								
 							}
 							else{
 								bekaari['game_start'].mode = 'idle';
@@ -2500,7 +2584,7 @@ function bekaari_new(){
 }
 
 function bekaari_start(){
-	console.log('bekaari_start');
+	console.log('bekaari_start', bekaari['map']);
 	set_map('save_field', bekaari['field'], 'save_dudes', bekaari['dudes']);
 	bekaari['game_mode'] = 'game_start';
 	bekaari['game_start'].mode = 'idle';
@@ -2656,7 +2740,12 @@ function get_occupant_position(position){
 }
 
 function get_occupant_selected(){
-	return  bekaari['dudes'][bekaari['field'][bekaari['selected'][0]][bekaari['selected'][1]].occupant];
+	if(bekaari['field'][bekaari['selected'][0]][bekaari['selected'][1]]){
+		return  bekaari['dudes'][bekaari['field'][bekaari['selected'][0]][bekaari['selected'][1]].occupant];
+	}
+	else{
+		return false;
+	}
 }
 
 function draw_deployment_zones(){
@@ -2703,7 +2792,7 @@ function draw_dude(dude){
 	}
 }
 
-function draw_patterns(dude){;
+function draw_patterns(dude, display){;
 	if(dude){
 		_.forEach(get_positions(dude.type, dude.position), function(position){
 			bekaari['ctx'].setLineDash([]);
@@ -2716,7 +2805,7 @@ function draw_patterns(dude){;
 				bekaari['position_radius']
 			);
 		});
-		_.forEach(get_attack_positions(dude.type, dude.position), function(position){
+		_.forEach(get_attack_positions(dude.type, dude.position, display), function(position){
 			bekaari['ctx'].setLineDash([20,bekaari['position_radius']-40, 20, 0]);
 			bekaari['ctx'].lineWidth=3;
 			bekaari['ctx'].strokeStyle= dude.color;
@@ -2781,12 +2870,12 @@ function start_bekaari(){
 						info += "idle:<br/><br/>";
 						var occupant = get_occupant_selected();
 						if(occupant){
-							draw_patterns(occupant)
+							draw_patterns(occupant, true);
 							info += dude_list[occupant.type].description;
 						}
 						break;
 					case 'moving':
-						draw_patterns(get_occupant_position(bekaari['game_start'].selected_position));
+						draw_patterns(get_occupant_position(bekaari['game_start'].selected_position), false);
 						info += "moving:<br/><br/>";
 						break;
 					case 'activating':
