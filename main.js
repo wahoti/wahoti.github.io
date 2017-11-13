@@ -1510,6 +1510,27 @@ function start_chess_clock(){
 	}, 500)
 }
 
+function attack_position(position){
+	var id = place_dude_capture('attack', 'dudes', [position[0],position[1]], 'field', '#ff0000');
+	setTimeout(function(){
+		remove_dude(id);
+	}, 500);
+	
+}
+
+function knight_movement(position){
+	var positions = [];
+	positions.push([position[0]+2,position[1]+1]);
+	positions.push([position[0]+2,position[1]-1]);
+	positions.push([position[0]-2,position[1]+1]);
+	positions.push([position[0]-2,position[1]-1]);
+	positions.push([position[0]+1,position[1]+2]);
+	positions.push([position[0]+1,position[1]-2]);
+	positions.push([position[0]-1,position[1]+2]);
+	positions.push([position[0]-1,position[1]-2]);
+	return positions;
+}
+
 var dude_list = {
 	attack: object = {
 		description: "attack:<br/> used for visuals",
@@ -1553,6 +1574,44 @@ var dude_list = {
 			
 		},
 	},
+	ninja: object = {
+		description: "ninja:<br/>moves far attacks close.",
+		tag: 'Nj',
+		sprite: 'cool_guy',
+		sprite_width: 56,
+		sprite_height: 80,
+		mobility: false,
+		is_piece: true,
+		movement_patterns: [
+			[1,0,7,9],
+			[-1,0,7,9],
+			[0,1,7,9],
+			[0,-1,7,9],
+			[1,1,7,9],
+			[1,-1,7,9],
+			[-1,1,7,9],
+			[-1,-1,7,9]
+		],
+		custom_movement_pattern: knight_movement,
+		attack_patterns: [
+			[1,0,3,5],
+			[-1,0,3,5],
+			[0,1,3,5],
+			[0,-1,3,5],
+			[1,1,3,5],
+			[1,-1,3,5],
+			[-1,1,3,5],
+			[-1,-1,3,5]
+		],
+		custom_attack_pattern: function(position){
+			return [];
+		},
+		action_patterns: [],
+		custom_action_pattern: knight_movement,
+		action: function(position){
+			move_dude(bekaari['game_start'].selected_id, bekaari['game_start'].selected_position,  position);
+		},
+	},
 	axe_dude: object = {
 		description: "axe_dude:<br/>swings axe.",
 		tag: 'AX',
@@ -1562,15 +1621,20 @@ var dude_list = {
 		mobility: true,
 		is_piece: true,
 		movement_patterns: [
+			[0, -1, 1, 3],
+			[1, 0, 1, 3],
+			[0, 1, 1, 3],
+			[-1, 0, 1, 3]
+		],
+		custom_movement_pattern: function(position){
+			return [];
+		},
+		attack_patterns: [
 			[0, -1, 1, 2],
 			[1, 0, 1, 2],
 			[0, 1, 1, 2],
 			[-1, 0, 1, 2]
 		],
-		custom_movement_pattern: function(position){
-			return [];
-		},
-		attack_patterns: [],
 		custom_attack_pattern: function(position){
 			return [];
 		},
@@ -1617,18 +1681,11 @@ var dude_list = {
 				default:
 					break;
 			}
-			
-			var ids = [];
 			for(var x=start_x; x<=end_x; x++){
 				for(var y=start_y; y<=end_y; y++){
-					ids.push(place_dude_capture('attack', 'dudes', [x,y], 'field', '#ff0000'));
+					attack_position([x,y]);
 				}
 			}
-			setTimeout(function(){
-				_.forEach(ids, function(id){
-					remove_dude(id);
-				});
-			}, 500);
 		},
 	},
 	wall_dude: object = {
@@ -1743,10 +1800,6 @@ var dude_list = {
 			return [];
 		},
 		attack_patterns: [
-			[1, -1, 1, 2],
-			[1, 1, 1, 2],
-			[-1, -1, 1, 2],
-			[-1, 1, 1, 2]
 		],
 		custom_attack_pattern: function(position){
 			return [];
@@ -2905,6 +2958,13 @@ function start_bekaari(){
 				info += "mouse-wheel [ ] (L1 R1) switch dude<br /><br />right-click < > (L2 R2) switch color<br /><br />left-click space (X) deploy<br /><br />Selected:<br />"
 				info += dude_list[bekaari['deployment'].selected].description;
 				bekaari['infobox'].innerHTML = info;
+				
+				//draw patterns
+				draw_patterns({
+					position: [bekaari['selected'][0], bekaari['selected'][1]],
+					color: bekaari['deployment'].color,
+					type: bekaari['deployment'].selected
+				}, true);
 				break;
 			case 'game_start':
 				var info = '';

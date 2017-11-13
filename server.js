@@ -49,6 +49,10 @@ app.get('/res/necromancer.png', function(req,res) {
 	res.sendFile(__dirname + '/res/necromancer.png');
 });
 
+app.get('/res/cool_guy.png', function(req,res) {
+	res.sendFile(__dirname + '/res/cool_guy.png');
+});
+
 app.get('/res/symphony.png', function(req,res) {
 	res.sendFile(__dirname + '/res/symphony.png');
 });
