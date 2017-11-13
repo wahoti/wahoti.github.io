@@ -53,6 +53,10 @@ app.get('/res/cool_guy.png', function(req,res) {
 	res.sendFile(__dirname + '/res/cool_guy.png');
 });
 
+app.get('/res/odin.png', function(req,res) {
+	res.sendFile(__dirname + '/res/odin.png');
+});
+
 app.get('/res/symphony.png', function(req,res) {
 	res.sendFile(__dirname + '/res/symphony.png');
 });

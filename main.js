@@ -1570,8 +1570,54 @@ var dude_list = {
 		custom_action_pattern: function(position){
 			return [];
 		},
-		action: function(position){
+		action: function(target_position, dude_position){
 			
+		},
+	},
+	lance: object = {
+		description: "lance:<br/>lance",
+		tag: '>>',
+		sprite: 'odin',
+		sprite_width: 80,
+		sprite_height: 72,
+		mobility: false,
+		is_piece: true,
+		movement_patterns: [
+			[1, -1, 1, 4],
+			[1, 1, 1, 4],
+			[-1, -1, 1, 4],
+			[-1, 1, 1, 4],
+			[1, 0, 1, 4],
+			[0, 1, 1, 4],
+			[-1, 0, 1, 4],
+			[0, -1, 1, 4]
+		],
+		custom_movement_pattern: function(position){
+			return [];
+		},
+		attack_patterns: [
+		],
+		custom_attack_pattern: function(position){
+			return [];
+		},
+		action_patterns: [
+			[1, -1, 1, 1],
+			[1, 1, 1, 1],
+			[-1, -1, 1, 1],
+			[-1, 1, 1, 1],
+			[1, 0, 1, 1],
+			[0, 1, 1, 1],
+			[-1, 0, 1, 1],
+			[0, -1, 1, 1]
+		],
+		custom_action_pattern: function(position){
+			return [];
+		},
+		action: function(target_position, dude_position){
+			var x_dir = target_position[0] - dude_position[0];
+			var y_dir = target_position[1] - dude_position[1];
+			attack_position([dude_position[0] + x_dir, dude_position[1] + y_dir]);
+			attack_position([dude_position[0] + (x_dir*2), dude_position[1] + (y_dir*2)]);
 		},
 	},
 	ninja: object = {
