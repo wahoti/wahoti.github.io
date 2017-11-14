@@ -85,6 +85,10 @@ app.get('/res/dragon.png', function(req,res) {
 	res.sendFile(__dirname + '/res/dragon.png');
 });
 
+app.get('/res/dervish.png', function(req,res) {
+	res.sendFile(__dirname + '/res/dervish.png');
+});
+
 app.get('/res/symphony.png', function(req,res) {
 	res.sendFile(__dirname + '/res/symphony.png');
 });

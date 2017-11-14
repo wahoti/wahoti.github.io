@@ -1781,6 +1781,46 @@ var dude_list = {
 			
 		},
 	},
+	dervish: object = {
+		description: "dervish:<br/> activates thrice",
+		tag: 'Dv',
+		sprite: 'dervish',
+		sprite_height: 80,
+		sprite_width: 59,
+		mobility: false,
+		is_piece: true,
+		moves: 2,
+		movement_patterns: [
+			[1, -1, 1, 2],
+			[1, 1, 1, 2],
+			[-1, -1, 1, 2],
+			[-1, 1, 1, 2]
+		],
+		custom_movement_pattern: function(position){
+			return [];
+		},
+		attack_patterns: [
+			[1, -1, 1, 2],
+			[1, 1, 1, 2],
+			[-1, -1, 1, 2],
+			[-1, 1, 1, 2]
+		],
+		custom_attack_pattern: function(position){
+			return [];
+		},
+		action_patterns: [
+			[1, 0, 1, 2],
+			[0, 1, 1, 2],
+			[-1, 0, 1, 2],
+			[-0, -1, 1, 2]
+		],
+		custom_action_pattern: function(position){
+			return [];
+		},
+		action: function(target_position, dude_position){
+			move_dude(bekaari['game_start'].selected_id, bekaari['game_start'].selected_position,  target_position);
+		},
+	},
 	dragon: object = {
 		description: "dragon:<br/> dont let the dragon drag on man.",
 		tag: 'Dg',
@@ -1789,6 +1829,7 @@ var dude_list = {
 		sprite: 'dragon',
 		sprite_width: 80,
 		sprite_height: 73,
+		moves: 1,
 		movement_patterns: [
 			[1, -1, 1, 1],
 			[1, 1, 1, 1],
@@ -1830,7 +1871,7 @@ var dude_list = {
 			return positions;
 		},
 		action: function(target_position, dude_position){
-			move_dude(bekaari['game_start'].selected_id, bekaari['game_start'].selected_position,  target_position)
+			move_dude(bekaari['game_start'].selected_id, bekaari['game_start'].selected_position,  target_position);
 		},
 	},
 	archer: object = {
@@ -2674,6 +2715,7 @@ function Dude(id, position, type, color){
 	this.type = type;
 	this.color = color;
 	this.activated = false;
+	this.count = 0;
 }
 
 function place_dude_capture(dude_type, dudes, position, field, color){
@@ -2866,12 +2908,28 @@ function bekaari_select(){
 							bekaari['game_start'].selected_position[0] = bekaari['selected'][0];
 							bekaari['game_start'].selected_position[1] = bekaari['selected'][1];
 							bekaari['game_start'].selected_positions = get_action_positions(bekaari['game_start'].selected_type, bekaari['selected']);
-							if(bekaari['game_start'].selected_positions.length > 0){							
-								bekaari['game_start'].mode = 'activating';
+							if(bekaari['game_start'].selected_positions.length > 0){	
+								bekaari['dudes'][bekaari['game_start'].selected_id].count += 1;
+								if(bekaari['dudes'][bekaari['game_start'].selected_id].count < dude_list[bekaari['game_start'].selected_type].moves){
+									//hm
+									bekaari['game_start'].selected_positions = get_all_positions(bekaari['game_start'].selected_type, bekaari['selected']);
+								}
+								else{
+									bekaari['dudes'][bekaari['game_start'].selected_id].count = 0;
+									bekaari['game_start'].mode = 'activating';
+								}
 							}
 							else{
-								bekaari['game_start'].mode = 'idle';
-								activate_dude(bekaari['game_start'].selected_id);
+								bekaari['dudes'][bekaari['game_start'].selected_id].count += 1;
+								if(bekaari['dudes'][bekaari['game_start'].selected_id].count < dude_list[bekaari['game_start'].selected_type].moves){
+									//hm
+									bekaari['game_start'].selected_positions = get_all_positions(bekaari['game_start'].selected_type, bekaari['selected']);
+								}
+								else{
+									bekaari['dudes'][bekaari['game_start'].selected_id].count = 0;
+									bekaari['game_start'].mode = 'idle';
+									activate_dude(bekaari['game_start'].selected_id);
+								}
 							}
 						
 						}
@@ -3030,6 +3088,12 @@ function next_piece(){
 				bekaari['next_pieces'] = [];
 				next_piece();
 			}
+		}
+		else if(bekaari['game_start'].mode == 'moving'){
+			//TODO
+		}
+		else if(bekaari['game_start'].mode == 'activating'){
+			//TODO
 		}
 	}
 }
