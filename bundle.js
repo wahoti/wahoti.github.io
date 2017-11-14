@@ -1778,6 +1778,72 @@ var dude_list = {
 			
 		},
 	},
+	archer: object = {
+		description: "bow_dude:<br/>long range attacks",
+		tag: 'bd',
+		mobility: false,
+		is_piece: true,
+		sprite: 'archer',
+		sprite_width: 78,
+		sprite_height: 80,
+		movement_patterns: [
+			[1, -1, 1, 1],
+			[1, 1, 1, 1],
+			[-1, -1, 1, 1],
+			[-1, 1, 1, 1]
+		],
+		custom_movement_pattern: function(position){
+			return [];
+		},
+		attack_patterns: [],
+		custom_attack_pattern: function(position){
+			return [];
+		},
+		action_patterns: [
+			[1, -1, 1, 1],
+			[1, 1, 1, 1],
+			[-1, -1, 1, 1],
+			[-1, 1, 1, 1],
+			[1, 0, 1, 1],
+			[0, 1, 1, 1],
+			[-1, 0, 1, 1],
+			[0, -1, 1, 1]
+		],
+		custom_action_pattern: function(position){
+			return [];
+		},
+		action: function(target_position, dude_position){
+			var x_dir = target_position[0] - dude_position[0];
+			var y_dir = target_position[1] - dude_position[1];
+			var hit = false;
+			var i = 0;
+			var hit_positions = [];
+			while(!hit){
+				i++;
+				var position = [dude_position[0] + (x_dir*i), dude_position[1] + (y_dir*i)];
+				if(
+					(position[0] >= 0) &&
+					(position[1] >= 1) &&
+					(position[0] < bekaari['width']) &&
+					(position[1] < bekaari['height'])
+				){
+					var occupant = get_occupant_position(position);
+					hit_positions.push(position);
+					if(occupant) hit = true;
+							
+				}
+				else{
+					hit = true;
+				}
+			}
+			var j = -1;
+			var hit_interval = setInterval(function(){
+				j++; 
+				if(j >= hit_positions.length) clearInterval(hit_interval);
+				else attack_position(hit_positions[j]);
+			}, 150);
+		},
+	},
 	lance: object = {
 		description: "lance:<br/>lance",
 		tag: '>>',
@@ -1901,36 +1967,36 @@ var dude_list = {
 			var x_direction = target_position[0] - dude_position[0];
 			var y_direction = target_position[1] - dude_position[1];
 			
-			switch(x_direction){
-				case 0:
-					var start_x = dude_position[0] - 1;
-					var end_x = start_x+2;
-					break;
-				case 1:
-					var start_x = dude_position[0] + 1;
-					var end_x = start_x;
-					break;
-				case -1:
-					var start_x = dude_position[0] - 1;
-					var end_x = start_x;
-				default:
-					break;
-			}
-			switch(y_direction){
-				case 0:
-					var start_y = dude_position[1] - 1;
-					var end_y = start_y+2;
-					break;
-				case 1:
-					var start_y = dude_position[1] + 1;
-					var end_y = start_y;
-					break;
-				case -1:
-					var start_y = dude_position[1] - 1;
-					var end_y = start_y;
-				default:
-					break;
-			}
+				switch(x_direction){
+					case 0:
+						var start_x = dude_position[0] - 1;
+						var end_x = start_x+2;
+						break;
+					case 1:
+						var start_x = dude_position[0] + 1;
+						var end_x = start_x+1;
+						break;
+					case -1:
+						var start_x = dude_position[0] - 2;
+						var end_x = start_x+1;
+					default:
+						break;
+				}
+				switch(y_direction){
+					case 0:
+						var start_y = dude_position[1] - 1;
+						var end_y = start_y+2;
+						break;
+					case 1:
+						var start_y = dude_position[1] + 1;
+						var end_y = start_y+1;
+						break;
+					case -1:
+						var start_y = dude_position[1] - 2;
+						var end_y = start_y+1;
+					default:
+						break;
+				}
 			for(var x=start_x; x<=end_x; x++){
 				for(var y=start_y; y<=end_y; y++){
 					attack_position([x,y]);
@@ -3035,9 +3101,11 @@ function initiate_bekaari(){
 }
 
 function remove_dude(id){
-	var position = bekaari['dudes'][id].position;
-	bekaari['field'][position[0]][position[1]].occupant = '';
-	capture_dude(id);
+	if(bekaari['dudes'][id]){
+		var position = bekaari['dudes'][id].position;
+		bekaari['field'][position[0]][position[1]].occupant = '';
+		capture_dude(id);
+	}
 }
 
 function capture_dude(dude_id){

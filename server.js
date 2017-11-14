@@ -77,6 +77,10 @@ app.get('/res/bishop.png', function(req,res) {
 	res.sendFile(__dirname + '/res/bishop.png');
 });
 
+app.get('/res/archer.png', function(req,res) {
+	res.sendFile(__dirname + '/res/archer.png');
+});
+
 app.get('/res/symphony.png', function(req,res) {
 	res.sendFile(__dirname + '/res/symphony.png');
 });
