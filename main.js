@@ -1553,7 +1553,7 @@ var dude_list = {
 		description: "attack:<br/> used for visuals",
 		tag: 'XX',
 		mobility: false,
-		is_piece: true,
+		is_piece: false,
 		movement_patterns: [],
 		custom_movement_pattern: function(position){
 			return [];
