@@ -2289,6 +2289,7 @@ var dude_list = {
 		sprite: 'king',
 		mobility: false,
 		is_piece: true,
+		is_king: true,
 		movement_patterns: [
 			[1, -1, 1, 1],
 			[1, 1, 1, 1],
@@ -2510,17 +2511,23 @@ function place_dude_capture(dude_type, dudes, position, field, color){
 }
 
 function place_dude_with(dude_type, dudes, position, field, color){
-	// if(
-		// (position[0] >= 0) &&
-		// (position[0] < bekaari['width']) &&
-		// (position[1] >= 0) &&
-		// (position[1] < bekaari['height'])
-	// ){
 	if(bekaari[field][position[0]][position[1]]){
 		if(!bekaari[field][position[0]][position[1]].occupant){
-			var id = shortid.generate();
-			bekaari[dudes][id] = new Dude(id, position, dude_type, color);
-			bekaari[field][position[0]][position[1]].occupant = id;
+			if(dude_list[dude_type].is_king){
+				var kings = _.filter(bekaari['dudes'], function(dude){
+					return (dude.type == 'king') && (dude.color == color);
+				})
+				if(kings.length<1){
+					var id = shortid.generate();
+					bekaari[dudes][id] = new Dude(id, position, dude_type, color);
+					bekaari[field][position[0]][position[1]].occupant = id;
+				}
+			}
+			else{
+				var id = shortid.generate();
+				bekaari[dudes][id] = new Dude(id, position, dude_type, color);
+				bekaari[field][position[0]][position[1]].occupant = id;
+			}
 		}
 	}
 	else{
@@ -2537,9 +2544,7 @@ function place_dude(){
 					color = zone[2];
 				}
 			});
-			var id = shortid.generate();
-			bekaari['dudes'][id] = new Dude(id, bekaari['selected'], bekaari['deployment'].selected, color);
-			bekaari['field'][bekaari['selected'][0]][bekaari['selected'][1]].occupant = id;
+			place_dude_with(bekaari['deployment'].selected, 'dudes', bekaari['selected'], 'field', color);
 		}
 	}
 }
@@ -2792,7 +2797,7 @@ function initiate_chess_map(){
 		}
 	});
 	
-	var W_color = '#FFFFFF';
+	var W_color = '#00FF00';
 	var E_color = '#FF00FF';
 	place_dude_with('rook', dudes, [8, 2], field, W_color);
 	place_dude_with('rook', dudes, [8, 9], field, W_color);
@@ -2976,6 +2981,12 @@ function remove_dude(id){
 }
 
 function capture_dude(dude_id){
+	if(dude_list[bekaari['dudes'][dude_id].type].is_king){
+		var color = bekaari['dudes'][dude_id].color;
+		_.forEach(bekaari['dudes'], function(dude){
+			if((dude.color == color) && (dude.type != 'king')) remove_dude(dude.id);
+		});
+	}
 	delete bekaari['dudes'][dude_id];
 }
 
