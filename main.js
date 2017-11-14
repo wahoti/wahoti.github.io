@@ -1591,6 +1591,58 @@ var dude_list = {
 			
 		},
 	},
+	dragon: object = {
+		description: "dragon:<br/> dont let the dragon drag on man.",
+		tag: 'Dg',
+		mobility: false,
+		is_piece: true,
+		sprite: 'dragon',
+		sprite_width: 80,
+		sprite_height: 73,
+		movement_patterns: [
+			[1, -1, 1, 1],
+			[1, 1, 1, 1],
+			[-1, -1, 1, 1],
+			[-1, 1, 1, 1],
+			[1, 0, 1, 2],
+			[0, 1, 1, 2],
+			[-1, 0, 1, 2],
+			[0, -1, 1, 2]
+		],
+		custom_movement_pattern: knight_movement,
+		attack_patterns: [
+			[1, -1, 1, 1],
+			[1, 1, 1, 1],
+			[-1, -1, 1, 1],
+			[-1, 1, 1, 1],
+			[1, 0, 1, 2],
+			[0, 1, 1, 2],
+			[-1, 0, 1, 2],
+			[0, -1, 1, 2]
+		],
+		custom_attack_pattern: knight_movement,
+		action_patterns: [
+			[1, -1, 4, 4],
+			[1, 1, 4, 4],
+			[-1, -1, 4, 4],
+			[-1, 1, 4, 4],
+			[1, 0, 7, 7],
+			[0, 1, 5, 5],
+			[-1, 0, 7, 7],
+			[0, -1, 5, 5]
+		],
+		custom_action_pattern: function(position){
+			var positions = [];
+			positions.push([position[0]-5, position[1]-2]);
+			positions.push([position[0]+5, position[1]-2]);
+			positions.push([position[0]-5, position[1]+2]);
+			positions.push([position[0]+5, position[1]+2]);
+			return positions;
+		},
+		action: function(target_position, dude_position){
+			move_dude(bekaari['game_start'].selected_id, bekaari['game_start'].selected_position,  target_position)
+		},
+	},
 	archer: object = {
 		description: "bow_dude:<br/>long range attacks",
 		tag: 'bd',
