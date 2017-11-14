@@ -2644,21 +2644,23 @@ function bekaari_select(){
 				case 'idle':
 					var occupant = get_occupant_selected();
 					if(occupant){
-						bekaari['game_start'].selected_id = occupant.id;
-						bekaari['game_start'].selected_position[0] = bekaari['selected'][0];
-						bekaari['game_start'].selected_position[1] = bekaari['selected'][1];
-						bekaari['game_start'].selected_type = occupant.type;
-						bekaari['game_start'].selected_positions = get_all_positions(occupant.type, occupant.position, false);
-						if(bekaari['game_start'].selected_positions.length > 0){
-							bekaari['game_start'].mode = 'moving';
-						}
-						else if(get_action_positions(bekaari['game_start'].selected_type, occupant.position).length > 0){
-							bekaari['game_start'].selected_positions = get_action_positions(bekaari['game_start'].selected_type, bekaari['selected']);
-							bekaari['game_start'].mode = 'activating';
-						}
-						else{
-							bekaari['game_start'].mode = 'idle';
-							activate_dude(bekaari['game_start'].selected_id);
+						if(!occupant.activated){
+							bekaari['game_start'].selected_id = occupant.id;
+							bekaari['game_start'].selected_position[0] = bekaari['selected'][0];
+							bekaari['game_start'].selected_position[1] = bekaari['selected'][1];
+							bekaari['game_start'].selected_type = occupant.type;
+							bekaari['game_start'].selected_positions = get_all_positions(occupant.type, occupant.position, false);
+							if(bekaari['game_start'].selected_positions.length > 0){
+								bekaari['game_start'].mode = 'moving';
+							}
+							else if(get_action_positions(bekaari['game_start'].selected_type, occupant.position).length > 0){
+								bekaari['game_start'].selected_positions = get_action_positions(bekaari['game_start'].selected_type, bekaari['selected']);
+								bekaari['game_start'].mode = 'activating';
+							}
+							else{
+								bekaari['game_start'].mode = 'idle';
+								activate_dude(bekaari['game_start'].selected_id);
+							}
 						}
 					}
 					break;
@@ -3311,7 +3313,7 @@ function start_bekaari(){
 						info += "idle:<br/><br/>select:<br/>left-click, space, X<br/><br/>cancel:<br/>k,O<br/><br/>";
 						var occupant = get_occupant_selected();
 						if(occupant){
-							draw_patterns(occupant, true);
+							if(!occupant.activated) draw_patterns(occupant, true);
 							info += 'Selected:<br/>' + dude_list[occupant.type].description;
 						}
 						break;
