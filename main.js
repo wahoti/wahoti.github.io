@@ -189,6 +189,9 @@ var keydown = function(c){
 			case 77://M
 				next_map();
 				break;
+			case 78://N
+				next_piece();
+				break;
 			case 75://K
 				bekaari_cancel();
 				break;
@@ -2825,8 +2828,26 @@ function initiate_chess_map(){
 	}
 }
 
+function next_piece(){
+	if(bekaari['game_mode'] == 'game_start'){
+		if(bekaari['game_start'].mode == 'idle'){
+			var next_list = _.filter(bekaari['dudes'], function(dude){
+				return ((!dude.activated) && (bekaari['next_pieces'].indexOf(dude.id)<0) && dude_list[dude.type].is_piece);
+			});
+			if(next_list.length > 0){
+				bekaari['selected'][0] = next_list[0].position[0];
+				bekaari['selected'][1] = next_list[0].position[1];
+				bekaari['next_pieces'].push(next_list[0].id);			
+			}
+			else{
+				bekaari['next_pieces'] = [];
+				next_piece();
+			}
+		}
+	}
+}
+
 function next_map(){
-	console.log('next_map');
 	var index = bekaari['maps'].indexOf(bekaari['map']);
 	var new_index = bekaari['maps'].length-1;
 	if((index-1) >= 0) new_index = index-1;
@@ -2919,6 +2940,7 @@ function initiate_bekaari(){
 	bekaari['infobox'] = document.getElementById('bekaari_infobox');
 	bekaari['game_mode_infobox'] = document.getElementById("bekaari_mode");
 	
+	bekaari['next_pieces'] = [];
 	bekaari['map'] = '';
 	bekaari['maps'] = ['', 'chess_', 'first_', 'second_'];
 	
@@ -3183,7 +3205,7 @@ function do_gamepad(index, buttIndex, butt){
 				bekaari['gamepads'][index].skip = true;
 				break;
 			case 3://triangle
-				bekaari_color_shift_forward();
+				next_piece();
 				break;
 			case 4://L1
 				bekaari_shift_backward();
@@ -3308,6 +3330,7 @@ function start_bekaari(){
 				var info = '';
 				info += "switch_dude: mouse-wheel, [ ], L1 R1<br /><br />switch_color: right-click, < >, L2 R2<br /><br />deploy_dude: left-click, space, X<br /><br />Selected:<br />"
 				info += dude_list[bekaari['deployment'].selected].description;
+				if(dude_list[bekaari['deployment'].selected].is_king) info += '<br/>Can only have one king.';
 				bekaari['infobox'].innerHTML = info;
 				
 				//draw patterns
@@ -3321,7 +3344,7 @@ function start_bekaari(){
 				var info = '';
 				switch(bekaari['game_start'].mode){
 					case 'idle':
-						info += "idle:<br/><br/>select:<br/>left-click, space, X<br/><br/>cancel:<br/>k,O<br/><br/>";
+						info += "idle:<br/><br/>select:<br/>left-click, space, X<br/><br/>next_piece:<br/>n,triangle<br/><br/>cancel:<br/>k,O<br/><br/>";
 						var occupant = get_occupant_selected();
 						if(occupant){
 							if(!occupant.activated) draw_patterns(occupant, true);
