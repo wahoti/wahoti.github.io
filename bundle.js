@@ -1906,21 +1906,291 @@ var dude_list = {
 		action: function(target_position, dude_position){
 			var x_dir = target_position[0] - dude_position[0];
 			var y_dir = target_position[1] - dude_position[1];
-			var x = target_position[0];
-			var y = target_position[1];
-			if((x_dir == 2) && (y_dir == 0)){
+			var x = dude_position[0];
+			var y = dude_position[1];
+			if((x_dir == 3) && (y_dir == 0)){
+				console.log('east right');
 				//east right
-				//everything in 4 rows out moves 2 squares east
+				//everything in 4 columns out moves 2 squares east
+				var start_x = x + 4;
+				var end_x = x + 1;
+				var iter_x = -1;
+				var push_x = 2; 
+				var start_y = 0;
+				var end_y = bekaari['height']-1;
+				var iter_y = 1;
+				var push_y = 0; 
+				var x_list = [];
+				var y_list = [];
+				for(var i=start_x; i>=end_x; i += iter_x) x_list.push(i);
+				for(var j=start_y; j<=end_y; j += iter_y) y_list.push(j);
 			}
 			else if((x_dir == 1) && (y_dir == 0)){
 				//east left
-				//everything in 4 rows out moves 2 squares west
+				//everything in 4 columns out moves 2 squares west
+				var start_x = x + 1;
+				var end_x = x + 4;
+				var iter_x = 1;
+				var push_x = -2; 
+				var start_y = 0;
+				var end_y = bekaari['height']-1;
+				var iter_y = 1;
+				var push_y = 0; 
+				var x_list = [];
+				var y_list = [];
+				for(var i=start_x; i<=end_x; i += iter_x) x_list.push(i);
+				for(var j=start_y; j<=end_y; j += iter_y) y_list.push(j);
 			}
-			// else if((x_dir == 2) && (y_dir == 0))
-			// else if((x_dir == 2) && (y_dir == 0))
-			// else if((x_dir == 2) && (y_dir == 0))
-			// else if((x_dir == 2) && (y_dir == 0))
-			// else if((x_dir == 2) && (y_dir == 0))
+			else if((x_dir == 2) && (y_dir == 1)){
+				//east bottom
+				//everything in 4 columns out moves 2 squares south
+				var start_x = x + 1;
+				var end_x = x + 4;
+				var iter_x = 1;
+				var push_x = 0; 
+				var start_y = bekaari['height']-1;
+				var end_y = 0;
+				var iter_y = -1;
+				var push_y = 2; 
+				var x_list = [];
+				var y_list = [];
+				for(var i=start_x; i<=end_x; i += iter_x) x_list.push(i);
+				for(var j=start_y; j>=end_y; j += iter_y) y_list.push(j);
+			}
+			else if((x_dir == 2) && (y_dir == -1)){
+				//east top
+				//everything in 4 columns out moves 2 squares north
+				var start_x = x + 1;
+				var end_x = x + 4;
+				var iter_x = 1;
+				var push_x = 0; 
+				var start_y = 0;
+				var end_y = bekaari['height']-1;
+				var iter_y = 1;
+				var push_y = -2; 
+				var x_list = [];
+				var y_list = [];
+				for(var i=start_x; i<=end_x; i += iter_x) x_list.push(i);
+				for(var j=start_y; j<=end_y; j += iter_y) y_list.push(j);
+			}
+			else if((x_dir == -3) && (y_dir == 0)){
+				//west left
+				//everything in 4 columns west moves 2 squares west
+				var start_x = x - 4;
+				var end_x = x - 1;
+				var iter_x = 1;
+				var push_x = -2; 
+				var start_y = 0;
+				var end_y = bekaari['height']-1;
+				var iter_y = 1;
+				var push_y = 0; 
+				var x_list = [];
+				var y_list = [];
+				for(var i=start_x; i<=end_x; i += iter_x) x_list.push(i);
+				for(var j=start_y; j<=end_y; j += iter_y) y_list.push(j);
+			}
+			else if((x_dir == -1) && (y_dir == 0)){
+				//west right
+				//everything in 4 columns west moves 2 squares east
+				var start_x = x - 1;
+				var end_x = x - 4;
+				var iter_x = -1;
+				var push_x = 2; 
+				var start_y = 0;
+				var end_y = bekaari['height']-1;
+				var iter_y = 1;
+				var push_y = 0; 
+				var x_list = [];
+				var y_list = [];
+				for(var i=start_x; i>=end_x; i += iter_x) x_list.push(i);
+				for(var j=start_y; j<=end_y; j += iter_y) y_list.push(j);
+			}
+			else if((x_dir == -2) && (y_dir == -1)){
+				//west top
+				//everything in 4 columns west moves 2 squares north
+				var start_x = x - 1;
+				var end_x = x - 4;
+				var iter_x = -1;
+				var push_x = 0; 
+				var start_y = 0;
+				var end_y = bekaari['height']-1;
+				var iter_y = 1;
+				var push_y = -2; 
+				var x_list = [];
+				var y_list = [];
+				for(var i=start_x; i>=end_x; i += iter_x) x_list.push(i);
+				for(var j=start_y; j<=end_y; j += iter_y) y_list.push(j);
+			}
+			else if((x_dir == -2) && (y_dir == 1)){
+				//west bottom
+				//everything in 4 columns west moves 2 squares south
+				var start_x = x - 1;
+				var end_x = x - 4;
+				var iter_x = -1;
+				var push_x = 0; 
+				var start_y = bekaari['height']-1;
+				var end_y = 0;
+				var iter_y = -1;
+				var push_y = 2; 
+				var x_list = [];
+				var y_list = [];
+				for(var i=start_x; i>=end_x; i += iter_x) x_list.push(i);
+				for(var j=start_y; j>=end_y; j += iter_y) y_list.push(j);
+			}
+			else if((x_dir == 0) && (y_dir == 3)){
+				//south bottom
+				//everything 2 rows south moves two squares south
+				var start_x = 0;
+				var end_x = bekaari['width']-1;
+				var iter_x = 1;
+				var push_x = 0; 
+				var start_y = y + 2;
+				var end_y = y + 1;
+				var iter_y = -1;
+				var push_y = 2; 
+				var x_list = [];
+				var y_list = [];
+				for(var i=start_x; i<=end_x; i += iter_x) x_list.push(i);
+				for(var j=start_y; j>=end_y; j += iter_y) y_list.push(j);
+			}
+			else if((x_dir == 0) && (y_dir == 1)){
+				//south top
+				//everything 2 rows south moves two squares north
+				var start_x = 0;
+				var end_x = bekaari['width']-1;
+				var iter_x = 1;
+				var push_x = 0; 
+				var start_y = y + 1;
+				var end_y = y + 2;
+				var iter_y = 1;
+				var push_y = -2; 
+				var x_list = [];
+				var y_list = [];
+				for(var i=start_x; i<=end_x; i += iter_x) x_list.push(i);
+				for(var j=start_y; j<=end_y; j += iter_y) y_list.push(j);
+			}
+			else if((x_dir == 1) && (y_dir == 2)){
+				//south east
+				//everything 2 rows south moves two squares west
+				var start_x = bekaari['width']-1;
+				var end_x = 0;
+				var iter_x = -1;
+				var push_x = 2; 
+				var start_y = y + 1;
+				var end_y = y + 2;
+				var iter_y = 1;
+				var push_y = 0; 
+				var x_list = [];
+				var y_list = [];
+				for(var i=start_x; i>=end_x; i += iter_x) x_list.push(i);
+				for(var j=start_y; j<=end_y; j += iter_y) y_list.push(j);
+			}	
+			else if((x_dir == -1) && (y_dir == 2)){
+				//south west
+				//everything 2 rows south moves two squares east
+				var start_x = 0;
+				var end_x = bekaari['width']-1;
+				var iter_x = 1;
+				var push_x = -2; 
+				var start_y = y + 1;
+				var end_y = y + 2;
+				var iter_y = 1;
+				var push_y = 0; 
+				var x_list = [];
+				var y_list = [];
+				for(var i=start_x; i<=end_x; i += iter_x) x_list.push(i);
+				for(var j=start_y; j<=end_y; j += iter_y) y_list.push(j);
+			}
+			else if((x_dir == 0) && (y_dir == -3)){
+				//north north
+				//everything 2 rows north mvoes two squares north
+				var start_x = bekaari['width']-1;
+				var end_x = 0;
+				var iter_x = -1;
+				var push_x = 0; 
+				var start_y = y - 2;
+				var end_y = y - 1;
+				var iter_y = 1;
+				var push_y = -2; 
+				var x_list = [];
+				var y_list = [];
+				for(var i=start_x; i>=end_x; i += iter_x) x_list.push(i);
+				for(var j=start_y; j<=end_y; j += iter_y) y_list.push(j);
+			}			
+			else if((x_dir == 0) && (y_dir == -1)){
+				//north south
+				//everything 2 rows north mvoes two squares south
+				var start_x = bekaari['width']-1;
+				var end_x = 0;
+				var iter_x = -1;
+				var push_x = 0; 
+				var start_y = y - 1;
+				var end_y = y - 2;
+				var iter_y = -1;
+				var push_y = +2; 
+				var x_list = [];
+				var y_list = [];
+				for(var i=start_x; i>=end_x; i += iter_x) x_list.push(i);
+				for(var j=start_y; j>=end_y; j += iter_y) y_list.push(j);
+			}			
+			else if((x_dir == -1) && (y_dir == -2)){
+				//north west
+				//everything 2 rows north mvoes two squares west
+				var start_x = 0;
+				var end_x = bekaari['width']-1;
+				var iter_x = 1;
+				var push_x = -2; 
+				var start_y = y - 1;
+				var end_y = y - 2;
+				var iter_y = -1;
+				var push_y = 0; 
+				var x_list = [];
+				var y_list = [];
+				for(var i=start_x; i<=end_x; i += iter_x) x_list.push(i);
+				for(var j=start_y; j>=end_y; j += iter_y) y_list.push(j);
+			}
+			else if((x_dir == 1) && (y_dir == -2)){
+				//north east
+				//everything 2 rows north mvoes two squares east
+				var start_x = bekaari['width']-1;
+				var end_x = 0;
+				var iter_x = -1;
+				var push_x = 2; 
+				var start_y = y - 1;
+				var end_y = y - 2;
+				var iter_y = -1;
+				var push_y = 0; 
+				var x_list = [];
+				var y_list = [];
+				for(var i=start_x; i>=end_x; i += iter_x) x_list.push(i);
+				for(var j=start_y; j>=end_y; j += iter_y) y_list.push(j);
+			}
+			var series = [];
+		
+			_.forEach(x_list, function(i){
+				_.forEach(y_list, function(j){
+					var occupant = get_occupant_position([i,j]);
+					if(occupant){
+						if(occupant.type != 'obstacle'){
+							//dude_id, old_position, position
+							// move_dude(occupant.id, [occupant.position[0], occupant.position[1]], [i+push_x, j+push_y]);
+							series.push([occupant.id, [occupant.position[0], occupant.position[1]], [i+push_x, j+push_y]]);
+						}
+					}
+				});
+			});
+
+			var iter = -1;
+			var end = series.length;
+			var move_interval = setInterval(function(){
+				iter += 1;
+				if(iter < series.length){
+					move_dude(series[iter][0], series[iter][1], series[iter][2]);
+				}
+				else{
+					clearInterval(move_interval);
+				}
+			}, 150);
 		},
 	},
 	dervish: object = {
@@ -2215,7 +2485,8 @@ var dude_list = {
 			[1,0,1,1],
 			[-1,0,1,1],
 			[0,1,1,1],
-			[0,-1,1,1]
+			[0,-1,1,1],
+			[0,0,1,1]
 		],
 		custom_action_pattern: function(position){
 			return [];
@@ -2223,7 +2494,17 @@ var dude_list = {
 		action: function(target_position, dude_position){
 			var x_direction = target_position[0] - dude_position[0];
 			var y_direction = target_position[1] - dude_position[1];
-			
+			if((x_direction == 0) && (y_direction == 0)){
+				for(var x=dude_position[0]-1; x<=dude_position[0]+1; x++){
+					for(var y=dude_position[1]-1; y<=dude_position[1]+1; y++){
+						if(!((x == dude_position[0]) && (y == dude_position[1]))){
+							console.log(dude_position, x, y);
+							attack_position([x,y]);
+						}
+					}
+				}
+			}
+			else{
 				switch(x_direction){
 					case 0:
 						var start_x = dude_position[0] - 1;
@@ -2254,9 +2535,10 @@ var dude_list = {
 					default:
 						break;
 				}
-			for(var x=start_x; x<=end_x; x++){
-				for(var y=start_y; y<=end_y; y++){
-					attack_position([x,y]);
+				for(var x=start_x; x<=end_x; x++){
+					for(var y=start_y; y<=end_y; y++){
+						attack_position([x,y]);
+					}
 				}
 			}
 		},
@@ -3474,11 +3756,34 @@ function capture_dude(dude_id){
 }
 
 function move_dude(dude_id, old_position, position){
+	var occupant = get_occupant_position(position);
+	if(occupant){
+		console.log('??', occupant.type, position);
+		if(occupant.type != 'obstacle'){
+			var type = occupant.type;
+			capture_dude(occupant.id);
+			if(dude_list[type].on_captured) dude_list[type].on_captured(dude_id, position);
+			bekaari['dudes'][dude_id].position[0] = position[0];
+			bekaari['dudes'][dude_id].position[1] = position[1];
+			bekaari['field'][old_position[0]][old_position[1]].occupant = false;
+			bekaari['field'][position[0]][position[1]].occupant = dude_id;
+		}
+	}
+	else{
+		bekaari['dudes'][dude_id].position[0] = position[0];
+		bekaari['dudes'][dude_id].position[1] = position[1];
+		bekaari['field'][old_position[0]][old_position[1]].occupant = false;
+		bekaari['field'][position[0]][position[1]].occupant = dude_id;
+	}
+}
+
+function move_dude_test(dude_id, old_position, position){
 	async.series([
 		function(callback) {
 			// do some stuff ...
 			var occupant = get_occupant_position(position);
 			if(occupant){
+				console.log(occupant.type, position);
 				if(occupant.type != 'obstacle'){
 					var type = occupant.type;
 					capture_dude(occupant.id);
