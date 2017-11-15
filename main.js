@@ -1660,7 +1660,7 @@ var dude_list = {
 		tag: 'iii',
 		mobility: false,
 		is_piece: false,
-		lifespan: 2,
+		lifespan: 3,
 		movement_patterns: [],
 		custom_movement_pattern: function(position){
 			return [];
@@ -1675,6 +1675,104 @@ var dude_list = {
 		},
 		action: function(position){
 			
+		},
+		on_captured: function(capturer_id, position){
+			if(bekaari['dudes'][capturer_id]){
+				bekaari['dudes'][capturer_id].frozen = true;
+			}
+		}
+	},
+	frost_giant: object = {
+		description: "frost_giant:<br/> freezes stuff.",
+		tag: 'iii',
+		sprite: 'frost_giant',
+		sprite_width: 57,
+		sprite_height: 80,
+		mobility: false,
+		is_piece: true,
+		movement_patterns: [
+			[1,0,1,2],
+			[-1,0,1,2],
+			[0,1,1,2],
+			[0,-1,1,2],
+			[1, -1, 1, 2],
+			[1, 1, 1, 2],
+			[-1, -1, 1, 2],
+			[-1, 1, 1, 2]	
+		],
+		custom_movement_pattern: function(position){
+			return [];
+		},
+		attack_patterns: [
+			[1,0,1,1],
+			[-1,0,1,1],
+			[0,1,1,1],
+			[0,-1,1,1],
+			[1, -1, 1, 1],
+			[1, 1, 1, 1],
+			[-1, -1, 1, 1],
+			[-1, 1, 1, 1]		
+		],
+		custom_attack_pattern: function(position){
+			return [];
+		},
+		action_patterns: [
+			[1,0,1,1],
+			[-1,0,1,1],
+			[0,1,1,1],
+			[0,-1,1,1],
+			[0,0,1,1]
+		],
+		custom_action_pattern: function(position){
+			return [];
+		},
+		action: function(target_position, dude_position){
+			var x_dir = target_position[0] - dude_position[0];
+			var y_dir = target_position[1] - dude_position[1];
+			var x = target_position[0];
+			var y = target_position[1];
+			if((x_dir == 0) && (y_dir == 0)){
+				for(var i = x-3; i <= x+3; i++){
+					for(var j = y-3; j<=y+3; j++){
+						if(((Math.random()*100)<=20) && !((i==x) && (j==y))){
+							var occupant = get_occupant_position([i,j]);
+							if(occupant){
+								bekaari['dudes'][occupant.id].frozen = true;
+							}
+							else{
+								place_dude_with('ice_wall', 'dudes', [i,j], 'field', '#0000FF');
+							}
+						}
+					}
+				}
+			}
+			else{
+				if((y_dir == 0)){
+					var spray_area = [
+						[x+(x_dir*1),y+(y_dir*1)],
+						[x+(x_dir*2),y+(y_dir*1)+1],
+						[x+(x_dir*2),y+(y_dir*1)-1],
+						[x+(x_dir*2),y+(y_dir*1)+0]
+					];
+				}
+				else{
+					var spray_area = [
+						[x+(x_dir*1),y+(y_dir*1)],
+						[x+(x_dir*1)+1,y+(y_dir*2)],
+						[x+(x_dir*1)-1,y+(y_dir*2)],
+						[x+(x_dir*1),y+(y_dir*2)+0]
+					];				
+				}
+				_.forEach(spray_area, function(position){
+					var occupant = get_occupant_position(position);
+					if(occupant){
+						bekaari['dudes'][occupant.id].frozen = true;
+					}
+					else{
+						place_dude_with('ice_wall', 'dudes', position, 'field', '#0000FF');
+					}
+				});
+			}
 		},
 		on_captured: function(capturer_id, position){
 			if(bekaari['dudes'][capturer_id]){
@@ -3136,7 +3234,8 @@ function activate_dude(dude_id){
 		_.forEach(bekaari['dudes'], function(dude){
 			bekaari['dudes'][dude.id].lifespan_count += 1;
 			if(bekaari['dudes'][dude.id].lifespan_count >= dude_list[dude.type].lifespan){
-				capture_dude(dude.id);
+				remove_dude(dude.id);
+				// capture_dude(dude.id);
 			}
 			else{
 				if(bekaari['dudes'][dude.id].frozen){
@@ -3717,6 +3816,14 @@ function draw_dude(dude){
 	else{
 		bekaari['ctx'].fillText(
 			dude_list[dude.type].tag,
+			dude.position[0]*bekaari['position_radius'],
+			((dude.position[1]+1)*bekaari['position_radius']) - 15
+		);
+	}
+	if(dude.frozen){
+		bekaari['ctx'].fillStyle = '#0000FF';	
+		bekaari['ctx'].fillText(
+			' iii',
 			dude.position[0]*bekaari['position_radius'],
 			((dude.position[1]+1)*bekaari['position_radius']) - 15
 		);

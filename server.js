@@ -97,6 +97,10 @@ app.get('/res/windy.png', function(req,res) {
 	res.sendFile(__dirname + '/res/windy.png');
 });
 
+app.get('/res/frost_giant.png', function(req,res) {
+	res.sendFile(__dirname + '/res/frost_giant.png');
+});
+
 app.get('/res/symphony.png', function(req,res) {
 	res.sendFile(__dirname + '/res/symphony.png');
 });
