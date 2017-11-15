@@ -1882,14 +1882,14 @@ var dude_list = {
 			positions.push([position[0]+5, position[1]-2]);
 			positions.push([position[0]-5, position[1]+2]);
 			positions.push([position[0]+5, position[1]+2]);
-			positions.push([position[0]+2,position[1]+1]);
-			positions.push([position[0]+2,position[1]-1]);
-			positions.push([position[0]-2,position[1]+1]);
-			positions.push([position[0]-2,position[1]-1]);
-			positions.push([position[0]+1,position[1]+2]);
-			positions.push([position[0]+1,position[1]-2]);
-			positions.push([position[0]-1,position[1]+2]);
-			positions.push([position[0]-1,position[1]-2]);
+			// positions.push([position[0]+2,position[1]+1]);
+			// positions.push([position[0]+2,position[1]-1]);
+			// positions.push([position[0]-2,position[1]+1]);
+			// positions.push([position[0]-2,position[1]-1]);
+			// positions.push([position[0]+1,position[1]+2]);
+			// positions.push([position[0]+1,position[1]-2]);
+			// positions.push([position[0]-1,position[1]+2]);
+			// positions.push([position[0]-1,position[1]-2]);
 			return positions;
 		},
 		action: function(target_position, dude_position){
@@ -1912,9 +1912,9 @@ var dude_list = {
 				}
 				
 			}
-			else if((x_dir < 4) && (x_dir > -4)){
-				move_dude(bekaari['game_start'].selected_id, bekaari['game_start'].selected_position,  target_position);
-			}
+			// else if((x_dir < 4) && (x_dir > -4)){
+				// move_dude(bekaari['game_start'].selected_id, bekaari['game_start'].selected_position,  target_position);
+			// }
 			else{
 				move_dude(bekaari['game_start'].selected_id, bekaari['game_start'].selected_position,  target_position);
 				place_dude_capture('fire_wall', 'dudes', [x+1,y+1], 'field', '#FF0000');
