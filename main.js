@@ -1594,6 +1594,27 @@ var dude_list = {
 			
 		},
 	},
+	wall: object = {
+		description: "wall:<br/> can't move can be captured.",
+		tag: '^^^',
+		mobility: false,
+		is_piece: false,
+		movement_patterns: [],
+		custom_movement_pattern: function(position){
+			return [];
+		},
+		attack_patterns: [],
+		custom_attack_pattern: function(position){
+			return [];
+		},
+		action_patterns: [],
+		custom_action_pattern: function(position){
+			return [];
+		},
+		action: function(position){
+			
+		}
+	},
 	fire_wall: object = {
 		description: "fire_wall:<br/> can't move can be captured - dude that captures it is captured.",
 		tag: '^^^',
@@ -1618,7 +1639,102 @@ var dude_list = {
 			if(bekaari['game_start'].selected_id == capturer_id) bekaari['game_start'].mode = 'idle';
 			capture_dude(capturer_id);
 			// attack_position(position);
+		},
+		on_turn: function(dude_id){
+			var x = bekaari['dudes'][dude_id].position[0];
+			var y = bekaari['dudes'][dude_id].position[1];
+			for(var i = -1; i<2; i++){
+				for(var j = -1; j<2; j++){
+					if(!get_occupant_position([x+i, y+j])){
+						if((Math.random() * 100) <= 5){
+							place_dude_with('fire_wall', 'dudes', [x+i, y+j], 'field', '#FF0000');
+						}
+					}
+				}
+			}
+			if((Math.random() * 100) <= 33) capture_dude(dude_id);
 		}
+	},
+	ice_wall: object = {
+		description: "ice_wall:<br/> can't move can be captured - dude that captures it is frozen.",
+		tag: 'iii',
+		mobility: false,
+		is_piece: false,
+		lifespan: 2,
+		movement_patterns: [],
+		custom_movement_pattern: function(position){
+			return [];
+		},
+		attack_patterns: [],
+		custom_attack_pattern: function(position){
+			return [];
+		},
+		action_patterns: [],
+		custom_action_pattern: function(position){
+			return [];
+		},
+		action: function(position){
+			
+		},
+		on_captured: function(capturer_id, position){
+			if(bekaari['dudes'][capturer_id]){
+				bekaari['dudes'][capturer_id].frozen = true;
+			}
+		}
+	},
+	wind_guy: object = {
+		description: "wind_guy:<br/> woosh.",
+		tag: 'Wd',
+		mobility: false,
+		is_piece: true,
+		movement_patterns: [
+			[1, 0, 1, 2],
+			[0, 1, 1, 2],
+			[-1, 0, 1, 2],
+			[0, -1, 1, 2],
+			[1, -1, 1, 2],
+			[1, 1, 1, 2],
+			[-1, -1, 1, 2],
+			[-1, 1, 1, 2]
+		],
+		custom_movement_pattern: function(position){
+			return [];
+		},
+		attack_patterns: [
+		],
+		custom_attack_pattern: function(position){
+			return [];
+		},
+		action_patterns: [
+			[1, 0, 3, 3],
+			[0, 1, 3, 3],
+			[-1, 0, 3, 3],
+			[0, -1, 3, 3],			
+			[1, 0, 1, 1],
+			[0, 1, 1, 1],
+			[-1, 0, 1, 1],
+			[0, -1, 1, 1]
+		],
+		custom_action_pattern: knight_movement,
+		action: function(target_position, dude_position){
+			var x_dir = target_position[0] - dude_position[0];
+			var y_dir = target_position[1] - dude_position[1];
+			var x = target_position[0];
+			var y = target_position[1];
+			if((x_dir == 2) && (y_dir == 0)){
+				//east right
+				//everything in 4 rows out moves 2 squares east
+			}
+			else if((x_dir == 1) && (y_dir == 0)){
+				//east left
+				//everything in 4 rows out moves 2 squares west
+			}
+			// else if((x_dir == 2) && (y_dir == 0))
+			// else if((x_dir == 2) && (y_dir == 0))
+			// else if((x_dir == 2) && (y_dir == 0))
+			// else if((x_dir == 2) && (y_dir == 0))
+			// else if((x_dir == 2) && (y_dir == 0))
+		},
 	},
 	dervish: object = {
 		description: "dervish:<br/> activates thrice",
@@ -1668,7 +1784,6 @@ var dude_list = {
 		sprite: 'dragon',
 		sprite_width: 80,
 		sprite_height: 73,
-		moves: 1,
 		movement_patterns: [
 		],
 		custom_movement_pattern: function(position){return [];},
@@ -1695,14 +1810,6 @@ var dude_list = {
 			positions.push([position[0]+5, position[1]-2]);
 			positions.push([position[0]-5, position[1]+2]);
 			positions.push([position[0]+5, position[1]+2]);
-			// positions.push([position[0]+2,position[1]+1]);
-			// positions.push([position[0]+2,position[1]-1]);
-			// positions.push([position[0]-2,position[1]+1]);
-			// positions.push([position[0]-2,position[1]-1]);
-			// positions.push([position[0]+1,position[1]+2]);
-			// positions.push([position[0]+1,position[1]-2]);
-			// positions.push([position[0]-1,position[1]+2]);
-			// positions.push([position[0]-1,position[1]-2]);
 			return positions;
 		},
 		action: function(target_position, dude_position){
@@ -2562,6 +2669,7 @@ function Dude(id, position, type, color){
 	this.color = color;
 	this.activated = false;
 	this.count = 0;
+	this.lifespan_count = 0;
 }
 
 function place_dude_capture(dude_type, dudes, position, field, color){
@@ -2705,11 +2813,20 @@ function activate_dude(dude_id){
 	}).length < 1){
 		console.log('all_dudes_activated');
 		_.forEach(bekaari['dudes'], function(dude){
-			if(bekaari['dudes'][dude.id].frozen){
-				bekaari['dudes'][dude.id].frozen = false;
+			bekaari['dudes'][dude.id].lifespan_count += 1;
+			if(bekaari['dudes'][dude.id].lifespan_count >= dude_list[dude.type].lifespan){
+				capture_dude(dude.id);
 			}
 			else{
-				bekaari['dudes'][dude.id].activated = false;
+				if(bekaari['dudes'][dude.id].frozen){
+					bekaari['dudes'][dude.id].frozen = false;
+				}
+				else{
+					bekaari['dudes'][dude.id].activated = false;
+				}
+			}
+			if(dude_list[dude.type].on_turn){
+				dude_list[dude.type].on_turn(dude.id);
 			}
 		});	
 	}
@@ -3272,6 +3389,17 @@ function draw_patterns(dude, display){;
 function draw_action_pattern(dude){
 	if(dude){
 		_.forEach(get_action_positions(dude.type, dude.position), function(position){
+			var x = position[0] * bekaari['position_radius'];
+			var y = position[1] * bekaari['position_radius'];
+			bekaari['ctx'].fillStyle = dude.color;
+			bekaari['ctx'].globalAlpha = 0.2;
+			bekaari['ctx'].fillRect(
+				x,
+				y,
+				bekaari['position_radius'],
+				bekaari['position_radius']
+			);
+			bekaari['ctx'].globalAlpha = 1.0;
 			bekaari['ctx'].setLineDash([]);
 			bekaari['ctx'].lineWidth=1;
 			bekaari['ctx'].strokeStyle=dude.color;
