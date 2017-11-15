@@ -1783,7 +1783,7 @@ var dude_list = {
 	},
 	wall: object = {
 		description: "wall:<br/> can't move can be captured.",
-		tag: '^^^',
+		tag: ' ---',
 		mobility: false,
 		is_piece: false,
 		movement_patterns: [],
