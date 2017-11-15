@@ -1872,6 +1872,9 @@ var dude_list = {
 	wind_guy: object = {
 		description: "wind_guy:<br/> woosh.",
 		tag: 'Wd',
+		sprite: 'windy',
+		sprite_height: 80,
+		sprite_width: 79,
 		mobility: false,
 		is_piece: true,
 		movement_patterns: [
@@ -1909,7 +1912,6 @@ var dude_list = {
 			var x = dude_position[0];
 			var y = dude_position[1];
 			if((x_dir == 3) && (y_dir == 0)){
-				console.log('east right');
 				//east right
 				//everything in 4 columns out moves 2 squares east
 				var start_x = x + 4;
@@ -2173,8 +2175,8 @@ var dude_list = {
 					if(occupant){
 						if(occupant.type != 'obstacle'){
 							//dude_id, old_position, position
-							// move_dude(occupant.id, [occupant.position[0], occupant.position[1]], [i+push_x, j+push_y]);
-							series.push([occupant.id, [occupant.position[0], occupant.position[1]], [i+push_x, j+push_y]]);
+							series.push([occupant.id, [occupant.position[0], occupant.position[1]], [i+(push_x/2), j+(push_y/2)]]);
+							series.push([occupant.id, [occupant.position[0]+(push_x/2), occupant.position[1]+(push_y/2)], [i+push_x, j+push_y]]);
 						}
 					}
 				});
@@ -2640,6 +2642,9 @@ var dude_list = {
 	zombie: object = {
 		description: "zombie:<br/>comes back from dead.",
 		tag: ' Z',
+		sprite: 'spooky',
+		sprite_height: 80,
+		sprite_width: 58,
 		mobility: false,
 		is_piece: true,
 		lives: 2,
@@ -3756,24 +3761,25 @@ function capture_dude(dude_id){
 }
 
 function move_dude(dude_id, old_position, position){
-	var occupant = get_occupant_position(position);
-	if(occupant){
-		console.log('??', occupant.type, position);
-		if(occupant.type != 'obstacle'){
-			var type = occupant.type;
-			capture_dude(occupant.id);
-			if(dude_list[type].on_captured) dude_list[type].on_captured(dude_id, position);
+	if(position_valid(position)){
+		var occupant = get_occupant_position(position);
+		if(occupant){
+			if(occupant.type != 'obstacle'){
+				var type = occupant.type;
+				capture_dude(occupant.id);
+				if(dude_list[type].on_captured) dude_list[type].on_captured(dude_id, position);
+				bekaari['dudes'][dude_id].position[0] = position[0];
+				bekaari['dudes'][dude_id].position[1] = position[1];
+				bekaari['field'][old_position[0]][old_position[1]].occupant = false;
+				bekaari['field'][position[0]][position[1]].occupant = dude_id;
+			}
+		}
+		else{
 			bekaari['dudes'][dude_id].position[0] = position[0];
 			bekaari['dudes'][dude_id].position[1] = position[1];
 			bekaari['field'][old_position[0]][old_position[1]].occupant = false;
 			bekaari['field'][position[0]][position[1]].occupant = dude_id;
 		}
-	}
-	else{
-		bekaari['dudes'][dude_id].position[0] = position[0];
-		bekaari['dudes'][dude_id].position[1] = position[1];
-		bekaari['field'][old_position[0]][old_position[1]].occupant = false;
-		bekaari['field'][position[0]][position[1]].occupant = dude_id;
 	}
 }
 
