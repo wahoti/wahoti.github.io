@@ -3494,8 +3494,11 @@ function bekaari_select(){
 					}
 					break;
 				case 'moving':
+					console.log('moving');
+					bekaari['game_start'].selected_positions = get_all_positions(bekaari['game_start'].selected_type, bekaari['game_start'].selected_position, false);
 					_.forEach(bekaari['game_start'].selected_positions, function(position){
 						if((position[0] == bekaari['selected'][0]) && (position[1] == bekaari['selected'][1])){
+							console.log('move_dude()');
 							move_dude(bekaari['game_start'].selected_id, bekaari['game_start'].selected_position,  position);
 							if(bekaari['dudes'][bekaari['game_start'].selected_id]){
 								bekaari['game_start'].selected_position[0] = bekaari['selected'][0];
@@ -3504,8 +3507,8 @@ function bekaari_select(){
 								if(bekaari['game_start'].selected_positions.length > 0){	
 									bekaari['dudes'][bekaari['game_start'].selected_id].count += 1;
 									if(bekaari['dudes'][bekaari['game_start'].selected_id].count < dude_list[bekaari['game_start'].selected_type].moves){
-										//hm
-										bekaari['game_start'].selected_positions = get_all_positions(bekaari['game_start'].selected_type, bekaari['selected']);
+										//multiple moves?
+										bekaari['game_start'].selected_positions = get_all_positions(bekaari['game_start'].selected_type, bekaari['selected'], false);
 									}
 									else{
 										bekaari['dudes'][bekaari['game_start'].selected_id].count = 0;
@@ -3515,8 +3518,8 @@ function bekaari_select(){
 								else{
 									bekaari['dudes'][bekaari['game_start'].selected_id].count += 1;
 									if(bekaari['dudes'][bekaari['game_start'].selected_id].count < dude_list[bekaari['game_start'].selected_type].moves){
-										//hm
-										bekaari['game_start'].selected_positions = get_all_positions(bekaari['game_start'].selected_type, bekaari['selected']);
+										//multiple moves?
+										bekaari['game_start'].selected_positions = get_all_positions(bekaari['game_start'].selected_type, bekaari['selected'], false);
 									}
 									else{
 										bekaari['dudes'][bekaari['game_start'].selected_id].count = 0;
