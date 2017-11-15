@@ -2318,7 +2318,8 @@ var dude_list = {
 			[1, 0, 1, 1],
 			[0, 1, 1, 1],
 			[-1, 0, 1, 1],
-			[0, -1, 1, 1]
+			[0, -1, 1, 1],
+			[0, 0, 1, 1]
 		],
 		custom_action_pattern: function(position){
 			return [];
@@ -2326,8 +2327,24 @@ var dude_list = {
 		action: function(target_position, dude_position){
 			var x_dir = target_position[0] - dude_position[0];
 			var y_dir = target_position[1] - dude_position[1];
-			attack_position([dude_position[0] + x_dir, dude_position[1] + y_dir]);
-			attack_position([dude_position[0] + (x_dir*2), dude_position[1] + (y_dir*2)]);
+			var x = dude_position[0];
+			var y = dude_position[1];
+			var r = 3;
+			if((x_dir == 0) && (y_dir == 0)){
+				for(var i = x-r; i<=x+r; i++){
+					place_dude_with('wall', 'dudes', [i,y-r], 'field', '#aaaaaa');
+					place_dude_with('wall', 'dudes', [i,y+r], 'field', '#aaaaaa');
+				}
+				for(var j = y-r; j<= y+r; j++){
+					place_dude_with('wall', 'dudes', [x+r,j], 'field', '#aaaaaa');
+					place_dude_with('wall', 'dudes', [x-r,j], 'field', '#aaaaaa');
+				}
+				place_dude_with('wall', 'dudes', [x,y], 'field', '#aaaaaa');
+			}
+			else{
+				attack_position([dude_position[0] + x_dir, dude_position[1] + y_dir]);
+				attack_position([dude_position[0] + (x_dir*2), dude_position[1] + (y_dir*2)]);
+			}
 		},
 	},
 	ninja: object = {
