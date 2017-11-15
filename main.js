@@ -2168,6 +2168,38 @@ var dude_list = {
 			}
 		},
 	},
+	zombie: object = {
+		description: "zombie:<br/>comes back from dead.",
+		tag: ' Z',
+		mobility: false,
+		is_piece: true,
+		lives: 2,
+		movement_patterns: [
+			[1,0,1,2],
+			[-1,0,1,2],
+			[0,1,1,2],
+			[0,-1,1,2]
+		],
+		custom_movement_pattern: function(position){
+			return [];
+		},
+		attack_patterns: [
+			[1, -1, 1, 1],
+			[1, 1, 1, 1],
+			[-1, -1, 1, 1],
+			[-1, 1, 1, 1]		
+		],
+		custom_attack_pattern: function(position){
+			return [];
+		},
+		action_patterns: [
+		],
+		custom_action_pattern: function(position){
+			return [];
+		},
+		action: function(target_position, dude_position){
+		},
+	},
 	necromancer: object = {
 		description: "necromancer:<br/>makes pawns.",
 		tag: 'NM',
@@ -2200,26 +2232,27 @@ var dude_list = {
 			return [];
 		},
 		action: function(target_position, dude_position){
-			var x_direction = target_position[0] - dude_position[0];
-			var y_direction = target_position[1] - dude_position[1];
 			var color = bekaari['dudes'][bekaari['game_start'].selected_id].color;
+			place_dude_with('zombie', 'dudes', target_position, 'field', color);
+			// var x_direction = target_position[0] - dude_position[0];
+			// var y_direction = target_position[1] - dude_position[1];
 				
-			if(x_direction == 0){
-				if(y_direction > 0){
-					place_dude_with('pawn_S', 'dudes', target_position, 'field', color);
-				}
-				else{
-					place_dude_with('pawn_N', 'dudes', target_position, 'field', color);
-				}
-			}
-			else if(y_direction == 0){
-				if(x_direction > 0){
-					place_dude_with('pawn_E', 'dudes', target_position, 'field', color);
-				}
-				else{
-					place_dude_with('pawn_W', 'dudes', target_position, 'field', color);
-				}
-			}
+			// if(x_direction == 0){
+				// if(y_direction > 0){
+					// place_dude_with('pawn_S', 'dudes', target_position, 'field', color);
+				// }
+				// else{
+					// place_dude_with('pawn_N', 'dudes', target_position, 'field', color);
+				// }
+			// }
+			// else if(y_direction == 0){
+				// if(x_direction > 0){
+					// place_dude_with('pawn_E', 'dudes', target_position, 'field', color);
+				// }
+				// else{
+					// place_dude_with('pawn_W', 'dudes', target_position, 'field', color);
+				// }
+			// }
 		},
 	},
 	rook: object = {
@@ -2670,6 +2703,7 @@ function Dude(id, position, type, color){
 	this.activated = false;
 	this.count = 0;
 	this.lifespan_count = 0;
+	this.captured_count = 0;
 }
 
 function place_dude_capture(dude_type, dudes, position, field, color){
@@ -3224,13 +3258,32 @@ function remove_dude(id){
 }
 
 function capture_dude(dude_id){
-	if(dude_list[bekaari['dudes'][dude_id].type].is_king){
-		var color = bekaari['dudes'][dude_id].color;
-		_.forEach(bekaari['dudes'], function(dude){
-			if((dude.color == color) && (dude.type != 'king')) remove_dude(dude.id);
-		});
+	var lives = dude_list[bekaari['dudes'][dude_id].type].lives;
+	bekaari['dudes'][dude_id].captured_count += 1;
+	if(bekaari['dudes'][dude_id].captured_count <= lives){
+		var x = bekaari['dudes'][dude_id].position[0];
+		var y = bekaari['dudes'][dude_id].position[1];
+		var adjacent = _.shuffle([[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,1],[1,-1],[1,0]]);
+		var found = false;
+		for(var a=0; a<adjacent.length; a++){
+			var i = adjacent[a][0];
+			var j = adjacent[a][1];
+			if((!get_occupant_position([x+i, y+j])) && !found){
+				move_dude(dude_id, [x,y], [x+i, y+j]);
+				a = 100;
+				found = true;
+			}
+		}
 	}
-	delete bekaari['dudes'][dude_id];
+	else{
+		if(dude_list[bekaari['dudes'][dude_id].type].is_king){
+			var color = bekaari['dudes'][dude_id].color;
+			_.forEach(bekaari['dudes'], function(dude){
+				if((dude.color == color) && (dude.type != 'king')) remove_dude(dude.id);
+			});
+		}
+		delete bekaari['dudes'][dude_id];
+	}
 }
 
 function move_dude(dude_id, old_position, position){
