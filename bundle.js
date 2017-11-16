@@ -2101,15 +2101,16 @@ var dude_list = {
 			var y_dir = target_position[1] - dude_position[1];
 			var x = dude_position[0];
 			var y = dude_position[1];
+			var r = 3;
 			if((x_dir == 3) && (y_dir == 0)){
 				//east right
 				//everything in 4 columns out moves 2 squares east
-				var start_x = x + 4;
+				var start_x = x + r;
 				var end_x = x + 1;
 				var iter_x = -1;
 				var push_x = 2; 
-				var start_y = 0;
-				var end_y = bekaari['height']-1;
+				var start_y = y-r;
+				var end_y = y+r//bekaari['height']-1;
 				var iter_y = 1;
 				var push_y = 0; 
 				var x_list = [];
@@ -2119,13 +2120,12 @@ var dude_list = {
 			}
 			else if((x_dir == 1) && (y_dir == 0)){
 				//east left
-				//everything in 4 columns out moves 2 squares west
 				var start_x = x + 1;
-				var end_x = x + 4;
+				var end_x = x + r;
 				var iter_x = 1;
 				var push_x = -2; 
-				var start_y = 0;
-				var end_y = bekaari['height']-1;
+				var start_y = y-r;
+				var end_y = y+r;
 				var iter_y = 1;
 				var push_y = 0; 
 				var x_list = [];
@@ -2137,11 +2137,11 @@ var dude_list = {
 				//east bottom
 				//everything in 4 columns out moves 2 squares south
 				var start_x = x + 1;
-				var end_x = x + 4;
+				var end_x = x + r;
 				var iter_x = 1;
 				var push_x = 0; 
-				var start_y = bekaari['height']-1;
-				var end_y = 0;
+				var start_y = y+r;
+				var end_y = y-r;
 				var iter_y = -1;
 				var push_y = 2; 
 				var x_list = [];
@@ -2153,11 +2153,11 @@ var dude_list = {
 				//east top
 				//everything in 4 columns out moves 2 squares north
 				var start_x = x + 1;
-				var end_x = x + 4;
+				var end_x = x + r;
 				var iter_x = 1;
 				var push_x = 0; 
-				var start_y = 0;
-				var end_y = bekaari['height']-1;
+				var start_y = y-r;
+				var end_y = y+r;
 				var iter_y = 1;
 				var push_y = -2; 
 				var x_list = [];
@@ -2168,12 +2168,12 @@ var dude_list = {
 			else if((x_dir == -3) && (y_dir == 0)){
 				//west left
 				//everything in 4 columns west moves 2 squares west
-				var start_x = x - 4;
+				var start_x = x - r;
 				var end_x = x - 1;
 				var iter_x = 1;
 				var push_x = -2; 
-				var start_y = 0;
-				var end_y = bekaari['height']-1;
+				var start_y = y-r;
+				var end_y = y+r;
 				var iter_y = 1;
 				var push_y = 0; 
 				var x_list = [];
@@ -2185,11 +2185,11 @@ var dude_list = {
 				//west right
 				//everything in 4 columns west moves 2 squares east
 				var start_x = x - 1;
-				var end_x = x - 4;
+				var end_x = x - r;
 				var iter_x = -1;
 				var push_x = 2; 
-				var start_y = 0;
-				var end_y = bekaari['height']-1;
+				var start_y = y-r;
+				var end_y = y+r;
 				var iter_y = 1;
 				var push_y = 0; 
 				var x_list = [];
@@ -2201,11 +2201,11 @@ var dude_list = {
 				//west top
 				//everything in 4 columns west moves 2 squares north
 				var start_x = x - 1;
-				var end_x = x - 4;
+				var end_x = x - r;
 				var iter_x = -1;
 				var push_x = 0; 
-				var start_y = 0;
-				var end_y = bekaari['height']-1;
+				var start_y = y-r;
+				var end_y = y+r;
 				var iter_y = 1;
 				var push_y = -2; 
 				var x_list = [];
@@ -2217,11 +2217,11 @@ var dude_list = {
 				//west bottom
 				//everything in 4 columns west moves 2 squares south
 				var start_x = x - 1;
-				var end_x = x - 4;
+				var end_x = x - r;
 				var iter_x = -1;
 				var push_x = 0; 
-				var start_y = bekaari['height']-1;
-				var end_y = 0;
+				var start_y = y+r;
+				var end_y = y-r;
 				var iter_y = -1;
 				var push_y = 2; 
 				var x_list = [];
@@ -2231,12 +2231,11 @@ var dude_list = {
 			}
 			else if((x_dir == 0) && (y_dir == 3)){
 				//south bottom
-				//everything 2 rows south moves two squares south
-				var start_x = 0;
-				var end_x = bekaari['width']-1;
+				var start_x = x-r;
+				var end_x = x+r;
 				var iter_x = 1;
 				var push_x = 0; 
-				var start_y = y + 2;
+				var start_y = y + r;
 				var end_y = y + 1;
 				var iter_y = -1;
 				var push_y = 2; 
@@ -2247,13 +2246,12 @@ var dude_list = {
 			}
 			else if((x_dir == 0) && (y_dir == 1)){
 				//south top
-				//everything 2 rows south moves two squares north
-				var start_x = 0;
-				var end_x = bekaari['width']-1;
+				var start_x = x-r;
+				var end_x = x+r;
 				var iter_x = 1;
 				var push_x = 0; 
 				var start_y = y + 1;
-				var end_y = y + 2;
+				var end_y = y + r;
 				var iter_y = 1;
 				var push_y = -2; 
 				var x_list = [];
@@ -2263,13 +2261,12 @@ var dude_list = {
 			}
 			else if((x_dir == 1) && (y_dir == 2)){
 				//south east
-				//everything 2 rows south moves two squares west
-				var start_x = bekaari['width']-1;
-				var end_x = 0;
+				var start_x = x+r;
+				var end_x = x-r;
 				var iter_x = -1;
 				var push_x = 2; 
 				var start_y = y + 1;
-				var end_y = y + 2;
+				var end_y = y + r;
 				var iter_y = 1;
 				var push_y = 0; 
 				var x_list = [];
@@ -2279,13 +2276,12 @@ var dude_list = {
 			}	
 			else if((x_dir == -1) && (y_dir == 2)){
 				//south west
-				//everything 2 rows south moves two squares east
-				var start_x = 0;
-				var end_x = bekaari['width']-1;
+				var start_x = x-r;
+				var end_x = x+r;
 				var iter_x = 1;
 				var push_x = -2; 
 				var start_y = y + 1;
-				var end_y = y + 2;
+				var end_y = y + r;
 				var iter_y = 1;
 				var push_y = 0; 
 				var x_list = [];
@@ -2295,12 +2291,11 @@ var dude_list = {
 			}
 			else if((x_dir == 0) && (y_dir == -3)){
 				//north north
-				//everything 2 rows north mvoes two squares north
-				var start_x = bekaari['width']-1;
-				var end_x = 0;
+				var start_x = x+r;
+				var end_x = x-r;
 				var iter_x = -1;
 				var push_x = 0; 
-				var start_y = y - 2;
+				var start_y = y - r;
 				var end_y = y - 1;
 				var iter_y = 1;
 				var push_y = -2; 
@@ -2311,13 +2306,12 @@ var dude_list = {
 			}			
 			else if((x_dir == 0) && (y_dir == -1)){
 				//north south
-				//everything 2 rows north mvoes two squares south
-				var start_x = bekaari['width']-1;
-				var end_x = 0;
+				var start_x = x+r;
+				var end_x = x-r;
 				var iter_x = -1;
 				var push_x = 0; 
 				var start_y = y - 1;
-				var end_y = y - 2;
+				var end_y = y - r;
 				var iter_y = -1;
 				var push_y = +2; 
 				var x_list = [];
@@ -2327,13 +2321,12 @@ var dude_list = {
 			}			
 			else if((x_dir == -1) && (y_dir == -2)){
 				//north west
-				//everything 2 rows north mvoes two squares west
-				var start_x = 0;
-				var end_x = bekaari['width']-1;
+				var start_x = x-r;
+				var end_x = x+r;
 				var iter_x = 1;
 				var push_x = -2; 
 				var start_y = y - 1;
-				var end_y = y - 2;
+				var end_y = y - r;
 				var iter_y = -1;
 				var push_y = 0; 
 				var x_list = [];
@@ -2343,13 +2336,12 @@ var dude_list = {
 			}
 			else if((x_dir == 1) && (y_dir == -2)){
 				//north east
-				//everything 2 rows north mvoes two squares east
-				var start_x = bekaari['width']-1;
-				var end_x = 0;
+				var start_x = x+r;
+				var end_x = x-r;
 				var iter_x = -1;
 				var push_x = 2; 
 				var start_y = y - 1;
-				var end_y = y - 2;
+				var end_y = y - r;
 				var iter_y = -1;
 				var push_y = 0; 
 				var x_list = [];
@@ -2635,7 +2627,7 @@ var dude_list = {
 		},
 	},
 	ninja: object = {
-		description: "ninja:<br/>moves far attacks close.",
+		description: "ninja:<br/>Nani!?.",
 		tag: 'Nj',
 		sprite: 'cool_guy',
 		sprite_width: 56,
@@ -2643,32 +2635,29 @@ var dude_list = {
 		mobility: false,
 		is_piece: true,
 		lives: 0,
+		moves: 4,
 		movement_patterns: [
-			[1,0,7,9],
-			[-1,0,7,9],
-			[0,1,7,9],
-			[0,-1,7,9],
-			[1,1,7,9],
-			[1,-1,7,9],
-			[-1,1,7,9],
-			[-1,-1,7,9]
+			[1,0,1,2],
+			[-1,0,1,2],
+			[0,1,1,2],
+			[0,-1,1,2]
 		],
-		custom_movement_pattern: knight_movement,
+		custom_movement_pattern: function(position){
+			return [];
+		},
 		attack_patterns: [
-			[1,0,3,5],
-			[-1,0,3,5],
-			[0,1,3,5],
-			[0,-1,3,5],
-			[1,1,3,5],
-			[1,-1,3,5],
-			[-1,1,3,5],
-			[-1,-1,3,5]
+			[1,0,1,1],
+			[-1,0,1,1],
+			[0,1,1,1],
+			[0,-1,1,1]
 		],
 		custom_attack_pattern: function(position){
 			return [];
 		},
 		action_patterns: [],
-		custom_action_pattern: knight_movement,
+		custom_action_pattern: function(position){
+			return [];
+		},
 		action: function(position){
 			move_dude(bekaari['game_start'].selected_id, bekaari['game_start'].selected_position,  position);
 		},
@@ -3666,6 +3655,108 @@ function bekaari_select(){
 	}
 }
 
+function initiate_fourth_map(){
+	var field = 'fourth_field';
+	var dudes = 'fourth_dudes';
+	var deployment_zone = 'fourth_deployment_zone';
+	
+	bekaari_new_matrix(field);
+	bekaari[dudes] = {};
+	bekaari[deployment_zone] = [];
+	
+	var S_color = '#FF00FF';
+	var E_color = '#00FF00';
+	var W_color = '#FF0000';
+	var N_color = '#00FFFF';
+	var obstacle_color = '#AAAAAA';
+	
+	var w = bekaari['width'];
+	var h = bekaari['height'];
+	
+	place_dude_with('king', dudes, [0, 0], field, N_color);
+	place_dude_with('frost_giant', dudes, [1, 2], field, N_color);
+	place_dude_with('frost_giant', dudes, [2, 1], field, N_color);
+	place_dude_with('frost_giant', dudes, [2, 2], field, N_color);
+	place_dude_with('frost_giant', dudes, [3, 0], field, N_color);
+	place_dude_with('frost_giant', dudes, [3, 1], field, N_color);
+	place_dude_with('frost_giant', dudes, [3, 2], field, N_color);
+	place_dude_with('necromancer', dudes, [0, 1], field, N_color);
+	place_dude_with('necromancer', dudes, [1, 0], field, N_color);
+	place_dude_with('tree_of_life', dudes, [2, 0], field, N_color);
+	place_dude_with('tree_of_life', dudes, [0, 2], field, N_color);
+	place_dude_with('tree_of_life', dudes, [1, 1], field, N_color);
+	place_dude_with('tree_of_life', dudes, [1, 1], field, N_color);
+	
+	
+	place_dude_with('king', dudes, [w-1, 0], field, E_color);	
+	place_dude_with('necromancer', dudes, [w-2, 0], field, E_color);	
+	place_dude_with('necromancer', dudes, [w-1, 1], field, E_color);	
+	place_dude_with('dervish', dudes, [w-3, 0], field, E_color);	
+	place_dude_with('dervish', dudes, [w-2, 1], field, E_color);	
+	place_dude_with('dervish', dudes, [w-1, 2], field, E_color);	
+	place_dude_with('archer', dudes, [w-4, 0], field, E_color);	
+	place_dude_with('archer', dudes, [w-3, 1], field, E_color);	
+	place_dude_with('archer', dudes, [w-2, 2], field, E_color);	
+	place_dude_with('archer', dudes, [w-4, 2], field, E_color);	
+	place_dude_with('dragon', dudes, [w-4, 1], field, E_color);	
+	place_dude_with('dragon', dudes, [w-3, 2], field, E_color);	
+	
+	place_dude_with('king', dudes, [0, h-1], field, W_color);	
+	place_dude_with('tree_of_life', dudes, [0, h-3], field, W_color);
+	place_dude_with('dragon', dudes, [0, h-2], field, W_color);
+	place_dude_with('dragon', dudes, [1, h-3], field, W_color);
+	place_dude_with('tree_of_life', dudes, [3, h-1], field, W_color);
+	place_dude_with('dragon', dudes, [2, h-1], field, W_color);
+	place_dude_with('dragon', dudes, [3, h-2], field, W_color);
+	place_dude_with('lance', dudes, [1, h-1], field, W_color);
+	place_dude_with('lance', dudes, [1, h-2], field, W_color);
+	place_dude_with('lance', dudes, [2, h-2], field, W_color);
+	place_dude_with('axe_dude', dudes, [2, h-3], field, W_color);
+	place_dude_with('axe_dude', dudes, [3, h-3], field, W_color);
+	
+	place_dude_with('king', dudes, [w-1, h-1], field, S_color);	
+	place_dude_with('wind_guy', dudes, [w-2, h-1], field, S_color);	
+	place_dude_with('wind_guy', dudes, [w-1, h-2], field, S_color);	
+	place_dude_with('wind_guy', dudes, [w-2, h-2], field, S_color);	
+	place_dude_with('lance', dudes, [w-3, h-3], field, S_color);	
+	place_dude_with('lance', dudes, [w-3, h-2], field, S_color);	
+	place_dude_with('lance', dudes, [w-4, h-2], field, S_color);	
+	place_dude_with('lance', dudes, [w-4, h-3], field, S_color);	
+	place_dude_with('ninja', dudes, [w-1, h-3], field, S_color);	
+	place_dude_with('ninja', dudes, [w-2, h-3], field, S_color);	
+	place_dude_with('dervish', dudes, [w-4, h-1], field, S_color);	
+	place_dude_with('dervish', dudes, [w-3, h-1], field, S_color);	
+	
+	for(var i=0; i<4; i++){
+		for(var j=0; j<3; j++){
+			bekaari[deployment_zone].push([i, j, N_color]);
+		}
+		for(var k=bekaari['height']-3; k<bekaari['height']; k++){
+			bekaari[deployment_zone].push([i, k, W_color]);
+		}
+		for(var l=5; l<7; l++){
+			place_dude_with('obstacle', dudes, [i, l], field, obstacle_color);	
+		}
+	}
+	
+	for(var a=bekaari['width']-4; a<bekaari['width']; a++){
+		for(var b=0; b<3; b++){
+			bekaari[deployment_zone].push([a, b, E_color]);
+		}
+		for(var c=bekaari['height']-3; c<bekaari['height']; c++){
+			bekaari[deployment_zone].push([a, c, S_color]);
+		}
+		for(var d=5; d<7; d++){
+			place_dude_with('obstacle', dudes, [a, d], field, obstacle_color);	
+		}
+	}
+	
+	for(var m=0; m<3; m++){
+		place_dude_with('obstacle', dudes, [12, m], field, obstacle_color);	
+		place_dude_with('obstacle', dudes, [12, bekaari['height']-(m+1)], field, obstacle_color);	
+	}
+}
+
 function initiate_third_map(){
 	var field = 'third_field';
 	var dudes = 'third_dudes';
@@ -3954,7 +4045,7 @@ function initiate_bekaari(){
 	
 	bekaari['next_pieces'] = [];
 	bekaari['map'] = '';
-	bekaari['maps'] = ['', 'chess_', 'first_', 'second_', 'third_'];
+	bekaari['maps'] = ['', 'chess_', 'first_', 'second_', 'third_', 'fourth_'];
 	
 	bekaari_new_matrix('field');
 	bekaari_new_matrix('save_field');
@@ -3962,6 +4053,7 @@ function initiate_bekaari(){
 	initiate_first_map();
 	initiate_second_map();
 	initiate_third_map();
+	initiate_fourth_map();
 	next_map();
 	bekaari_color_shift_forward();
 	bekaari['width_ratio'] = 2;
