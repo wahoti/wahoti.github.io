@@ -1844,7 +1844,7 @@ var dude_list = {
 	},
 	ice_wall: object = {
 		description: "ice_wall:<br/> can't move can be captured - dude that captures it is frozen.",
-		tag: 'iii',
+		tag: 'ice',
 		mobility: false,
 		is_piece: false,
 		lifespan: 3,
@@ -1975,7 +1975,11 @@ var dude_list = {
 			[-1,0,1,1],
 			[0,1,1,1],
 			[0,-1,1,1],
-			[0,0,1,1]
+			[0,0,1,1],
+			[1, -1, 1, 1],
+			[1, 1, 1, 1],
+			[-1, -1, 1, 1],
+			[-1, 1, 1, 1]	
 		],
 		custom_action_pattern: function(position){
 			return [];
@@ -1983,15 +1987,18 @@ var dude_list = {
 		action: function(target_position, dude_position){
 			var x_dir = target_position[0] - dude_position[0];
 			var y_dir = target_position[1] - dude_position[1];
-			var x = target_position[0];
-			var y = target_position[1];
+			var x = dude_position[0];
+			var y = dude_position[1];
 			if((x_dir == 0) && (y_dir == 0)){
-				for(var i = x-3; i <= x+3; i++){
-					for(var j = y-3; j<=y+3; j++){
-						if(((Math.random()*100)<=20) && !((i==x) && (j==y))){
+				var r = 4;
+				for(var i = x-r; i <= x+r; i++){
+					for(var j = y-r; j<=y+r; j++){
+						if((Math.random()*100)<=15){
 							var occupant = get_occupant_position([i,j]);
 							if(occupant){
-								bekaari['dudes'][occupant.id].frozen = true;
+								if(occupant.color != get_occupant_position(dude_position).color){
+									bekaari['dudes'][occupant.id].frozen = true;
+								}
 							}
 							else{
 								place_dude_with('ice_wall', 'dudes', [i,j], 'field', '#0000FF');
@@ -2001,21 +2008,38 @@ var dude_list = {
 				}
 			}
 			else{
-				if((y_dir == 0)){
+				if((Math.abs(x_dir) == 1) && (Math.abs(y_dir) == 1)){
 					var spray_area = [
 						[x+(x_dir*1),y+(y_dir*1)],
-						[x+(x_dir*2),y+(y_dir*1)+1],
-						[x+(x_dir*2),y+(y_dir*1)-1],
-						[x+(x_dir*2),y+(y_dir*1)+0]
+						[x+(x_dir*2),y+(y_dir*2)],
+						[x+(x_dir*2),y+(y_dir*1)],
+						[x+(x_dir*1),y+(y_dir*2)],
+						[x+(x_dir*3),y+(y_dir*1)],
+						[x+(x_dir*1),y+(y_dir*3)],
+						[x+(x_dir*3),y+(y_dir*3)]
+					];
+				}
+				else if(y_dir == 0){
+					var spray_area = [
+						[x+(x_dir*1),y+(y_dir)],
+						[x+(x_dir*2),y+(y_dir)],
+						[x+(x_dir*3),y+(y_dir)],
+						[x+(x_dir*2),y-1],
+						[x+(x_dir*2),y+1],
+						[x+(x_dir*3),y-2],
+						[x+(x_dir*3),y+2]						
 					];
 				}
 				else{
 					var spray_area = [
-						[x+(x_dir*1),y+(y_dir*1)],
-						[x+(x_dir*1)+1,y+(y_dir*2)],
-						[x+(x_dir*1)-1,y+(y_dir*2)],
-						[x+(x_dir*1),y+(y_dir*2)+0]
-					];				
+						[x+(x_dir),y+(y_dir*1)],
+						[x+(x_dir),y+(y_dir*2)],
+						[x+(x_dir),y+(y_dir*3)],
+						[x-1,y+(y_dir*2)],
+						[x+1,y+(y_dir*2)],
+						[x-2,y+(y_dir*3)],
+						[x+2,y+(y_dir*3)]
+					];
 				}
 				_.forEach(spray_area, function(position){
 					var occupant = get_occupant_position(position);
@@ -4187,7 +4211,7 @@ function draw_dude(dude){
 	if(dude.frozen){
 		bekaari['ctx'].fillStyle = '#0000FF';	
 		bekaari['ctx'].fillText(
-			' iii',
+			'ice',
 			dude.position[0]*bekaari['position_radius'],
 			((dude.position[1]+1)*bekaari['position_radius']) - 15
 		);
