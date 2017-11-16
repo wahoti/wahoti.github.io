@@ -1682,6 +1682,72 @@ var dude_list = {
 			}
 		}
 	},
+	tree_of_life: object = {
+		description: "tree_of_life:<br/>brings life to dudes.",
+		tag: 'Tr',
+		sprite: 'tree',
+		sprite_height: 80,
+		sprite_width: 80,
+		mobility: false,
+		is_piece: true,
+		lives: 0,
+		movement_patterns: [],
+		custom_movement_pattern: function(position){
+			return [];
+		},
+		attack_patterns: [],
+		custom_attack_pattern: function(position){
+			return [];
+		},
+		action_patterns: [
+			[1,0,1,1],
+			[-1,0,1,1],
+			[0,1,1,1],
+			[0,-1,1,1],
+			[0,0,0,0]
+		],
+		custom_action_pattern: function(position){
+			var spots = [
+				[2,0],
+				[-2,0],
+				[0,2],
+				[0,-2],
+				[2, -2],
+				[2, 2],
+				[-2, -2],
+				[-2, 2]
+			];
+			var free = [];
+			_.forEach(spots, function(spot){
+				var x = position[0] + spot[0];
+				var y = position[1] + spot[1];
+				if(!get_occupant_position([x,y])){
+					free.push([x,y]);
+				}
+			});
+			return free;
+		},
+		action: function(target_position, dude_position){
+			var x_dir = target_position[0] - dude_position[0];
+			var y_dir = target_position[1] - dude_position[1];
+			var x = target_position[0];
+			var y = target_position[1];
+			if((Math.abs(x_dir) == 2) || ((Math.abs(y_dir) == 2))){
+				move_dude(bekaari['game_start'].selected_id, bekaari['game_start'].selected_position,  target_position);
+			}
+			else if((x_dir == 0) && (y_dir == 0)){
+				console.log('tree middle');
+			}
+			else{
+				var occupant = get_occupant_position(target_position);
+				if(occupant){
+					if(dude_list[occupant.type].is_piece){
+						bekaari['dudes'][occupant.id].captured_count -= 1;
+					}
+				}
+			}
+		},
+	},
 	frost_giant: object = {
 		description: "frost_giant:<br/> freezes stuff.",
 		tag: 'iii',
@@ -1690,6 +1756,7 @@ var dude_list = {
 		sprite_height: 80,
 		mobility: false,
 		is_piece: true,
+		lives: 0,
 		movement_patterns: [
 			[1,0,1,2],
 			[-1,0,1,2],
@@ -1788,6 +1855,7 @@ var dude_list = {
 		sprite_width: 79,
 		mobility: false,
 		is_piece: true,
+		lives: 0,
 		movement_patterns: [
 			[1, 0, 1, 2],
 			[0, 1, 1, 2],
@@ -2114,6 +2182,7 @@ var dude_list = {
 		sprite_width: 59,
 		mobility: false,
 		is_piece: true,
+		lives: 0,
 		moves: 2,
 		movement_patterns: [
 			[1, -1, 1, 2],
@@ -2154,6 +2223,7 @@ var dude_list = {
 		sprite: 'dragon',
 		sprite_width: 80,
 		sprite_height: 73,
+		lives: 0,
 		movement_patterns: [
 		],
 		custom_movement_pattern: function(position){return [];},
@@ -2226,6 +2296,7 @@ var dude_list = {
 		sprite: 'archer',
 		sprite_width: 78,
 		sprite_height: 80,
+		lives: 0,
 		movement_patterns: [
 			[1, -1, 1, 1],
 			[1, 1, 1, 1],
@@ -2296,6 +2367,7 @@ var dude_list = {
 		sprite_height: 72,
 		mobility: false,
 		is_piece: true,
+		lives: 0,
 		movement_patterns: [
 			[1, -1, 1, 4],
 			[1, 1, 1, 4],
@@ -2359,6 +2431,7 @@ var dude_list = {
 		sprite_height: 80,
 		mobility: false,
 		is_piece: true,
+		lives: 0,
 		movement_patterns: [
 			[1,0,7,9],
 			[-1,0,7,9],
@@ -2397,6 +2470,7 @@ var dude_list = {
 		sprite_height: 80,
 		mobility: true,
 		is_piece: true,
+		lives: 0,
 		movement_patterns: [
 			[0, -1, 1, 3],
 			[1, 0, 1, 3],
@@ -2485,6 +2559,7 @@ var dude_list = {
 		sprite_height: 80,
 		mobility: false,
 		is_piece: true,
+		lives: 0,
 		movement_patterns: [],
 		custom_movement_pattern: function(position){
 			var positions = [];
@@ -2581,19 +2656,19 @@ var dude_list = {
 		is_piece: true,
 		lives: 1,
 		movement_patterns: [
-			[1,0,1,2],
-			[-1,0,1,2],
-			[0,1,1,2],
-			[0,-1,1,2]
+			[1, -1, 1, 1],
+			[1, 1, 1, 1],
+			[-1, -1, 1, 1],
+			[-1, 1, 1, 1]	
 		],
 		custom_movement_pattern: function(position){
 			return [];
 		},
-		attack_patterns: [
-			[1, -1, 1, 1],
-			[1, 1, 1, 1],
-			[-1, -1, 1, 1],
-			[-1, 1, 1, 1]		
+		attack_patterns: [	
+			[1,0,1,1],
+			[-1,0,1,1],
+			[0,1,1,1],
+			[0,-1,1,1]
 		],
 		custom_attack_pattern: function(position){
 			return [];
@@ -2612,6 +2687,7 @@ var dude_list = {
 		sprite: 'necromancer',
 		sprite_width: 57,
 		sprite_height: 80,
+		lives: 0,
 		mobility: false,
 		is_piece: true,
 		movement_patterns: [
@@ -2667,6 +2743,7 @@ var dude_list = {
 		sprite: 'rook',
 		sprite_width: 69,
 		sprite_height: 80,
+		lives: 0,
 		mobility: false,
 		is_piece: true,
 		movement_patterns: [
@@ -2700,6 +2777,7 @@ var dude_list = {
 		tag: 'p',
 		mobility: false,
 		is_piece: true,
+		lives: 0,
 		movement_patterns: [
 			[0, -1, 1, 1],
 			[1, 0, 1, 1],
@@ -2731,6 +2809,7 @@ var dude_list = {
 		tag: 'ps',
 		mobility: false,
 		is_piece: true,
+		lives: 0,
 		movement_patterns: [
 			[0, 1, 1, 1]
 		],
@@ -2757,6 +2836,7 @@ var dude_list = {
 		tag: 'pn',
 		mobility: false,
 		is_piece: true,
+		lives: 0,
 		movement_patterns: [
 			[0, -1, 1, 1]
 		],
@@ -2783,6 +2863,7 @@ var dude_list = {
 		tag: 'pe',
 		mobility: false,
 		is_piece: true,
+		lives: 0,
 		movement_patterns: [
 			[1, 0, 1, 1]
 		],
@@ -2809,6 +2890,7 @@ var dude_list = {
 		tag: 'pw',
 		mobility: false,
 		is_piece: true,
+		lives: 0,
 		movement_patterns: [
 			[-1, 0, 1, 1]
 		],
@@ -2838,6 +2920,7 @@ var dude_list = {
 		sprite_height: 80,
 		mobility: false,
 		is_piece: true,		
+		lives: 0,
 		movement_patterns: [
 			[1, -1, 1, 7],
 			[1, 1, 1, 7],
@@ -2872,6 +2955,7 @@ var dude_list = {
 		sprite_height: 75,		
 		mobility: false,
 		is_piece: true,
+		lives: 0,
 		movement_patterns: [
 			[1, -1, 1, 7],
 			[1, 1, 1, 7],
@@ -2913,6 +2997,7 @@ var dude_list = {
 		mobility: false,
 		is_piece: true,
 		is_king: true,
+		lives: 0,
 		movement_patterns: [
 			[1, -1, 1, 1],
 			[1, 1, 1, 1],
@@ -2955,6 +3040,7 @@ var dude_list = {
 		sprite_height: 80,
 		mobility: false,
 		is_piece: true,
+		lives: 0,
 		movement_patterns: [
 		],
 		custom_movement_pattern: function(position){
@@ -3918,6 +4004,17 @@ function draw_dude(dude){
 			dude.position[0]*bekaari['position_radius'],
 			((dude.position[1]+1)*bekaari['position_radius']) - 15
 		);
+	}
+	var lives = dude_list[dude.type].lives - dude.captured_count;
+	if(lives > 0){
+		bekaari['ctx'].fillStyle = dude.color;	
+		bekaari['ctx'].font = '20pt Calibri';
+		bekaari['ctx'].fillText(
+			lives,
+			dude.position[0]*bekaari['position_radius'],
+			((dude.position[1]+1)*bekaari['position_radius']) - 15
+		);
+		bekaari['ctx'].font = '40pt Calibri';	
 	}
 }
 

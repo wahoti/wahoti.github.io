@@ -101,6 +101,10 @@ app.get('/res/frost_giant.png', function(req,res) {
 	res.sendFile(__dirname + '/res/frost_giant.png');
 });
 
+app.get('/res/tree.png', function(req,res) {
+	res.sendFile(__dirname + '/res/tree.png');
+});
+
 app.get('/res/symphony.png', function(req,res) {
 	res.sendFile(__dirname + '/res/symphony.png');
 });
