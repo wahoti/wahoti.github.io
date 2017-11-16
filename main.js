@@ -3365,6 +3365,51 @@ function bekaari_select(){
 	}
 }
 
+function initiate_third_map(){
+	var field = 'third_field';
+	var dudes = 'third_dudes';
+	var deployment_zone = 'third_deployment_zone';
+	
+	bekaari_new_matrix(field);
+	bekaari[dudes] = {};
+	bekaari[deployment_zone] = [];
+	
+	var S_color = '#FF00FF';
+	var E_color = '#00FF00';
+	var W_color = '#FF0000';
+	var N_color = '#0000FF';
+	var obstacle_color = '#AAAAAA';
+	
+	for(var i=0; i<4; i++){
+		for(var j=0; j<3; j++){
+			bekaari[deployment_zone].push([i, j, N_color]);
+		}
+		for(var k=bekaari['height']-3; k<bekaari['height']; k++){
+			bekaari[deployment_zone].push([i, k, W_color]);
+		}
+		for(var l=5; l<7; l++){
+			place_dude_with('obstacle', dudes, [i, l], field, obstacle_color);	
+		}
+	}
+	
+	for(var a=bekaari['width']-4; a<bekaari['width']; a++){
+		for(var b=0; b<3; b++){
+			bekaari[deployment_zone].push([a, b, E_color]);
+		}
+		for(var c=bekaari['height']-3; c<bekaari['height']; c++){
+			bekaari[deployment_zone].push([a, c, S_color]);
+		}
+		for(var d=5; d<7; d++){
+			place_dude_with('obstacle', dudes, [a, d], field, obstacle_color);	
+		}
+	}
+	
+	for(var m=0; m<3; m++){
+		place_dude_with('obstacle', dudes, [12, m], field, obstacle_color);	
+		place_dude_with('obstacle', dudes, [12, bekaari['height']-(m+1)], field, obstacle_color);	
+	}
+}
+
 function initiate_second_map(){
 	var field = 'second_field';
 	var dudes = 'second_dudes';
@@ -3374,7 +3419,7 @@ function initiate_second_map(){
 	bekaari[deployment_zone] = [];
 	var W_color = '#FF0000';
 	var E_color = '#FF00FF';
-	var obstacle_color = '#AAAAAA'
+	var obstacle_color = '#AAAAAA';
 	_.forEach([], function(point){
 		for(var x=point[0]; x<(point[0]+point[2]);x++){
 			for(var y=point[1]; y<(point[1]+point[3]); y++){
@@ -3603,13 +3648,14 @@ function initiate_bekaari(){
 	
 	bekaari['next_pieces'] = [];
 	bekaari['map'] = '';
-	bekaari['maps'] = ['', 'chess_', 'first_', 'second_'];
+	bekaari['maps'] = ['', 'chess_', 'first_', 'second_', 'third_'];
 	
 	bekaari_new_matrix('field');
 	bekaari_new_matrix('save_field');
 	initiate_chess_map();
 	initiate_first_map();
 	initiate_second_map();
+	initiate_third_map();
 	next_map();
 	bekaari_color_shift_forward();
 	bekaari['width_ratio'] = 2;
