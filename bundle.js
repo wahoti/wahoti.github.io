@@ -3861,11 +3861,23 @@ function capture_dude(dude_id){
 		for(var a=0; a<adjacent.length; a++){
 			var i = adjacent[a][0];
 			var j = adjacent[a][1];
-			if((!get_occupant_position([x+i, y+j])) && !found){
-				move_dude(dude_id, [x,y], [x+i, y+j]);
-				a = 100;
-				found = true;
+			if(position_valid([x+i, y+j])){
+				if((!get_occupant_position([x+i, y+j])) && !found){
+					console.log('revive!', [x+i, y+j]);
+					move_dude(dude_id, [x,y], [x+i, y+j]);
+					a = 100;
+					found = true;
+				}
 			}
+		}
+		if(!found){
+			if(dude_list[bekaari['dudes'][dude_id].type].is_king){
+				var color = bekaari['dudes'][dude_id].color;
+				_.forEach(bekaari['dudes'], function(dude){
+					if((dude.color == color) && (dude.type != 'king')) remove_dude(dude.id);
+				});
+			}
+			delete bekaari['dudes'][dude_id];
 		}
 	}
 	else{
@@ -3957,8 +3969,13 @@ function get_occupant_position(position){
 }
 
 function get_occupant_selected(){
-	if(bekaari['field'][bekaari['selected'][0]][bekaari['selected'][1]]){
-		return  bekaari['dudes'][bekaari['field'][bekaari['selected'][0]][bekaari['selected'][1]].occupant];
+	if(position_valid(bekaari['selected'])){
+		if(bekaari['field'][bekaari['selected'][0]][bekaari['selected'][1]]){
+			return  bekaari['dudes'][bekaari['field'][bekaari['selected'][0]][bekaari['selected'][1]].occupant];
+		}
+		else{
+			return false;
+		}
 	}
 	else{
 		return false;
