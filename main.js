@@ -1637,7 +1637,7 @@ var dude_list = {
 		},
 		on_captured: function(capturer_id, position){
 			if(bekaari['game_start'].selected_id == capturer_id) bekaari['game_start'].mode = 'idle';
-			capture_dude(capturer_id);
+			remove_dude(capturer_id);
 			// attack_position(position);
 		},
 		on_turn: function(dude_id){
@@ -1652,7 +1652,7 @@ var dude_list = {
 					}
 				}
 			}
-			if((Math.random() * 100) <= 33) capture_dude(dude_id);
+			if((Math.random() * 100) <= 33) remove_dude(dude_id);
 		}
 	},
 	ice_wall: object = {
@@ -2230,7 +2230,11 @@ var dude_list = {
 			[1, -1, 1, 1],
 			[1, 1, 1, 1],
 			[-1, -1, 1, 1],
-			[-1, 1, 1, 1]
+			[-1, 1, 1, 1],
+			[1, 0, 1, 2],
+			[0, 1, 1, 2],
+			[-1, 0, 1, 2],
+			[0, -1, 1, 2]
 		],
 		custom_movement_pattern: function(position){
 			return [];
@@ -2575,7 +2579,7 @@ var dude_list = {
 		sprite_width: 58,
 		mobility: false,
 		is_piece: true,
-		lives: 2,
+		lives: 1,
 		movement_patterns: [
 			[1,0,1,2],
 			[-1,0,1,2],
@@ -3379,6 +3383,11 @@ function initiate_third_map(){
 	var W_color = '#FF0000';
 	var N_color = '#00FFFF';
 	var obstacle_color = '#AAAAAA';
+	
+	place_dude_with('king', dudes, [0, 0], field, N_color);	
+	place_dude_with('king', dudes, [bekaari['width']-1, 0], field, E_color);	
+	place_dude_with('king', dudes, [0, bekaari['height']-1], field, W_color);	
+	place_dude_with('king', dudes, [bekaari['width']-1, bekaari['height']-1], field, S_color);	
 	
 	for(var i=0; i<4; i++){
 		for(var j=0; j<3; j++){
