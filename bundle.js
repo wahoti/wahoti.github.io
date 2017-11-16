@@ -1828,6 +1828,7 @@ var dude_list = {
 			// attack_position(position);
 		},
 		on_turn: function(dude_id){
+			console.log('fire_wall turn()');
 			var x = bekaari['dudes'][dude_id].position[0];
 			var y = bekaari['dudes'][dude_id].position[1];
 			for(var i = -1; i<2; i++){
@@ -1847,7 +1848,7 @@ var dude_list = {
 		tag: 'ice',
 		mobility: false,
 		is_piece: false,
-		lifespan: 3,
+		lifespan: 1,
 		movement_patterns: [],
 		custom_movement_pattern: function(position){
 			return [];
@@ -1989,6 +1990,7 @@ var dude_list = {
 			var y_dir = target_position[1] - dude_position[1];
 			var x = dude_position[0];
 			var y = dude_position[1];
+			var dude_color = get_occupant_position(dude_position).color;
 			if((x_dir == 0) && (y_dir == 0)){
 				var r = 4;
 				for(var i = x-r; i <= x+r; i++){
@@ -1996,12 +1998,13 @@ var dude_list = {
 						if((Math.random()*100)<=15){
 							var occupant = get_occupant_position([i,j]);
 							if(occupant){
-								if(occupant.color != get_occupant_position(dude_position).color){
+								if(occupant.color != dude_color){
 									bekaari['dudes'][occupant.id].frozen = true;
+									// bekaari['dudes'][occupant.id].activated = true;
 								}
 							}
 							else{
-								place_dude_with('ice_wall', 'dudes', [i,j], 'field', '#0000FF');
+								place_dude_with('ice_wall', 'dudes', [i,j], 'field', dude_color);
 							}
 						}
 					}
@@ -2045,9 +2048,10 @@ var dude_list = {
 					var occupant = get_occupant_position(position);
 					if(occupant){
 						bekaari['dudes'][occupant.id].frozen = true;
+						// bekaari['dudes'][occupant.id].activated = true;
 					}
 					else{
-						place_dude_with('ice_wall', 'dudes', position, 'field', '#0000FF');
+						place_dude_with('ice_wall', 'dudes', position, 'field', dude_color);
 					}
 				});
 			}
@@ -2434,14 +2438,6 @@ var dude_list = {
 		],
 		custom_attack_pattern: function(position){return [];},
 		action_patterns: [
-			[1, -1, 4, 4],
-			[1, 1, 4, 4],
-			[-1, -1, 4, 4],
-			[-1, 1, 4, 4],
-			[1, 0, 7, 7],
-			[0, 1, 5, 5],
-			[-1, 0, 7, 7],
-			[0, -1, 5, 5],
 			[1, 0, 1, 1],
 			[0, 1, 1, 1],
 			[-1, 0, 1, 1],
@@ -2449,10 +2445,17 @@ var dude_list = {
 		],
 		custom_action_pattern: function(position){
 			var positions = [];
-			positions.push([position[0]-5, position[1]-2]);
-			positions.push([position[0]+5, position[1]-2]);
-			positions.push([position[0]-5, position[1]+2]);
-			positions.push([position[0]+5, position[1]+2]);
+			_.forEach([
+				[-5,-2],[5,2],[5,-2],[-5,2],
+				[7,0],[-7,0],[0,5],[0,-5],
+				[4,4],[-4,-4],[4,-4],[-4,4],
+			], function(spot){
+				var x = position[0] + spot[0]; 
+				var y = position[1] + spot[1]; 
+				if(!get_occupant_position([x, y])){
+					positions.push([x, y]);
+				}
+			})
 			return positions;
 		},
 		action: function(target_position, dude_position){
@@ -2460,34 +2463,32 @@ var dude_list = {
 			var y_dir = target_position[1] - dude_position[1];
 			var x = target_position[0];
 			var y = target_position[1];
+			var dude_color = get_occupant_position(dude_position).color;
 			if((x_dir < 2) && (x_dir > -2) && (y_dir < 2) && (y_dir > -2)){
 				if(y_dir == 0){
-					place_dude_capture('fire_wall', 'dudes', [x+(x_dir*1),y], 'field', '#FF0000');
-					place_dude_capture('fire_wall', 'dudes', [x+(x_dir*2),y-1], 'field', '#FF0000');
-					place_dude_capture('fire_wall', 'dudes', [x+(x_dir*2),y+1], 'field', '#FF0000');
-					place_dude_capture('fire_wall', 'dudes', [x+(x_dir*2),y+0], 'field', '#FF0000');
+					place_dude_capture('fire_wall', 'dudes', [x+(x_dir*1),y], 'field', dude_color);
+					place_dude_capture('fire_wall', 'dudes', [x+(x_dir*2),y-1], 'field', dude_color);
+					place_dude_capture('fire_wall', 'dudes', [x+(x_dir*2),y+1], 'field', dude_color);
+					place_dude_capture('fire_wall', 'dudes', [x+(x_dir*2),y+0], 'field', dude_color);
 				}
 				else{
-					place_dude_capture('fire_wall', 'dudes', [x+0,y+(y_dir*1)], 'field', '#FF0000');
-					place_dude_capture('fire_wall', 'dudes', [x+0,y+(y_dir*2)], 'field', '#FF0000');
-					place_dude_capture('fire_wall', 'dudes', [x+1,y+(y_dir*2)], 'field', '#FF0000');
-					place_dude_capture('fire_wall', 'dudes', [x-1,y+(y_dir*2)], 'field', '#FF0000');
+					place_dude_capture('fire_wall', 'dudes', [x+0,y+(y_dir*1)], 'field', dude_color);
+					place_dude_capture('fire_wall', 'dudes', [x+0,y+(y_dir*2)], 'field', dude_color);
+					place_dude_capture('fire_wall', 'dudes', [x+1,y+(y_dir*2)], 'field', dude_color);
+					place_dude_capture('fire_wall', 'dudes', [x-1,y+(y_dir*2)], 'field', dude_color);
 				}
 				
 			}
-			// else if((x_dir < 4) && (x_dir > -4)){
-				// move_dude(bekaari['game_start'].selected_id, bekaari['game_start'].selected_position,  target_position);
-			// }
 			else{
 				move_dude(bekaari['game_start'].selected_id, bekaari['game_start'].selected_position,  target_position);
-				place_dude_capture('fire_wall', 'dudes', [x+1,y+1], 'field', '#FF0000');
-				place_dude_capture('fire_wall', 'dudes', [x+1,y-1], 'field', '#FF0000');
-				place_dude_capture('fire_wall', 'dudes', [x-1,y+1], 'field', '#FF0000');
-				place_dude_capture('fire_wall', 'dudes', [x-1,y-1], 'field', '#FF0000');
-				place_dude_capture('fire_wall', 'dudes', [x+1,y+0], 'field', '#FF0000');
-				place_dude_capture('fire_wall', 'dudes', [x-1,y+0], 'field', '#FF0000');
-				place_dude_capture('fire_wall', 'dudes', [x+0,y+1], 'field', '#FF0000');
-				place_dude_capture('fire_wall', 'dudes', [x+0,y-1], 'field', '#FF0000');
+				place_dude_capture('fire_wall', 'dudes', [x+1,y+1], 'field', dude_color);
+				place_dude_capture('fire_wall', 'dudes', [x+1,y-1], 'field', dude_color);
+				place_dude_capture('fire_wall', 'dudes', [x-1,y+1], 'field', dude_color);
+				place_dude_capture('fire_wall', 'dudes', [x-1,y-1], 'field', dude_color);
+				place_dude_capture('fire_wall', 'dudes', [x+1,y+0], 'field', dude_color);
+				place_dude_capture('fire_wall', 'dudes', [x-1,y+0], 'field', dude_color);
+				place_dude_capture('fire_wall', 'dudes', [x+0,y+1], 'field', dude_color);
+				place_dude_capture('fire_wall', 'dudes', [x+0,y-1], 'field', dude_color);
 			}
 		},
 	},
@@ -3396,6 +3397,8 @@ function Dude(id, position, type, color){
 	this.count = 0;
 	this.lifespan_count = 0;
 	this.captured_count = 0;
+	this.frozen = false;
+	this.was_frozen = false;
 }
 
 function place_dude_capture(dude_type, dudes, position, field, color){
@@ -3535,26 +3538,21 @@ function activate_dude(dude_id){
 	console.log('activate_dude');
 	bekaari['dudes'][dude_id].activated = true;
 	if(_.filter(bekaari['dudes'], function(dude){
-		return !dude.activated && dude_list[dude.type].is_piece;
+		return !dude.activated && dude_list[dude.type].is_piece;// && (dude.color == bekaari['dudes'][dude_id].color);
 	}).length < 1){
 		console.log('all_dudes_activated');
 		_.forEach(bekaari['dudes'], function(dude){
-			bekaari['dudes'][dude.id].lifespan_count += 1;
-			if(bekaari['dudes'][dude.id].lifespan_count >= dude_list[dude.type].lifespan){
-				remove_dude(dude.id);
-				// capture_dude(dude.id);
+			if(bekaari['dudes'][dude.id].frozen){
+				bekaari['dudes'][dude.id].frozen = false;
+				bekaari['dudes'][dude.id].was_frozen = true;
 			}
 			else{
-				if(bekaari['dudes'][dude.id].frozen){
-					bekaari['dudes'][dude.id].frozen = false;
-				}
-				else{
-					bekaari['dudes'][dude.id].activated = false;
-				}
+				bekaari['dudes'][dude.id].activated = false;
+				bekaari['dudes'][dude.id].was_frozen = false;
 			}
-			if(dude_list[dude.type].on_turn){
-				dude_list[dude.type].on_turn(dude.id);
-			}
+			// if(dude_list[dude.type].on_turn){
+				// dude_list[dude.type].on_turn(dude.id);
+			// }
 		});	
 	}
 }
@@ -3576,7 +3574,28 @@ function bekaari_select(){
 				case 'idle':
 					var occupant = get_occupant_selected();
 					if(occupant){
-						if(!occupant.activated){
+						if(!occupant.activated && dude_list[occupant.type].is_piece){
+							//get all dudes on same team that haven't activated yet
+							var activated_team = _.filter(bekaari['dudes'], function(dude){
+								return (dude.activated && !dude.was_frozen) && dude_list[dude.type].is_piece && (dude.color == occupant.color);
+							});
+							//if there is none trigger start of turn stuff
+							if(activated_team.length < 1){
+								console.log('turn start');
+								var team = _.filter(bekaari['dudes'], function(dude){
+									return (dude.color == occupant.color);
+								});
+								_.forEach(team, function(dude){
+									bekaari['dudes'][dude.id].lifespan_count += 1;
+									if(bekaari['dudes'][dude.id].lifespan_count >= dude_list[dude.type].lifespan){
+										remove_dude(dude.id);
+									}
+									if(dude_list[dude.type].on_turn){
+										dude_list[dude.type].on_turn(dude.id);
+									}
+								});
+							}
+							
 							bekaari['game_start'].selected_id = occupant.id;
 							bekaari['game_start'].selected_position[0] = bekaari['selected'][0];
 							bekaari['game_start'].selected_position[1] = bekaari['selected'][1];
@@ -4029,7 +4048,8 @@ function initiate_bekaari(){
 	bekaari['height'] = Math.floor(bekaari['canvas'].height / bekaari['position_radius']);
 	bekaari['selected'] = [2, 2];
 	bekaari['gamepads'] = {};
-	bekaari['game_mode'] = 'deployment';
+	// bekaari['game_mode'] = 'deployment';
+	bekaari['game_mode'] = 'game_start';
 	bekaari['dudes'] = {};
 	bekaari['save_dudes'] = {};
 	bekaari['deployment'] = {};
@@ -4301,7 +4321,7 @@ function draw_dude(dude){
 		);
 	}
 	if(dude.frozen){
-		bekaari['ctx'].fillStyle = '#0000FF';	
+		bekaari['ctx'].fillStyle = '#00FFFF';	
 		bekaari['ctx'].fillText(
 			'ice',
 			dude.position[0]*bekaari['position_radius'],
