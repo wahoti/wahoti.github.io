@@ -3377,7 +3377,7 @@ function initiate_third_map(){
 	var S_color = '#FF00FF';
 	var E_color = '#00FF00';
 	var W_color = '#FF0000';
-	var N_color = '#0000FF';
+	var N_color = '#00FFFF';
 	var obstacle_color = '#AAAAAA';
 	
 	for(var i=0; i<4; i++){
