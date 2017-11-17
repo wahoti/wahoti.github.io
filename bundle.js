@@ -3568,6 +3568,8 @@ function bekaari_new_matrix(matrix){
 function activate_dude(dude_id){
 	console.log('activate_dude');
 	bekaari['dudes'][dude_id].activated = true;
+	bekaari['dudes'][dude_id].count = 0;
+	
 	if(_.filter(bekaari['dudes'], function(dude){
 		return !dude.activated && dude_list[dude.type].is_piece;// && (dude.color == bekaari['dudes'][dude_id].color);
 	}).length < 1){
@@ -3820,15 +3822,15 @@ function initiate_fourth_map(){
 	place_dude_with('knight', dudes, [w-1, 1], field, E_color);	
 	
 	place_dude_with('king', dudes, [0, h-1], field, W_color);	
-	place_dude_with('tree_of_life', dudes, [2, h-2], field, W_color);
-	place_dude_with('dragon', dudes, [2, h-3], field, W_color);
-	place_dude_with('dragon', dudes, [3, h-2], field, W_color);
-	place_dude_with('queen', dudes, [3, h-3], field, W_color);
-	place_dude_with('ninja', dudes, [0, h-3], field, W_color);
-	place_dude_with('ninja', dudes, [1, h-2], field, W_color);
-	place_dude_with('ninja', dudes, [2, h-1], field, W_color);
-	place_dude_with('bishop', dudes, [1, h-3], field, W_color);
-	place_dude_with('bishop', dudes, [3, h-1], field, W_color);
+	place_dude_with('dragon', dudes, [1, h-1], field, W_color);
+	place_dude_with('wind_guy', dudes, [0, h-3], field, W_color);
+	place_dude_with('wind_guy', dudes, [0, h-2], field, W_color);
+	place_dude_with('axe_dude', dudes, [1, h-3], field, W_color);
+	place_dude_with('axe_dude', dudes, [1, h-2], field, W_color);
+	place_dude_with('axe_dude', dudes, [2, h-3], field, W_color);
+	place_dude_with('axe_dude', dudes, [2, h-2], field, W_color);
+	place_dude_with('wall_dude', dudes, [3, h-3], field, W_color);
+	place_dude_with('wall_dude', dudes, [3, h-2], field, W_color);
 	
 	place_dude_with('king', dudes, [w-1, h-1], field, S_color);	
 	place_dude_with('necromancer', dudes, [w-2, h-3], field, S_color);	
