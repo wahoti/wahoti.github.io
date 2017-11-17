@@ -1832,19 +1832,19 @@ var dude_list = {
 			// attack_position(position);
 		},
 		on_turn: function(dude_id){
-			console.log('fire_wall turn()');
 			var x = bekaari['dudes'][dude_id].position[0];
 			var y = bekaari['dudes'][dude_id].position[1];
+			var color = bekaari['dudes'][dude_id].color;
 			for(var i = -1; i<2; i++){
 				for(var j = -1; j<2; j++){
 					if(!get_occupant_position([x+i, y+j])){
-						if((Math.random() * 100) <= 5){
-							place_dude_with('fire_wall', 'dudes', [x+i, y+j], 'field', '#FF0000');
+						if((Math.random() * 100) <= 10){
+							place_dude_with('fire_wall', 'dudes', [x+i, y+j], 'field', color);
 						}
 					}
 				}
 			}
-			if((Math.random() * 100) <= 33) remove_dude(dude_id);
+			if((Math.random() * 100) <= 80) remove_dude(dude_id);
 		}
 	},
 	ice_wall: object = {
@@ -1883,7 +1883,7 @@ var dude_list = {
 		mobility: false,
 		is_piece: true,
 		lives: 0,
-		cost: 5,
+		cost: 15,
 		movement_patterns: [],
 		custom_movement_pattern: function(position){
 			return [];
@@ -1950,7 +1950,7 @@ var dude_list = {
 		mobility: false,
 		is_piece: true,
 		lives: 0,
-		cost: 3,
+		cost: 10,
 		movement_patterns: [
 			[1,0,1,2],
 			[-1,0,1,2],
@@ -2077,7 +2077,7 @@ var dude_list = {
 		mobility: false,
 		is_piece: true,
 		lives: 0,
-		cost: 4,
+		cost: 13,
 		movement_patterns: [
 			[1, 0, 1, 2],
 			[0, 1, 1, 2],
@@ -2398,7 +2398,7 @@ var dude_list = {
 		is_piece: true,
 		lives: 0,
 		moves: 2,
-		cost: 2,
+		cost: 7,
 		movement_patterns: [
 			[1, -1, 1, 2],
 			[1, 1, 1, 2],
@@ -2439,7 +2439,7 @@ var dude_list = {
 		sprite_width: 80,
 		sprite_height: 73,
 		lives: 0,
-		cost: 9,
+		cost: 23,
 		movement_patterns: [
 		],
 		custom_movement_pattern: function(position){return [];},
@@ -2510,7 +2510,7 @@ var dude_list = {
 		sprite_width: 78,
 		sprite_height: 80,
 		lives: 0,
-		cost: 3,
+		cost: 12,
 		movement_patterns: [
 			[1, -1, 1, 1],
 			[1, 1, 1, 1],
@@ -2582,7 +2582,7 @@ var dude_list = {
 		mobility: false,
 		is_piece: true,
 		lives: 0,
-		cost: 5,
+		cost: 15,
 		movement_patterns: [
 			[1, -1, 1, 4],
 			[1, 1, 1, 4],
@@ -2649,7 +2649,7 @@ var dude_list = {
 		is_piece: true,
 		lives: 0,
 		moves: 4,
-		cost: 3,
+		cost: 8,
 		movement_patterns: [
 			[1,0,1,2],
 			[-1,0,1,2],
@@ -2685,7 +2685,7 @@ var dude_list = {
 		mobility: true,
 		is_piece: true,
 		lives: 0,
-		cost: 3,
+		cost: 10,
 		movement_patterns: [
 			[0, -1, 1, 3],
 			[1, 0, 1, 3],
@@ -2775,7 +2775,7 @@ var dude_list = {
 		mobility: false,
 		is_piece: true,
 		lives: 0,
-		cost: 2,
+		cost: 5,
 		movement_patterns: [],
 		custom_movement_pattern: function(position){
 			var positions = [];
@@ -2873,7 +2873,7 @@ var dude_list = {
 		mobility: false,
 		is_piece: true,
 		lives: 1,
-		cost: 1,
+		cost: 2,
 		movement_patterns: [
 			[1, -1, 1, 1],
 			[1, 1, 1, 1],
@@ -2907,7 +2907,7 @@ var dude_list = {
 		sprite_width: 57,
 		sprite_height: 80,
 		lives: 0,
-		cost: 4,
+		cost: 15,
 		mobility: false,
 		is_piece: true,
 		movement_patterns: [
@@ -3457,7 +3457,7 @@ function place_dude_capture(dude_type, dudes, position, field, color){
 }
 
 function place_dude_with(dude_type, dudes, position, field, color){
-	if(bekaari[field][position[0]][position[1]]){
+	if(position_valid(position)){
 		if(!bekaari[field][position[0]][position[1]].occupant){
 			if(dude_list[dude_type].is_king){
 				var kings = _.filter(bekaari['dudes'], function(dude){
@@ -3796,58 +3796,52 @@ function initiate_fourth_map(){
 	}
 	
 	place_dude_with('king', dudes, [0, 0], field, N_color);
-	place_dude_with('frost_giant', dudes, [1, 2], field, N_color);
-	place_dude_with('frost_giant', dudes, [2, 1], field, N_color);
-	place_dude_with('frost_giant', dudes, [2, 2], field, N_color);
-	place_dude_with('frost_giant', dudes, [3, 0], field, N_color);
 	place_dude_with('frost_giant', dudes, [3, 1], field, N_color);
 	place_dude_with('frost_giant', dudes, [3, 2], field, N_color);
-	place_dude_with('necromancer', dudes, [0, 1], field, N_color);
-	place_dude_with('necromancer', dudes, [1, 0], field, N_color);
-	place_dude_with('tree_of_life', dudes, [2, 0], field, N_color);
-	place_dude_with('tree_of_life', dudes, [0, 2], field, N_color);
-	place_dude_with('tree_of_life', dudes, [1, 1], field, N_color);
-	place_dude_with('tree_of_life', dudes, [1, 1], field, N_color);
+	place_dude_with('frost_giant', dudes, [2, 2], field, N_color);
+	place_dude_with('archer', dudes, [2, 1], field, N_color);
+	place_dude_with('archer', dudes, [1, 2], field, N_color);
+	place_dude_with('archer', dudes, [3, 1], field, N_color);
+	place_dude_with('bishop', dudes, [1, 1], field, N_color);
+	place_dude_with('lance', dudes, [0, 2], field, N_color);
+	place_dude_with('lance', dudes, [2, 0], field, N_color);
 	
 	
 	place_dude_with('king', dudes, [w-1, 0], field, E_color);	
-	place_dude_with('necromancer', dudes, [w-2, 0], field, E_color);	
-	place_dude_with('necromancer', dudes, [w-1, 1], field, E_color);	
-	place_dude_with('dervish', dudes, [w-3, 0], field, E_color);	
-	place_dude_with('dervish', dudes, [w-2, 1], field, E_color);	
-	place_dude_with('dervish', dudes, [w-1, 2], field, E_color);	
-	place_dude_with('archer', dudes, [w-4, 0], field, E_color);	
-	place_dude_with('archer', dudes, [w-3, 1], field, E_color);	
-	place_dude_with('archer', dudes, [w-2, 2], field, E_color);	
-	place_dude_with('archer', dudes, [w-4, 2], field, E_color);	
-	place_dude_with('dragon', dudes, [w-4, 1], field, E_color);	
-	place_dude_with('dragon', dudes, [w-3, 2], field, E_color);	
+	place_dude_with('tree_of_life', dudes, [w-2, 0], field, E_color);	
+	place_dude_with('tree_of_life', dudes, [w-3, 0], field, E_color);	
+	place_dude_with('tree_of_life', dudes, [w-4, 0], field, E_color);	
+	place_dude_with('ninja', dudes, [w-2, 1], field, E_color);	
+	place_dude_with('ninja', dudes, [w-3, 1], field, E_color);	
+	place_dude_with('ninja', dudes, [w-4, 1], field, E_color);	
+	place_dude_with('frost_giant', dudes, [w-4, 2], field, E_color);	
+	place_dude_with('wall_dude', dudes, [w-3, 2], field, E_color);	
+	place_dude_with('wind_guy', dudes, [w-1, 2], field, E_color);	
+	place_dude_with('knight', dudes, [w-1, 1], field, E_color);	
 	
 	place_dude_with('king', dudes, [0, h-1], field, W_color);	
-	place_dude_with('tree_of_life', dudes, [0, h-3], field, W_color);
-	place_dude_with('dragon', dudes, [0, h-2], field, W_color);
-	place_dude_with('dragon', dudes, [1, h-3], field, W_color);
-	place_dude_with('tree_of_life', dudes, [3, h-1], field, W_color);
-	place_dude_with('dragon', dudes, [2, h-1], field, W_color);
+	place_dude_with('tree_of_life', dudes, [2, h-2], field, W_color);
+	place_dude_with('dragon', dudes, [2, h-3], field, W_color);
 	place_dude_with('dragon', dudes, [3, h-2], field, W_color);
-	place_dude_with('lance', dudes, [1, h-1], field, W_color);
-	place_dude_with('lance', dudes, [1, h-2], field, W_color);
-	place_dude_with('lance', dudes, [2, h-2], field, W_color);
-	place_dude_with('axe_dude', dudes, [2, h-3], field, W_color);
-	place_dude_with('axe_dude', dudes, [3, h-3], field, W_color);
+	place_dude_with('queen', dudes, [3, h-3], field, W_color);
+	place_dude_with('ninja', dudes, [0, h-3], field, W_color);
+	place_dude_with('ninja', dudes, [1, h-2], field, W_color);
+	place_dude_with('ninja', dudes, [2, h-1], field, W_color);
+	place_dude_with('bishop', dudes, [1, h-3], field, W_color);
+	place_dude_with('bishop', dudes, [3, h-1], field, W_color);
 	
 	place_dude_with('king', dudes, [w-1, h-1], field, S_color);	
-	place_dude_with('wind_guy', dudes, [w-2, h-1], field, S_color);	
-	place_dude_with('wind_guy', dudes, [w-1, h-2], field, S_color);	
-	place_dude_with('wind_guy', dudes, [w-2, h-2], field, S_color);	
-	place_dude_with('lance', dudes, [w-3, h-3], field, S_color);	
-	place_dude_with('lance', dudes, [w-3, h-2], field, S_color);	
-	place_dude_with('lance', dudes, [w-4, h-2], field, S_color);	
+	place_dude_with('necromancer', dudes, [w-2, h-3], field, S_color);	
+	place_dude_with('necromancer', dudes, [w-3, h-2], field, S_color);	
+	place_dude_with('necromancer', dudes, [w-4, h-1], field, S_color);	
+	place_dude_with('rook', dudes, [w-1, h-2], field, S_color);	
+	place_dude_with('rook', dudes, [w-2, h-1], field, S_color);	
 	place_dude_with('lance', dudes, [w-4, h-3], field, S_color);	
-	place_dude_with('ninja', dudes, [w-1, h-3], field, S_color);	
-	place_dude_with('ninja', dudes, [w-2, h-3], field, S_color);	
-	place_dude_with('dervish', dudes, [w-4, h-1], field, S_color);	
 	place_dude_with('dervish', dudes, [w-3, h-1], field, S_color);	
+	place_dude_with('dervish', dudes, [w-3, h-3], field, S_color);	
+	place_dude_with('dervish', dudes, [w-2, h-2], field, S_color);	
+	place_dude_with('dervish', dudes, [w-4, h-2], field, S_color);	
+	place_dude_with('zombie', dudes, [w-1, h-3], field, S_color);	
 	
 	for(var i=0; i<4; i++){
 		for(var j=0; j<3; j++){
@@ -4204,7 +4198,7 @@ function initiate_bekaari(){
 	bekaari['infobox'] = document.getElementById('bekaari_infobox');
 	bekaari['game_mode_infobox'] = document.getElementById("bekaari_mode");
 	
-	bekaari['max_dude_points'] = 50;
+	bekaari['max_dude_points'] = 100;
 	bekaari['max_game_points'] = 10;
 	bekaari['teams'] = [
 		{
