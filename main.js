@@ -1641,8 +1641,7 @@ var dude_list = {
 		},
 		on_captured: function(capturer_id, position){
 			if(bekaari['game_start'].selected_id == capturer_id) bekaari['game_start'].mode = 'idle';
-			remove_dude(capturer_id);
-			// attack_position(position);
+			if(!dude_list[bekaari['dudes'][capturer_id].type].immunity_fire) remove_dude(capturer_id);
 		},
 		on_turn: function(dude_id){
 			var x = bekaari['dudes'][dude_id].position[0];
@@ -1650,8 +1649,15 @@ var dude_list = {
 			var color = bekaari['dudes'][dude_id].color;
 			for(var i = -1; i<2; i++){
 				for(var j = -1; j<2; j++){
-					if(!get_occupant_position([x+i, y+j])){
-						if((Math.random() * 100) <= 10){
+					if((Math.random() * 100) <= 10){
+						var burn = true;
+						var occupant = get_occupant_position([x+i, y+j]);
+						if(occupant){
+							if(!dude_list[occupant.type].immunity_fire){
+								place_dude_capture('fire_wall', 'dudes', [x+i, y+j], 'field', color);
+							}
+						}
+						else{
 							place_dude_with('fire_wall', 'dudes', [x+i, y+j], 'field', color);
 						}
 					}
@@ -1752,6 +1758,47 @@ var dude_list = {
 					}
 				}
 			}
+		},
+	},
+	wraith: object = {
+		description: "wraith:<br/>spooky.",
+		tag: 'Wr',
+		sprite: 'wraith',
+		sprite_height: 80,
+		sprite_width: 51,
+		mobility: false,
+		is_piece: true,
+		lives: 1,
+		cost: 8,
+		movement_patterns: [],
+		custom_movement_pattern: function(position){
+			var movement = [];
+			for(var x = position[0]-10; x<position[0]+10; x++){
+				for(var y = position[1]-10; y<position[1]+10; y++){
+					if(position_valid([x,y])) movement.push([x,y]);
+				}
+			}
+			return movement;
+		},
+		attack_patterns: [
+			[1, -1, 1, 1],
+			[1, 1, 1, 1],
+			[-1, -1, 1, 1],
+			[-1, 1, 1, 1],
+			[0, -1, 1, 1],
+			[1, 0, 1, 1],
+			[0, 1, 1, 1],
+			[-1, 0, 1, 1]
+		],
+		custom_attack_pattern: function(position){
+			return [];
+		},
+		action_patterns: [
+		],
+		custom_action_pattern: function(position){
+			return [];
+		},
+		action: function(target_position, dude_position){
 		},
 	},
 	frost_giant: object = {
@@ -2246,6 +2293,7 @@ var dude_list = {
 	dragon: object = {
 		description: "dragon:<br/> dont let the dragon drag on man.",
 		tag: 'Dg',
+		immunity_fire: true,
 		mobility: false,
 		is_piece: true,
 		sprite: 'dragon',
@@ -3466,12 +3514,14 @@ function bekaari_select(){
 									return (dude.color == occupant.color);
 								});
 								_.forEach(team, function(dude){
-									bekaari['dudes'][dude.id].lifespan_count += 1;
-									if(bekaari['dudes'][dude.id].lifespan_count >= dude_list[dude.type].lifespan){
-										remove_dude(dude.id);
-									}
-									if(dude_list[dude.type].on_turn){
-										dude_list[dude.type].on_turn(dude.id);
+									if(bekaari['dudes'][dude.id]){
+										bekaari['dudes'][dude.id].lifespan_count += 1;
+										if(bekaari['dudes'][dude.id].lifespan_count >= dude_list[dude.type].lifespan){
+											remove_dude(dude.id);
+										}
+										if(dude_list[dude.type].on_turn){
+											dude_list[dude.type].on_turn(dude.id);
+										}
 									}
 								});
 							}
@@ -3653,10 +3703,9 @@ function initiate_fourth_map(){
 	place_dude_with('rook', dudes, [w-2, h-1], field, S_color);	
 	place_dude_with('lance', dudes, [w-4, h-3], field, S_color);	
 	place_dude_with('dervish', dudes, [w-3, h-1], field, S_color);	
-	place_dude_with('dervish', dudes, [w-3, h-3], field, S_color);	
+	place_dude_with('wraith', dudes, [w-3, h-3], field, S_color);	
 	place_dude_with('dervish', dudes, [w-2, h-2], field, S_color);	
-	place_dude_with('dervish', dudes, [w-4, h-2], field, S_color);	
-	place_dude_with('zombie', dudes, [w-1, h-3], field, S_color);	
+	place_dude_with('wraith', dudes, [w-4, h-2], field, S_color);	
 	
 	for(var i=0; i<4; i++){
 		for(var j=0; j<3; j++){
