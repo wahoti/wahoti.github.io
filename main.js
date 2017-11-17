@@ -195,6 +195,9 @@ var keydown = function(c){
 			case 75://K
 				bekaari_cancel();
 				break;
+			case 85://U
+				bekaari_to_deployment();
+				break;
 			default:
 		}
 	}
@@ -1692,6 +1695,7 @@ var dude_list = {
 		mobility: false,
 		is_piece: true,
 		lives: 0,
+		cost: 4,
 		movement_patterns: [],
 		custom_movement_pattern: function(position){
 			return [];
@@ -1758,6 +1762,7 @@ var dude_list = {
 		mobility: false,
 		is_piece: true,
 		lives: 0,
+		cost: 3,
 		movement_patterns: [
 			[1,0,1,2],
 			[-1,0,1,2],
@@ -1884,6 +1889,7 @@ var dude_list = {
 		mobility: false,
 		is_piece: true,
 		lives: 0,
+		cost: 4,
 		movement_patterns: [
 			[1, 0, 1, 2],
 			[0, 1, 1, 2],
@@ -2204,6 +2210,7 @@ var dude_list = {
 		is_piece: true,
 		lives: 0,
 		moves: 2,
+		cost: 2,
 		movement_patterns: [
 			[1, -1, 1, 2],
 			[1, 1, 1, 2],
@@ -2244,6 +2251,7 @@ var dude_list = {
 		sprite_width: 80,
 		sprite_height: 73,
 		lives: 0,
+		cost: 9,
 		movement_patterns: [
 		],
 		custom_movement_pattern: function(position){return [];},
@@ -2314,6 +2322,7 @@ var dude_list = {
 		sprite_width: 78,
 		sprite_height: 80,
 		lives: 0,
+		cost: 3,
 		movement_patterns: [
 			[1, -1, 1, 1],
 			[1, 1, 1, 1],
@@ -2385,6 +2394,7 @@ var dude_list = {
 		mobility: false,
 		is_piece: true,
 		lives: 0,
+		cost: 5,
 		movement_patterns: [
 			[1, -1, 1, 4],
 			[1, 1, 1, 4],
@@ -2450,6 +2460,7 @@ var dude_list = {
 		is_piece: true,
 		lives: 0,
 		moves: 4,
+		cost: 3,
 		movement_patterns: [
 			[1,0,1,2],
 			[-1,0,1,2],
@@ -2485,6 +2496,7 @@ var dude_list = {
 		mobility: true,
 		is_piece: true,
 		lives: 0,
+		cost: 3,
 		movement_patterns: [
 			[0, -1, 1, 3],
 			[1, 0, 1, 3],
@@ -2574,6 +2586,7 @@ var dude_list = {
 		mobility: false,
 		is_piece: true,
 		lives: 0,
+		cost: 2,
 		movement_patterns: [],
 		custom_movement_pattern: function(position){
 			var positions = [];
@@ -2669,6 +2682,7 @@ var dude_list = {
 		mobility: false,
 		is_piece: true,
 		lives: 1,
+		cost: 1,
 		movement_patterns: [
 			[1, -1, 1, 1],
 			[1, 1, 1, 1],
@@ -2702,6 +2716,7 @@ var dude_list = {
 		sprite_width: 57,
 		sprite_height: 80,
 		lives: 0,
+		cost: 4,
 		mobility: false,
 		is_piece: true,
 		movement_patterns: [
@@ -2758,6 +2773,7 @@ var dude_list = {
 		sprite_width: 69,
 		sprite_height: 80,
 		lives: 0,
+		cost: 5,
 		mobility: false,
 		is_piece: true,
 		movement_patterns: [
@@ -2792,6 +2808,7 @@ var dude_list = {
 		mobility: false,
 		is_piece: true,
 		lives: 0,
+		cost: 1,
 		movement_patterns: [
 			[0, -1, 1, 1],
 			[1, 0, 1, 1],
@@ -2824,6 +2841,7 @@ var dude_list = {
 		mobility: false,
 		is_piece: true,
 		lives: 0,
+		cost: 1,
 		movement_patterns: [
 			[0, 1, 1, 1]
 		],
@@ -2851,6 +2869,7 @@ var dude_list = {
 		mobility: false,
 		is_piece: true,
 		lives: 0,
+		cost: 1,
 		movement_patterns: [
 			[0, -1, 1, 1]
 		],
@@ -2878,6 +2897,7 @@ var dude_list = {
 		mobility: false,
 		is_piece: true,
 		lives: 0,
+		cost: 1,
 		movement_patterns: [
 			[1, 0, 1, 1]
 		],
@@ -2905,6 +2925,7 @@ var dude_list = {
 		mobility: false,
 		is_piece: true,
 		lives: 0,
+		cost: 1,
 		movement_patterns: [
 			[-1, 0, 1, 1]
 		],
@@ -2935,6 +2956,7 @@ var dude_list = {
 		mobility: false,
 		is_piece: true,		
 		lives: 0,
+		cost: 3,
 		movement_patterns: [
 			[1, -1, 1, 7],
 			[1, 1, 1, 7],
@@ -2970,6 +2992,7 @@ var dude_list = {
 		mobility: false,
 		is_piece: true,
 		lives: 0,
+		cost: 9,
 		movement_patterns: [
 			[1, -1, 1, 7],
 			[1, 1, 1, 7],
@@ -3012,6 +3035,7 @@ var dude_list = {
 		is_piece: true,
 		is_king: true,
 		lives: 0,
+		cost: 0,
 		movement_patterns: [
 			[1, -1, 1, 1],
 			[1, 1, 1, 1],
@@ -3055,6 +3079,7 @@ var dude_list = {
 		mobility: false,
 		is_piece: true,
 		lives: 0,
+		cost: 3,
 		movement_patterns: [
 		],
 		custom_movement_pattern: function(position){
@@ -3354,6 +3379,40 @@ function activate_dude(dude_id){
 		return !dude.activated && dude_list[dude.type].is_piece;// && (dude.color == bekaari['dudes'][dude_id].color);
 	}).length < 1){
 		console.log('all_dudes_activated');
+		_.forEach(bekaari['scenario_zones'], function(zone){
+			//get occupants of the zone
+			//if there is only 1 color of pieces in the zone
+			//that team gets a point
+			var occupant_colors = {};
+			_.forEach(zone, function(position){
+				var x = position[0];
+				var y = position[1];
+				var occupant = get_occupant_position([x,y]);
+				if(occupant){
+					if(dude_list[occupant.type].is_piece){
+						occupant_colors[occupant.color] = true;
+					}
+				}
+			});
+			var keys = Object.keys(occupant_colors);
+			if(keys.length == 1){
+				var team = _.filter(bekaari['teams'], function(t){
+					return t.color == keys[0];
+				})[0];
+				team.game_points +=1;
+			}
+		});
+		_.forEach(bekaari['teams'], function(team){
+			draw_game_points(team);
+			if(team.game_points >= bekaari['max_game_points']){
+				console.log(team.color, ' WINS');
+				_.forEach(bekaari['dudes'], function(dude){
+					if(dude.color != team.color){
+						remove_dude(dude.id);
+					}
+				});
+			}
+		});
 		_.forEach(bekaari['dudes'], function(dude){
 			if(bekaari['dudes'][dude.id].frozen){
 				bekaari['dudes'][dude.id].frozen = false;
@@ -3481,7 +3540,28 @@ function bekaari_select(){
 			}
 			break;
 		case 'deployment':
-			place_dude();
+			var dude_type = dude_list[bekaari['deployment'].selected];
+			var dude_color = bekaari['deployment'].color; 
+			_.forEach(bekaari['deployment_zone'], function(zone){
+				if((zone[0] == bekaari['selected'][0]) && (zone[1] == bekaari['selected'][1])){
+					dude_color = zone[2];
+				}
+			});
+			if(dude_type.is_piece){
+				var team = _.filter(bekaari['teams'], function(t){
+						return t.color == dude_color;
+				})[0];
+				if(team){
+					if((team.dude_points + dude_type.cost) <= bekaari['max_dude_points']){
+						team.dude_points += dude_type.cost;
+						place_dude();
+						draw_dude_points(team);
+					}
+					else{
+						bekaari['message'] = '<br/><br/> not enough points';
+					}
+				}
+			}
 			break;
 		default:
 	}
@@ -3491,10 +3571,13 @@ function initiate_fourth_map(){
 	var field = 'fourth_field';
 	var dudes = 'fourth_dudes';
 	var deployment_zone = 'fourth_deployment_zone';
+	var scenario_zone = 'fourth_scenario_zones';
 	
 	bekaari_new_matrix(field);
 	bekaari[dudes] = {};
 	bekaari[deployment_zone] = [];
+	bekaari[scenario_zone] = [];
+	
 	
 	var S_color = '#FF00FF';
 	var E_color = '#00FF00';
@@ -3504,6 +3587,20 @@ function initiate_fourth_map(){
 	
 	var w = bekaari['width'];
 	var h = bekaari['height'];
+	
+	var zw = 3;
+	var zh = 2;
+	var zones = [[7,2], [15,2], [7,8], [15,8], [11,5]];
+	for(var o = 0; o<zones.length; o++){
+		var z0 = zones[o][0];
+		var z1 = zones[o][1];
+		bekaari[scenario_zone].push([]);
+		for(var n=z0; n < z0+zw; n++){
+			for(var p=z1; p < z1+zh; p++){
+				bekaari[scenario_zone][o].push([n,p]);
+			}
+		}
+	}
 	
 	place_dude_with('king', dudes, [0, 0], field, N_color);
 	place_dude_with('frost_giant', dudes, [1, 2], field, N_color);
@@ -3593,10 +3690,12 @@ function initiate_third_map(){
 	var field = 'third_field';
 	var dudes = 'third_dudes';
 	var deployment_zone = 'third_deployment_zone';
+	var scenario_zone = 'third_scenario_zones';
 	
 	bekaari_new_matrix(field);
 	bekaari[dudes] = {};
 	bekaari[deployment_zone] = [];
+	bekaari[scenario_zone] = [];
 	
 	var S_color = '#FF00FF';
 	var E_color = '#00FF00';
@@ -3604,10 +3703,27 @@ function initiate_third_map(){
 	var N_color = '#00FFFF';
 	var obstacle_color = '#AAAAAA';
 	
-	place_dude_with('king', dudes, [0, 0], field, N_color);	
+	var w = bekaari['width'];
+	var h = bekaari['height'];
+	
+	var zw = 3;
+	var zh = 2;
+	var zones = [[7,2], [15,2], [7,8], [15,8], [11,5]];
+	for(var o = 0; o<zones.length; o++){
+		var z0 = zones[o][0];
+		var z1 = zones[o][1];
+		bekaari[scenario_zone].push([]);
+		for(var n=z0; n < z0+zw; n++){
+			for(var p=z1; p < z1+zh; p++){
+				bekaari[scenario_zone][o].push([n,p]);
+			}
+		}
+	}
+	
+	// place_dude_with('king', dudes, [0, 0], field, N_color);	
 	place_dude_with('king', dudes, [bekaari['width']-1, 0], field, E_color);	
 	place_dude_with('king', dudes, [0, bekaari['height']-1], field, W_color);	
-	place_dude_with('king', dudes, [bekaari['width']-1, bekaari['height']-1], field, S_color);	
+	// place_dude_with('king', dudes, [bekaari['width']-1, bekaari['height']-1], field, S_color);	
 	
 	for(var i=0; i<4; i++){
 		for(var j=0; j<3; j++){
@@ -3794,12 +3910,15 @@ function next_map(){
 		var new_field = bekaari['maps'][new_index] + 'field';
 		var new_dudes = bekaari['maps'][new_index] + 'dudes';
 		var new_deployment_zone = bekaari['maps'][new_index] + 'deployment_zone';
+		var new_scenario_zone = bekaari['maps'][new_index] + 'scenario_zones';
 		set_map('field', bekaari[new_field], 'dudes', bekaari[new_dudes]);
-		set_deployment_zone('deployment_zone', new_deployment_zone);
+		set_zone('deployment_zone', new_deployment_zone);
+		set_zone('scenario_zones', new_scenario_zone);
 	}
+	bekaari_to_deployment();
 }
 
-function set_deployment_zone(zone, new_zone){
+function set_zone(zone, new_zone){
 	bekaari[zone] = bekaari[new_zone];
 }
 
@@ -3822,14 +3941,25 @@ function bekaari_restart(){
 	bekaari['game_mode'] = 'game_start';
 	bekaari['game_start'].mode = 'idle';
 	bekaari['game_mode_infobox'].innerHTML = 'mode: Game Start';
+	_.forEach(bekaari['teams'], function(team){
+		team.game_points = 0;
+		draw_game_points;
+	});
 }
 
 function bekaari_new(){
-	console.log('bekaari_new');
 	bekaari['dudes'] = {};
-	bekaari['game_mode'] = 'deployment';
 	bekaari_new_matrix('field');
+	bekaari_to_deployment();
+}
+
+function bekaari_to_deployment(){
+	bekaari['game_mode'] = 'deployment';
 	bekaari['game_mode_infobox'].innerHTML = 'mode: Deployment';
+	_.forEach(bekaari['teams'], function(team){
+		team.dude_points = 0;
+		draw_dude_points(team);
+	});
 }
 
 function bekaari_start(){
@@ -3838,6 +3968,10 @@ function bekaari_start(){
 	bekaari['game_mode'] = 'game_start';
 	bekaari['game_start'].mode = 'idle';
 	bekaari['game_mode_infobox'].innerHTML = 'mode: Game Start';
+	_.forEach(bekaari['teams'], function(team){
+		team.game_points = 0;
+		draw_game_points(team);
+	});
 }
 
 function initiate_bekaari(){
@@ -3854,6 +3988,7 @@ function initiate_bekaari(){
 	
 	//calculate the width and height of field based on canvas size and desired size of position
 	bekaari['deployment_zone'] = [];
+	bekaari['scenario_zones'] = [];
 	bekaari['field'] = [];
 	bekaari['save_field'] = [];
 	bekaari['position_radius'] = 80;//note: this will be half? 
@@ -3861,8 +3996,8 @@ function initiate_bekaari(){
 	bekaari['height'] = Math.floor(bekaari['canvas'].height / bekaari['position_radius']);
 	bekaari['selected'] = [2, 2];
 	bekaari['gamepads'] = {};
-	// bekaari['game_mode'] = 'deployment';
-	bekaari['game_mode'] = 'game_start';
+	bekaari['game_mode'] = 'deployment';
+	bekaari['message'] = '';
 	bekaari['dudes'] = {};
 	bekaari['save_dudes'] = {};
 	bekaari['deployment'] = {};
@@ -3875,6 +4010,33 @@ function initiate_bekaari(){
 	bekaari['game_start'].selected_position = [0,0];
 	bekaari['infobox'] = document.getElementById('bekaari_infobox');
 	bekaari['game_mode_infobox'] = document.getElementById("bekaari_mode");
+	
+	bekaari['max_dude_points'] = 50;
+	bekaari['max_game_points'] = 10;
+	bekaari['teams'] = [
+		{
+			color: '#FF00FF',
+			box: document.getElementById("bekaari_purple"),
+			game_points: 0,
+			dude_points: 0 
+		},		{
+			color: '#FF0000',
+			box: document.getElementById("bekaari_red"),
+			game_points: 0,
+			dude_points: 0 
+		},		{
+			color: '#00FFFF',
+			box: document.getElementById("bekaari_blue"),
+			game_points: 0,
+			dude_points: 0 
+		},		{
+			color: '#00FF00',
+			box: document.getElementById("bekaari_green"),
+			game_points: 0,
+			dude_points: 0 
+		},
+		
+	];
 	
 	bekaari['next_pieces'] = [];
 	bekaari['map'] = '';
@@ -3927,9 +4089,7 @@ function initiate_bekaari(){
 	}
 	bekaari['grid_ctx'].strokeStyle = "grey";
 	bekaari['grid_ctx'].stroke();
-	//controller stuff?
-	//key press?
-	//first do draw;
+	bekaari_start();
 }
 
 function remove_dude(id){
@@ -4071,6 +4231,14 @@ function get_occupant_selected(){
 	}
 }
 
+function draw_game_points(team){
+	team.box.innerHTML = 'game points: ' + team.game_points + '/' + bekaari['max_game_points'];
+}
+
+function draw_dude_points(team){
+	team.box.innerHTML = 'dude points: ' + team.dude_points + '/' + bekaari['max_dude_points'];
+}
+
 function draw_deployment_zones(){
 	bekaari['ctx'].setLineDash([]);
 	_.forEach(bekaari['deployment_zone'], function(zone){
@@ -4083,6 +4251,24 @@ function draw_deployment_zones(){
 		);
 		
 	});
+}
+
+function draw_scenario_zones(){
+	bekaari['ctx'].globalAlpha = 0.2;
+	bekaari['ctx'].fillStyle = '#ffffff';
+	_.forEach(bekaari['scenario_zones'], function(zone){
+		_.forEach(zone, function(position){
+			var x = position[0];
+			var y = position[1];
+			bekaari['ctx'].fillRect(
+				x*bekaari['position_radius'],
+				y*bekaari['position_radius'],
+				bekaari['position_radius'],
+				bekaari['position_radius']
+			);
+		});
+	});
+	bekaari['ctx'].globalAlpha = 1.0;
 }
 
 function shadeColor2(color, percent) {   
@@ -4344,6 +4530,7 @@ function start_bekaari(){
 	console.log('start_bekaari');
 	intervals['bekaari_draw_interval'] = setInterval(function(){
 		bekaari['ctx'].clearRect(0, 0, bekaari['canvas'].width, bekaari['canvas'].height);
+		draw_scenario_zones();
 		switch(bekaari['game_mode']){
 			case 'deployment':
 				//draw deployment zones
@@ -4360,6 +4547,13 @@ function start_bekaari(){
 				info += "switch_dude: mouse-wheel, [ ], L1 R1<br /><br />switch_color: right-click, < >, L2 R2<br /><br />deploy_dude: left-click, space, X<br /><br />Selected:<br />"
 				info += dude_list[bekaari['deployment'].selected].description;
 				if(dude_list[bekaari['deployment'].selected].is_king) info += '<br/>Can only have one king.';
+				
+				//draw cost
+				
+				if(dude_list[bekaari['deployment'].selected].cost >= 0){
+					info += '<br /><br />cost: ' + dude_list[bekaari['deployment'].selected].cost;
+				}
+				
 				bekaari['infobox'].innerHTML = info;
 				
 				//draw patterns
