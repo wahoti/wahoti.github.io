@@ -1789,6 +1789,7 @@ var dude_list = {
 		tag: ' ---',
 		mobility: false,
 		is_piece: false,
+		lifespan: 1,
 		movement_patterns: [],
 		custom_movement_pattern: function(position){
 			return [];
@@ -1882,7 +1883,7 @@ var dude_list = {
 		mobility: false,
 		is_piece: true,
 		lives: 0,
-		cost: 4,
+		cost: 5,
 		movement_patterns: [],
 		custom_movement_pattern: function(position){
 			return [];
@@ -2615,6 +2616,7 @@ var dude_list = {
 			return [];
 		},
 		action: function(target_position, dude_position){
+			var dude_color = get_occupant_position(dude_position).color;
 			var x_dir = target_position[0] - dude_position[0];
 			var y_dir = target_position[1] - dude_position[1];
 			var x = dude_position[0];
@@ -2622,14 +2624,14 @@ var dude_list = {
 			var r = 3;
 			if((x_dir == 0) && (y_dir == 0)){
 				for(var i = x-r; i<=x+r; i++){
-					place_dude_with('wall', 'dudes', [i,y-r], 'field', '#aaaaaa');
-					place_dude_with('wall', 'dudes', [i,y+r], 'field', '#aaaaaa');
+					place_dude_with('wall', 'dudes', [i,y-r], 'field', dude_color);
+					place_dude_with('wall', 'dudes', [i,y+r], 'field', dude_color);
 				}
 				for(var j = y-r; j<= y+r; j++){
-					place_dude_with('wall', 'dudes', [x+r,j], 'field', '#aaaaaa');
-					place_dude_with('wall', 'dudes', [x-r,j], 'field', '#aaaaaa');
+					place_dude_with('wall', 'dudes', [x+r,j], 'field', dude_color);
+					place_dude_with('wall', 'dudes', [x-r,j], 'field', dude_color);
 				}
-				place_dude_with('wall', 'dudes', [x,y], 'field', '#aaaaaa');
+				place_dude_with('wall', 'dudes', [x,y], 'field', dude_color);
 			}
 			else{
 				attack_position([dude_position[0] + x_dir, dude_position[1] + y_dir]);
@@ -2804,16 +2806,18 @@ var dude_list = {
 			[1,0,1,1],
 			[-1,0,1,1],
 			[0,1,1,1],
-			[0,-1,1,1]
+			[0,-1,1,1],
+			[0,0,0,0]
 		],
 		custom_action_pattern: function(position){
-			return [position];
+			return [];
 		},
 		action: function(target_position, dude_position){
+			var dude_color = get_occupant_position(dude_position).color;
 			if(target_position == dude_position){
 				for(var x=dude_position[0]-1; x<=dude_position[0]+1; x++){
 					for(var y=dude_position[1]-1; y<=dude_position[1]+1; y++){
-						place_dude_with('wall', 'dudes', [x,y], 'field', '#aaaaaa');
+						place_dude_with('wall', 'dudes', [x,y], 'field', dude_color);
 					}
 				}
 			}
@@ -2854,7 +2858,7 @@ var dude_list = {
 				
 				for(var x=start_x; x<=end_x; x++){
 					for(var y=start_y; y<=end_y; y++){
-						place_dude_with('wall', 'dudes', [x,y], 'field', '#aaaaaa');
+						place_dude_with('wall', 'dudes', [x,y], 'field', dude_color);
 					}
 				}
 			}
@@ -3427,26 +3431,28 @@ function Dude(id, position, type, color){
 }
 
 function place_dude_capture(dude_type, dudes, position, field, color){
-	if(bekaari[field][position[0]][position[1]]){
-		var occupant = get_occupant_position(position);
-		var id = shortid.generate();
-		if(occupant){
-			if(occupant.type != 'obstacle'){
-				capture_dude(occupant.id);
+	if(position_valid(position)){
+		if(bekaari[field][position[0]][position[1]]){
+			var occupant = get_occupant_position(position);
+			var id = shortid.generate();
+			if(occupant){
+				if(occupant.type != 'obstacle'){
+					capture_dude(occupant.id);
+					bekaari[dudes][id] = new Dude(id, position, dude_type, color);
+					bekaari[field][position[0]][position[1]].occupant = id;
+					return id;
+				}
+			}
+			else{
 				bekaari[dudes][id] = new Dude(id, position, dude_type, color);
 				bekaari[field][position[0]][position[1]].occupant = id;
 				return id;
 			}
+			
 		}
 		else{
-			bekaari[dudes][id] = new Dude(id, position, dude_type, color);
-			bekaari[field][position[0]][position[1]].occupant = id;
-			return id;
+			console.log('position doesnt exist!', position);
 		}
-		
-	}
-	else{
-		console.log('position doesnt exist!', position);
 	}
 }
 
@@ -3595,7 +3601,7 @@ function activate_dude(dude_id){
 				console.log(team.color, ' WINS');
 				_.forEach(bekaari['dudes'], function(dude){
 					if(dude.color != team.color){
-						remove_dude(dude.id);
+						remove_dude_ignore_lives(dude.id);
 					}
 				});
 			}
@@ -4130,7 +4136,7 @@ function bekaari_restart(){
 	bekaari['game_mode_infobox'].innerHTML = 'mode: Game Start';
 	_.forEach(bekaari['teams'], function(team){
 		team.game_points = 0;
-		draw_game_points;
+		draw_game_points(team);
 	});
 }
 
@@ -4287,6 +4293,15 @@ function remove_dude(id){
 	}
 }
 
+function remove_dude_ignore_lives(id){
+	console.log('remove_dude_ignore_lives');
+	if(bekaari['dudes'][id]){
+		var position = bekaari['dudes'][id].position;
+		bekaari['field'][position[0]][position[1]].occupant = '';
+		capture_dude_ignore_lives(id);
+	}
+}
+
 function capture_dude(dude_id){
 	var lives = dude_list[bekaari['dudes'][dude_id].type].lives;
 	bekaari['dudes'][dude_id].captured_count += 1;
@@ -4310,7 +4325,9 @@ function capture_dude(dude_id){
 			if(dude_list[bekaari['dudes'][dude_id].type].is_king){
 				var color = bekaari['dudes'][dude_id].color;
 				_.forEach(bekaari['dudes'], function(dude){
-					if((dude.color == color) && (dude.type != 'king')) remove_dude(dude.id);
+					if((dude.color == color) && (dude.type != 'king')){
+						remove_dude_ignore_lives(dude.id);
+					}
 				});
 			}
 			delete bekaari['dudes'][dude_id];
@@ -4318,13 +4335,24 @@ function capture_dude(dude_id){
 	}
 	else{
 		if(dude_list[bekaari['dudes'][dude_id].type].is_king){
-			var color = bekaari['dudes'][dude_id].color;
-			_.forEach(bekaari['dudes'], function(dude){
-				if((dude.color == color) && (dude.type != 'king')) remove_dude(dude.id);
-			});
+				var color = bekaari['dudes'][dude_id].color;
+				_.forEach(bekaari['dudes'], function(dude){
+					if((dude.color == color) && (dude.type != 'king')){
+						remove_dude_ignore_lives(dude.id);
+					}
+				});
 		}
 		delete bekaari['dudes'][dude_id];
 	}
+}
+function capture_dude_ignore_lives(dude_id){
+	if(dude_list[bekaari['dudes'][dude_id].type].is_king){
+		var color = bekaari['dudes'][dude_id].color;
+		_.forEach(bekaari['dudes'], function(dude){
+			if((dude.color == color) && (dude.type != 'king')) remove_dude(dude.id);
+		});
+	}
+	delete bekaari['dudes'][dude_id];
 }
 
 function move_dude(dude_id, old_position, position){
