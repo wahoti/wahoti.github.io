@@ -1910,7 +1910,16 @@ var dude_list = {
 		is_piece: true,
 		lives: 0,
 		cost: 15,
-		movement_patterns: [],
+		movement_patterns: [
+			[1,0,1,2],
+			[-1,0,1,2],
+			[0,1,1,2],
+			[0,-1,1,2],
+			[1,1,1,2],
+			[-1,-1,1,2],
+			[1,-1,1,2],
+			[-1,1,1,2]
+		],
 		custom_movement_pattern: function(position){
 			return [];
 		},
@@ -1922,8 +1931,7 @@ var dude_list = {
 			[1,0,1,1],
 			[-1,0,1,1],
 			[0,1,1,1],
-			[0,-1,1,1],
-			[0,0,0,0]
+			[0,-1,1,1]
 		],
 		custom_action_pattern: function(position){
 			var spots = [
@@ -1944,7 +1952,7 @@ var dude_list = {
 					free.push([x,y]);
 				}
 			});
-			return free;
+			return [];
 		},
 		action: function(target_position, dude_position){
 			var x_dir = target_position[0] - dude_position[0];
@@ -1997,15 +2005,76 @@ var dude_list = {
 			[0, 1, 1, 1],
 			[-1, 0, 1, 1]
 		],
-		custom_attack_pattern: function(position){
-			return [];
-		},
+		custom_attack_pattern: knight_movement,
 		action_patterns: [
 		],
 		custom_action_pattern: function(position){
 			return [];
 		},
 		action: function(target_position, dude_position){
+		},
+	},
+	wizard: object = {
+		description: "wizard:<br/>.",
+		tag: 'wiz',
+		mobility: false,
+		is_piece: true,
+		immunity_fire: true,
+		lives: 0,
+		cost: 10,
+		movement_patterns: [
+			[1, -1, 1, 1],
+			[1, 1, 1, 1],
+			[-1, -1, 1, 1],
+			[-1, 1, 1, 1],
+			[0, -1, 1, 2],
+			[1, 0, 1, 2],
+			[0, 1, 1, 2],
+			[-1, 0, 1, 2]
+		],
+		custom_movement_pattern: function(position){
+			return [];
+		},
+		attack_patterns: [
+		],
+		custom_attack_pattern: function(position){
+			return [];
+		},
+		action_patterns: [
+			[-1, 1, 3, 3],
+			[-1, -1, 3, 3],
+			[1, 1, 3, 3],
+			[1, -1, 3, 3],
+			[0, 1, 4, 4],
+			[0, -1, 4, 4],
+			[1, 0, 6, 6],
+			[-1, 0, 6, 6],
+			[1, 0, 3, 3],
+			[-1, 0, 3, 3]
+		],
+		custom_action_pattern: function(position){
+			return [];
+		},
+		action: function(target_position, dude_position){
+			var x = target_position[0];
+			var y = target_position[1];
+			var r = 2;
+			var dude_color = get_occupant_position(dude_position).color;
+			for(var a=x-r; a<=x+r; a++){
+				for(var b=y-r; b<=y+r; b++){
+					var occupant = get_occupant_position([a,b]);
+					if(occupant){
+						if(!dude_list[occupant.type].is_piece){
+							if((Math.random()*100)>50){
+								place_dude_capture('fire_wall', 'dudes', [a,b], 'field', dude_color);
+							}
+						}
+					}
+					else if((Math.random()*100)<=25){
+						place_dude_capture('fire_wall', 'dudes', [a,b], 'field', dude_color);
+					}
+				}
+			}
 		},
 	},
 	frost_giant: object = {
@@ -2071,10 +2140,10 @@ var dude_list = {
 						if((Math.random()*100)<=15){
 							var occupant = get_occupant_position([i,j]);
 							if(occupant){
-								if(occupant.color != dude_color){
-									bekaari['dudes'][occupant.id].frozen = true;
-									// bekaari['dudes'][occupant.id].activated = true;
+								if(dude_list[occupant.type].is_piece){
+									if(occupant.color != dude_color) bekaari['dudes'][occupant.id].frozen = true;
 								}
+								else place_dude_capture('ice_wall', 'dudes', position, 'field', dude_color);
 							}
 							else{
 								place_dude_with('ice_wall', 'dudes', [i,j], 'field', dude_color);
@@ -2120,8 +2189,8 @@ var dude_list = {
 				_.forEach(spray_area, function(position){
 					var occupant = get_occupant_position(position);
 					if(occupant){
-						bekaari['dudes'][occupant.id].frozen = true;
-						// bekaari['dudes'][occupant.id].activated = true;
+						if(dude_list[occupant.type].is_piece) bekaari['dudes'][occupant.id].frozen = true;
+						else place_dude_capture('ice_wall', 'dudes', position, 'field', dude_color);
 					}
 					else{
 						place_dude_with('ice_wall', 'dudes', position, 'field', dude_color);
@@ -3021,25 +3090,6 @@ var dude_list = {
 		action: function(target_position, dude_position){
 			var color = bekaari['dudes'][bekaari['game_start'].selected_id].color;
 			place_dude_with('zombie', 'dudes', target_position, 'field', color);
-			// var x_direction = target_position[0] - dude_position[0];
-			// var y_direction = target_position[1] - dude_position[1];
-				
-			// if(x_direction == 0){
-				// if(y_direction > 0){
-					// place_dude_with('pawn_S', 'dudes', target_position, 'field', color);
-				// }
-				// else{
-					// place_dude_with('pawn_N', 'dudes', target_position, 'field', color);
-				// }
-			// }
-			// else if(y_direction == 0){
-				// if(x_direction > 0){
-					// place_dude_with('pawn_E', 'dudes', target_position, 'field', color);
-				// }
-				// else{
-					// place_dude_with('pawn_W', 'dudes', target_position, 'field', color);
-				// }
-			// }
 		},
 	},
 	rook: object = {
@@ -3081,15 +3131,18 @@ var dude_list = {
 	pawn: object = {
 		description: 'pawn:<br/>moves on columns and rows. attacks on diagonals.',
 		tag: 'p',
+		sprite: 'pawn',
+		sprite_width: 80,
+		sprite_height: 80,
 		mobility: false,
 		is_piece: true,
 		lives: 0,
 		cost: 1,
 		movement_patterns: [
-			[0, -1, 1, 1],
-			[1, 0, 1, 1],
-			[0, 1, 1, 1],
-			[-1, 0, 1, 1]
+			[0, -1, 1, 2],
+			[1, 0, 1, 2],
+			[0, 1, 1, 2],
+			[-1, 0, 1, 2]
 		],
 		custom_movement_pattern: function(position){
 			return [];
@@ -3110,118 +3163,6 @@ var dude_list = {
 		action: function(position){
 			
 		}
-	},
-	pawn_S: object = {
-		description: 'pawn:<br/>moves on columns and rows. attacks on diagonals.',
-		tag: 'ps',
-		mobility: false,
-		is_piece: true,
-		lives: 0,
-		cost: 1,
-		movement_patterns: [
-			[0, 1, 1, 1]
-		],
-		custom_movement_pattern: function(position){
-			return [];
-		},
-		attack_patterns: [
-			[1, 1, 1, 1],
-			[-1, 1, 1, 1]
-		],
-		custom_attack_pattern: function(position){
-			return [];
-		},
-		action_patterns: [],
-		custom_action_pattern: function(position){
-			return [];
-		},
-		action: function(position){
-			
-		}
-	},
-	pawn_N: object = {
-		description: 'pawn:<br/>moves on columns and rows. attacks on diagonals.',
-		tag: 'pn',
-		mobility: false,
-		is_piece: true,
-		lives: 0,
-		cost: 1,
-		movement_patterns: [
-			[0, -1, 1, 1]
-		],
-		custom_movement_pattern: function(position){
-			return [];
-		},
-		attack_patterns: [
-			[1, -1, 1, 1],
-			[-1, -1, 1, 1]
-		],
-		custom_attack_pattern: function(position){
-			return [];
-		},
-		action_patterns: [],
-		custom_action_pattern: function(position){
-			return [];
-		},
-		action: function(position){
-			
-		}
-	},
-	pawn_E: object = {
-		description: 'pawn:<br/>moves on columns and rows. attacks on diagonals.',
-		tag: 'pe',
-		mobility: false,
-		is_piece: true,
-		lives: 0,
-		cost: 1,
-		movement_patterns: [
-			[1, 0, 1, 1]
-		],
-		custom_movement_pattern: function(position){
-			return [];
-		},
-		attack_patterns: [
-			[1, -1, 1, 1],
-			[1, 1, 1, 1]
-		],
-		custom_attack_pattern: function(position){
-			return [];
-		},
-		action_patterns: [],
-		custom_action_pattern: function(position){
-			return [];
-		},
-		action: function(position){
-			
-		},
-	},
-	pawn_W: object = {
-		description: 'pawn:<br/>moves on columns and rows. attacks on diagonals.',
-		tag: 'pw',
-		mobility: false,
-		is_piece: true,
-		lives: 0,
-		cost: 1,
-		movement_patterns: [
-			[-1, 0, 1, 1]
-		],
-		custom_movement_pattern: function(position){
-			return [];
-		},
-		attack_patterns: [
-			[-1, -1, 1, 1],
-			[-1, 1, 1, 1]
-		],
-		custom_attack_pattern: function(position){
-			return [];
-		},
-		action_patterns: [],
-		custom_action_pattern: function(position){
-			return [];
-		},
-		action: function(position){
-			
-		},
 	},
 	bishop: object = {
 		description: 'bishop:<br/>moves/attacks on diagonals.',
@@ -4129,8 +4070,8 @@ function initiate_chess_map(){
 	place_dude_with('queen', dudes, [15, 6], field, E_color);
 	
 	for(var c=2; c<10; c++){
-		place_dude_with('pawn_E', dudes, [9, c], field, W_color);
-		place_dude_with('pawn_W', dudes, [14, c], field, E_color);
+		place_dude_with('pawn', dudes, [9, c], field, W_color);
+		place_dude_with('pawn', dudes, [14, c], field, E_color);
 	}
 }
 

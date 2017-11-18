@@ -109,6 +109,10 @@ app.get('/res/wraith.png', function(req,res) {
 	res.sendFile(__dirname + '/res/wraith.png');
 });
 
+app.get('/res/pawn.png', function(req,res) {
+	res.sendFile(__dirname + '/res/pawn.png');
+});
+
 app.get('/res/symphony.png', function(req,res) {
 	res.sendFile(__dirname + '/res/symphony.png');
 });
