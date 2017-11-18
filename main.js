@@ -1533,6 +1533,17 @@ function start_chess_clock(){
 	}, 500)
 }
 
+function get_adjacent(position){
+	var x = position[0];
+	var y = position[1];
+	var adj = [[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,1],[1,-1],[1,0]];
+	var positions = [];
+	_.forEach(adj, function(pos){
+		if(position_valid([x+pos[0],y+pos[1]])) positions.push([x+pos[0],y+pos[1]]);
+	});
+	return positions;
+}
+
 function attack_position(position){
 	var id = place_dude_capture('attack', 'dudes', [position[0],position[1]], 'field', '#ff0000');
 	setTimeout(function(){
@@ -2361,6 +2372,18 @@ var dude_list = {
 				place_dude_capture('fire_wall', 'dudes', [x+0,y-1], 'field', dude_color);
 			}
 		},
+		action_attack_patterns: function(position){
+			var x = position[0];
+			var y = position[1];
+			var attack_positions = [];
+			var action_positions = dude_list['dragon'].custom_action_pattern(position);
+			_.forEach(action_positions, function(act_pos){
+				_.forEach(get_adjacent(act_pos), function(adj){
+					attack_positions.push(adj);
+				})
+			});
+			return attack_positions;
+		},
 	},
 	archer: object = {
 		description: "bow_dude:<br/>long range attacks",
@@ -2400,6 +2423,7 @@ var dude_list = {
 			[0, -1, 1, 1]
 		],
 		custom_action_pattern: function(position){
+
 			return [];
 		},
 		action: function(target_position, dude_position){
@@ -4413,35 +4437,76 @@ function draw_dude(dude){
 	}
 }
 
-function draw_patterns(dude, display){;
+function draw_patterns(dude, display, activating){;
 	if(dude){
-		_.forEach(get_positions(dude.type, dude.position), function(position){
-			bekaari['ctx'].setLineDash([]);
-			bekaari['ctx'].lineWidth=1;
-			bekaari['ctx'].strokeStyle=dude.color;
-			bekaari['ctx'].strokeRect(
-				position[0]*bekaari['position_radius'],
-				position[1]*bekaari['position_radius'],
-				bekaari['position_radius'],
-				bekaari['position_radius']
-			);
-		});
-		_.forEach(get_attack_positions(dude.type, dude.position, display), function(position){
-			bekaari['ctx'].setLineDash([20,bekaari['position_radius']-40, 20, 0]);
-			bekaari['ctx'].lineWidth=3;
-			bekaari['ctx'].strokeStyle= dude.color;
-			bekaari['ctx'].strokeRect(
-				position[0]*bekaari['position_radius'],
-				position[1]*bekaari['position_radius'],
-				bekaari['position_radius'],
-				bekaari['position_radius']
-			);
-		});
+		if(!activating){
+			_.forEach(get_positions(dude.type, dude.position), function(position){
+				bekaari['ctx'].setLineDash([]);
+				bekaari['ctx'].lineWidth=1;
+				bekaari['ctx'].strokeStyle=dude.color;
+				bekaari['ctx'].strokeRect(
+					position[0]*bekaari['position_radius'],
+					position[1]*bekaari['position_radius'],
+					bekaari['position_radius'],
+					bekaari['position_radius']
+				);
+			});
+			_.forEach(get_attack_positions(dude.type, dude.position, display), function(position){
+				bekaari['ctx'].setLineDash([20,bekaari['position_radius']-40, 20, 0]);
+				bekaari['ctx'].lineWidth=3;
+				bekaari['ctx'].strokeStyle= dude.color;
+				bekaari['ctx'].strokeRect(
+					position[0]*bekaari['position_radius'],
+					position[1]*bekaari['position_radius'],
+					bekaari['position_radius'],
+					bekaari['position_radius']
+				);
+			});
+		}
+		else{
+			bekaari['ctx'].globalAlpha = 0.2;
+			bekaari['ctx'].fillStyle=dude.color;
+			_.forEach(get_positions(dude.type, dude.position), function(position){
+				bekaari['ctx'].fillRect(
+					position[0]*bekaari['position_radius'],
+					position[1]*bekaari['position_radius'],
+					bekaari['position_radius'],
+					bekaari['position_radius']
+				);
+			});
+			_.forEach(get_attack_positions(dude.type, dude.position, display), function(position){
+				bekaari['ctx'].fillRect(
+					position[0]*bekaari['position_radius'],
+					position[1]*bekaari['position_radius'],
+					bekaari['position_radius'],
+					bekaari['position_radius']
+				);
+			});			
+			bekaari['ctx'].globalAlpha = 1.0;
+		}
 	}
 }
 
+//qwerty
 function draw_action_pattern(dude){
 	if(dude){
+		dude_type = dude_list[dude.type];
+		if(dude_type.action_attack_patterns){
+			bekaari['ctx'].strokeStyle= dude.color;
+			bekaari['ctx'].setLineDash([20,bekaari['position_radius']-40, 20, 0]);
+			bekaari['ctx'].lineWidth=3;
+			_.forEach(dude_type.action_attack_patterns([dude.position[0], dude.position[1]]), function(position){
+				var x = position[0] * bekaari['position_radius'];
+				var y = position[1] * bekaari['position_radius'];
+				bekaari['ctx'].strokeRect(
+					x,
+					y,
+					bekaari['position_radius'],
+					bekaari['position_radius']
+				);
+			});
+			bekaari['ctx'].setLineDash([]);
+		}
 		_.forEach(get_action_positions(dude.type, dude.position), function(position){
 			var x = position[0] * bekaari['position_radius'];
 			var y = position[1] * bekaari['position_radius'];
@@ -4490,6 +4555,7 @@ function do_gamepad(index, buttIndex, butt){
 				bekaari_cancel();
 				break;
 			case 2://square
+				bekaari['view_action'] = true;
 				bekaari['gamepads'][index].skip = true;
 				break;
 			case 3://triangle
@@ -4554,6 +4620,7 @@ function do_gamepad(index, buttIndex, butt){
 			case 1://circle
 				break;
 			case 2://square
+				bekaari['view_action'] = false;
 				bekaari['gamepads'][index].skip = false;
 				break;
 			case 3://triangle
@@ -4634,24 +4701,49 @@ function start_bekaari(){
 					position: [bekaari['selected'][0], bekaari['selected'][1]],
 					color: bekaari['deployment'].color,
 					type: bekaari['deployment'].selected
-				}, true);
+				}, true, false);
 				break;
 			case 'game_start':
+				var occupant = get_occupant_selected();
 				var info = '';
 				switch(bekaari['game_start'].mode){
 					case 'idle':
-						info += "idle:<br/><br/>select:<br/>left-click, space, X<br/><br/>next_piece:<br/>n,triangle<br/><br/>cancel:<br/>k,O<br/><br/>";
-						var occupant = get_occupant_selected();
 						if(occupant){
-							if(!occupant.activated) draw_patterns(occupant, true);
+							if(!occupant.activated){
+								if(bekaari['view_action']){
+									draw_action_pattern(occupant);
+								}
+								else draw_patterns(occupant, true, false);
+							}
 							info += 'Selected:<br/>' + dude_list[occupant.type].description;
 						}
+						info += "idle:<br/><br/>select:<br/>left-click, space, X<br/><br/>next_piece:<br/>n,triangle<br/><br/>cancel:<br/>k,O<br/><br/>";
 						break;
 					case 'moving':
-						draw_patterns(get_occupant_position(bekaari['game_start'].selected_position), false);
+						if(occupant){
+							if((occupant.position[0] != bekaari['game_start'].selected_position[0]) ||
+								(occupant.position[1] != bekaari['game_start'].selected_position[1])){
+								if(bekaari['view_action']){
+									draw_action_pattern(occupant);
+								}
+								else draw_patterns(occupant, true, false);
+								info += 'Selected:<br/>' + dude_list[occupant.type].description;
+							}
+						}
+						draw_patterns(get_occupant_position(bekaari['game_start'].selected_position), false, true);
 						info += "moving:<br/><br/>select:<br/>left-click, space, X<br/><br/>cancel:<br/>k,O<br/><br/>";
 						break;
 					case 'activating':
+						if(occupant){
+							if((occupant.position[0] != bekaari['game_start'].selected_position[0]) ||
+								(occupant.position[1] != bekaari['game_start'].selected_position[1])){
+								if(bekaari['view_action']){
+									draw_action_pattern(occupant);
+								}
+								else draw_patterns(occupant, true, false);
+								info += 'Selected:<br/>' + dude_list[occupant.type].description;
+							}
+						}
 						draw_action_pattern(get_occupant_position(bekaari['game_start'].selected_position));
 						info += "activating:<br/><br/>select:<br/>left-click, space, X<br/><br/>cancel:<br/>k,O<br/><br/>";
 						break;
