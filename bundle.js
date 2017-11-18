@@ -351,6 +351,7 @@ var keydown = function(c){
 				bekaari_select();
 				break;
 			case 16://shift
+				bekaari['view_action'] = true;
 				break;
 			case 190://, >
 				bekaari_color_shift_forward();
@@ -424,6 +425,14 @@ var keydown = function(c){
 
 var keyup = function(c){
 	var key = c.keyCode;
+	if(last_tab == 'Bekaari'){
+		switch(key){
+			case 16://shift
+				bekaari['view_action'] = false;
+				break;
+			default:
+		}
+	}
 	if(last_tab == 'Dark Squares'){
 		switch(key){
 			case 87://w
@@ -2516,7 +2525,7 @@ var dude_list = {
 			_.forEach([
 				[-5,-2],[5,2],[5,-2],[-5,2],
 				[7,0],[-7,0],[0,5],[0,-5],
-				[4,4],[-4,-4],[4,-4],[-4,4],
+				[3,4],[-3,-4],[3,-4],[-3,4],
 			], function(spot){
 				var x = position[0] + spot[0]; 
 				var y = position[1] + spot[1]; 
@@ -2762,7 +2771,11 @@ var dude_list = {
 			[0, -1, 1, 3],
 			[1, 0, 1, 3],
 			[0, 1, 1, 3],
-			[-1, 0, 1, 3]
+			[-1, 0, 1, 3],
+			[1,1,1,1],
+			[-1,-1,1,1],
+			[-1,1,1,1],
+			[1,-1,1,1]
 		],
 		custom_movement_pattern: function(position){
 			return [];
@@ -3836,6 +3849,48 @@ function bekaari_select(){
 	}
 }
 
+function four_corners_deployment(deployment_zone, dudes, field){
+	bekaari[deployment_zone] = [];
+	
+	var S_color = '#FF00FF';
+	var E_color = '#00FF00';
+	var W_color = '#FF0000';
+	var N_color = '#00FFFF';
+	var obstacle_color = '#AAAAAA';
+	
+	var dh = 3;
+	var dw = 5;
+	
+	for(var i=0; i<dw; i++){
+		for(var j=0; j<dh; j++){
+			bekaari[deployment_zone].push([i, j, N_color]);
+		}
+		for(var k=bekaari['height']-dh; k<bekaari['height']; k++){
+			bekaari[deployment_zone].push([i, k, W_color]);
+		}
+		for(var l=5; l<7; l++){
+			place_dude_with('obstacle', dudes, [i, l], field, obstacle_color);	
+		}
+	}
+	
+	for(var a=bekaari['width']-dw; a<bekaari['width']; a++){
+		for(var b=0; b<dh; b++){
+			bekaari[deployment_zone].push([a, b, E_color]);
+		}
+		for(var c=bekaari['height']-dh; c<bekaari['height']; c++){
+			bekaari[deployment_zone].push([a, c, S_color]);
+		}
+		for(var d=5; d<7; d++){
+			place_dude_with('obstacle', dudes, [a, d], field, obstacle_color);	
+		}
+	}
+	
+	for(var m=0; m<dh; m++){
+		place_dude_with('obstacle', dudes, [12, m], field, obstacle_color);	
+		place_dude_with('obstacle', dudes, [12, bekaari['height']-(m+1)], field, obstacle_color);	
+	}
+}
+
 function initiate_fourth_map(){
 	var field = 'fourth_field';
 	var dudes = 'fourth_dudes';
@@ -3844,9 +3899,9 @@ function initiate_fourth_map(){
 	
 	bekaari_new_matrix(field);
 	bekaari[dudes] = {};
-	bekaari[deployment_zone] = [];
 	bekaari[scenario_zone] = [];
-	
+
+	four_corners_deployment(deployment_zone, dudes, field);
 	
 	var S_color = '#FF00FF';
 	var E_color = '#00FF00';
@@ -3917,35 +3972,6 @@ function initiate_fourth_map(){
 	place_dude_with('wraith', dudes, [w-3, h-3], field, S_color);	
 	place_dude_with('dervish', dudes, [w-2, h-2], field, S_color);	
 	place_dude_with('wraith', dudes, [w-4, h-2], field, S_color);	
-	
-	for(var i=0; i<4; i++){
-		for(var j=0; j<3; j++){
-			bekaari[deployment_zone].push([i, j, N_color]);
-		}
-		for(var k=bekaari['height']-3; k<bekaari['height']; k++){
-			bekaari[deployment_zone].push([i, k, W_color]);
-		}
-		for(var l=5; l<7; l++){
-			place_dude_with('obstacle', dudes, [i, l], field, obstacle_color);	
-		}
-	}
-	
-	for(var a=bekaari['width']-4; a<bekaari['width']; a++){
-		for(var b=0; b<3; b++){
-			bekaari[deployment_zone].push([a, b, E_color]);
-		}
-		for(var c=bekaari['height']-3; c<bekaari['height']; c++){
-			bekaari[deployment_zone].push([a, c, S_color]);
-		}
-		for(var d=5; d<7; d++){
-			place_dude_with('obstacle', dudes, [a, d], field, obstacle_color);	
-		}
-	}
-	
-	for(var m=0; m<3; m++){
-		place_dude_with('obstacle', dudes, [12, m], field, obstacle_color);	
-		place_dude_with('obstacle', dudes, [12, bekaari['height']-(m+1)], field, obstacle_color);	
-	}
 }
 
 function initiate_third_map(){
@@ -3956,8 +3982,9 @@ function initiate_third_map(){
 	
 	bekaari_new_matrix(field);
 	bekaari[dudes] = {};
-	bekaari[deployment_zone] = [];
 	bekaari[scenario_zone] = [];
+	
+	four_corners_deployment(deployment_zone, dudes, field);
 	
 	var S_color = '#FF00FF';
 	var E_color = '#00FF00';
@@ -3987,34 +4014,6 @@ function initiate_third_map(){
 	place_dude_with('king', dudes, [0, bekaari['height']-1], field, W_color);	
 	// place_dude_with('king', dudes, [bekaari['width']-1, bekaari['height']-1], field, S_color);	
 	
-	for(var i=0; i<4; i++){
-		for(var j=0; j<3; j++){
-			bekaari[deployment_zone].push([i, j, N_color]);
-		}
-		for(var k=bekaari['height']-3; k<bekaari['height']; k++){
-			bekaari[deployment_zone].push([i, k, W_color]);
-		}
-		for(var l=5; l<7; l++){
-			place_dude_with('obstacle', dudes, [i, l], field, obstacle_color);	
-		}
-	}
-	
-	for(var a=bekaari['width']-4; a<bekaari['width']; a++){
-		for(var b=0; b<3; b++){
-			bekaari[deployment_zone].push([a, b, E_color]);
-		}
-		for(var c=bekaari['height']-3; c<bekaari['height']; c++){
-			bekaari[deployment_zone].push([a, c, S_color]);
-		}
-		for(var d=5; d<7; d++){
-			place_dude_with('obstacle', dudes, [a, d], field, obstacle_color);	
-		}
-	}
-	
-	for(var m=0; m<3; m++){
-		place_dude_with('obstacle', dudes, [12, m], field, obstacle_color);	
-		place_dude_with('obstacle', dudes, [12, bekaari['height']-(m+1)], field, obstacle_color);	
-	}
 }
 
 function initiate_second_map(){
@@ -4884,11 +4883,20 @@ function start_bekaari(){
 				bekaari['infobox'].innerHTML = info;
 				
 				//draw patterns
-				draw_patterns({
-					position: [bekaari['selected'][0], bekaari['selected'][1]],
-					color: bekaari['deployment'].color,
-					type: bekaari['deployment'].selected
-				}, true, false);
+				if(bekaari['view_action']){
+					draw_action_pattern({
+						position: [bekaari['selected'][0], bekaari['selected'][1]],
+						color: bekaari['deployment'].color,
+						type: bekaari['deployment'].selected
+					});
+				}
+				else{
+					draw_patterns({
+						position: [bekaari['selected'][0], bekaari['selected'][1]],
+						color: bekaari['deployment'].color,
+						type: bekaari['deployment'].selected
+					}, true, false);
+				}
 				break;
 			case 'game_start':
 				var occupant = get_occupant_selected();
