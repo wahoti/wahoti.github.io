@@ -4811,6 +4811,7 @@ function start_bekaari(){
 				
 				//draw the description
 				var info = '';
+				info += 'game_mode: deployment<br/><br/>';
 				info += "switch_dude: mouse-wheel, [ ], L1 R1<br /><br />switch_color: right-click, < >, L2 R2<br /><br />deploy_dude: left-click, space, X<br /><br />Selected:<br />"
 				info += dude_list[bekaari['deployment'].selected].description;
 				if(dude_list[bekaari['deployment'].selected].is_king) info += '<br/>Can only have one king.';
@@ -4853,7 +4854,7 @@ function start_bekaari(){
 							}
 							info += 'Selected:<br/>' + dude_list[occupant.type].description;
 						}
-						info += "idle:<br/><br/>select:<br/>left-click, space, X<br/><br/>next_piece:<br/>n,triangle<br/><br/>cancel:<br/>k,O<br/><br/>";
+						info += "<br/><br/>game_mode: idle<br/><br/>select:<br/>left-click, space, X<br/><br/>next_piece:<br/>n,triangle<br/><br/>cancel:<br/>k,O<br/><br/>Display action: shift, square<br/<br/>";
 						break;
 					case 'moving':
 						if(occupant){
@@ -4881,7 +4882,7 @@ function start_bekaari(){
 							}
 						}
 						draw_action_pattern(get_occupant_position(bekaari['game_start'].selected_position));
-						info += "activating:<br/><br/>select:<br/>left-click, space, X<br/><br/>cancel:<br/>k,O<br/><br/>";
+						info += "game_mode:activating:<br/><br/>select:<br/>left-click, space, X<br/><br/>cancel:<br/>k,O<br/><br/>";
 						break;
 					default:
 				}
