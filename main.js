@@ -1392,7 +1392,7 @@ function create_player(id) {
 	things[id].phase = 'moving';
 	things[id].speed = 5;
 	things[id].space = 'dodge';
-	things[id].shift = 'freeze';
+	things[id].shift = 'fist_of_the_north_star';
 	things[id].m1 = 'sword';
 	things[id].m2 = 'axe';
 	things[id].is_player = true;
@@ -4423,6 +4423,18 @@ function draw_patterns(dude, display, activating){;
 				);
 			});			
 			bekaari['ctx'].globalAlpha = 1.0;
+			_.forEach(get_attack_positions(dude.type, dude.position, display), function(position){
+				bekaari['ctx'].setLineDash([20,bekaari['position_radius']-40, 20, 0]);
+				bekaari['ctx'].lineWidth=3;
+				bekaari['ctx'].strokeStyle= dude.color;
+				bekaari['ctx'].strokeRect(
+					position[0]*bekaari['position_radius'],
+					position[1]*bekaari['position_radius'],
+					bekaari['position_radius'],
+					bekaari['position_radius']
+				);
+				bekaari['ctx'].setLineDash([]);
+			});
 		}
 	}
 }
