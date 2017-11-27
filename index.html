@@ -452,6 +452,49 @@
 		div#bekaari_map:hover {
 			background-color: #ddd;
 		}
+		canvas#SF_canvas {
+			border:1px solid #000000;
+			width: 1000px;
+			height: 500px;
+			z-index: 1;
+			position: absolute;
+			left: 50%;
+			margin-left: -500px;
+			top: 50%;
+			margin-top: -275px;
+		}
+		canvas#SF_backdrop_canvas {
+			background-color: #333333;
+			border:1px solid #000000;
+			width: 1000px;
+			height: 500px;
+			z-index: 0;
+			position: absolute;
+			left: 50%;
+			margin-left: -500px;
+			top: 50%;
+			margin-top: -275px;
+		}
+		div#SF_canvas_wrapper {
+			position: relative;
+			margin: auto;
+			height: 100%;
+			width: 100%;
+		}
+		div#SF_gamepad_infobox{
+			border:1px solid grey;
+			font-size: 10px;
+			color: grey;
+			
+			height: 12px;
+			width: 160px;
+			
+			position: absolute;
+			
+			bottom: 50px;
+			
+			right: 0px;
+		}
 	</style>
 	</head>
 	<body>
@@ -461,6 +504,7 @@
 		<button class="tablinks" onclick="openTab(event, 'Box')">Box</button>
 		<button class="tablinks" onclick="openTab(event, 'Chess Clock')">Chess Clock</button>
 		<button class="tablinks" onclick="openTab(event, 'Bekaari')">Bekaari</button>
+		<button class="tablinks" onclick="openTab(event, 'SF')">SquareFighter</button>
 	</div>
 	
 	<div id="About Me" class="tabcontent">
@@ -550,6 +594,16 @@
 			<div id="bekaari_blue"></div>
 			<div id="bekaari_green"></div>
 			<div id="bekaari_purple"></div>
+		</div>
+	</div>
+	<div id="SF" class="tabcontent">
+		<div>in progress</div>
+		<div id="SF_canvas_wrapper">
+			<div id="SF_gamepad_infobox">
+			<p id="SF_gamepad_p">Gamepads Connected: 0</p>
+			</div>
+			<canvas id="SF_backdrop_canvas" width="2000" height="1000" ></canvas>
+			<canvas id="SF_canvas" width="2000" height="1000" ></canvas>
 		</div>
 	</div>
 	<div id="resources">

@@ -231,6 +231,12 @@ function tab_event(tab_name) {
 	else if (tab_name != 'Bekaari' && hold_last_tab == 'Bekaari'){
 		stop_bekaari();
 	}
+	if (tab_name == 'SF' && hold_last_tab != 'SF'){
+		start_SF();
+	}
+	else if (tab_name != 'SF' && hold_last_tab == 'SF'){
+		stop_SF();
+	}
 }
 
 domready(function() {
@@ -239,6 +245,7 @@ domready(function() {
 	add_event_listeners();//put this in tab - and add remove_event_listeners()?????
 	initiate_chess_clock();
 	initiate_bekaari();
+	initiate_SF();
 	// controller_stuff()//NOT NEEDED YO... YO
 });
 
@@ -1597,7 +1604,8 @@ create_player('player');
 
 var intervals = {};
 var chess_clock = {};
-var bekaari = {}
+var bekaari = {};
+var SF = {};
 
 function reset_chess_clock(){
 var now = new Date().getTime();
@@ -4684,7 +4692,6 @@ function do_gamepad(index, buttIndex, butt){
 	
 	//on_press
 	if(butt.pressed && !bekaari['gamepads'][index].buttons[buttIndex].pressed){
-		console.log('press');
 		bekaari['gamepads'][index].buttons[buttIndex].pressed = true;
 		switch(buttIndex){
 			case 0://cross
@@ -4750,8 +4757,6 @@ function do_gamepad(index, buttIndex, butt){
 		}		
 	}	
 	else if(!butt.pressed && bekaari['gamepads'][index].buttons[buttIndex].pressed){
-		//on release
-		console.log('release');
 		bekaari['gamepads'][index].buttons[buttIndex].pressed = false;
 		switch(buttIndex){
 			case 0://cross
@@ -4944,6 +4949,227 @@ function start_bekaari(){
 						};
 						_.forEach([0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17], function(i){
 								bekaari['gamepads'][gamepad.index].buttons[i] = {
+									pressed: false,
+								}
+						});
+					}
+				}
+			}
+		})
+	}, 1000);
+}
+
+function do_SF_gamepad(index, buttIndex, butt){
+	//on_hold
+	// if(butt.pressed && bekaari['gamepads'][index].buttons[buttIndex].pressed){
+		// bekaari['gamepads'][index].buttons[buttIndex].pressed_count += 1;
+		// if(bekaari['gamepads'][index].buttons[buttIndex].pressed_count >= bekaari['gamepads'][index].buttons[buttIndex].hold_trigger){
+			
+		// }
+		// bekaari['gamepads'][index].buttons[buttIndex].pressed_count
+		
+	// }
+	
+	//on_press
+	//if the button is pressed and it wasn't pressed before
+	if(butt.pressed && !SF['gamepads'][index].buttons[buttIndex].pressed){
+		SF['gamepads'][index].buttons[buttIndex].pressed = true;
+		switch(buttIndex){
+			case 0://cross
+				console.log('yo');
+				if(!SF['gamepads'][index].ready){
+					SF['gamepads'][index].ready = true;
+					SF['gamepads'][index].player_index = SF['number_of_players']+0;
+					SF['players'][SF['number_of_players']].ready = true;
+					SF['players'][SF['number_of_players']].gamepad_index = index;
+					SF['number_of_players']+=1;
+				}
+				break;
+			case 1://circle
+				break;
+			case 2://square
+				break;
+			case 3://triangle
+				break;
+			case 4://L1
+				break;
+			case 5://R1
+				break;
+			case 6://L2
+				break;
+			case 7://R2
+				break;								
+			case 8://share
+				break;							
+			case 9://options
+				break;							
+			case 10://L3
+				break;							
+			case 11://R3
+				break;							
+			case 12://up
+				break;							
+			case 13://down
+				break;
+			case 14://left
+				break;
+			case 15://right
+				break;
+			case 16://playstation button
+				break;
+			case 17://keypad
+				break;								
+			default:
+		}		
+	}	
+	else if(!butt.pressed && SF['gamepads'][index].buttons[buttIndex].pressed){
+		SF['gamepads'][index].buttons[buttIndex].pressed = false;
+		switch(buttIndex){
+			case 0://cross
+				break;
+			case 1://circle
+				break;
+			case 2://square
+				break;
+			case 3://triangle
+				break;
+			case 4://L1
+				break;
+			case 5://R1
+				break;
+			case 6://L2
+				break;
+			case 7://R2
+				break;								
+			case 8://share
+				break;							
+			case 9://options
+				break;							
+			case 10://L3
+				break;							
+			case 11://R3
+				break;							
+			case 12://up
+				break;							
+			case 13://down
+				break;
+			case 14://left
+				break;
+			case 15://right
+				break;
+			case 16://playstation button
+				break;
+			case 17://keypad
+				break;								
+			default:
+		}		
+		
+	}
+}
+
+function SF_Player(text_x, text_y){
+	this.text_x = text_x;
+	this.text_y = text_y;
+	this.gamepad_index = false;
+	this.ready = false;
+}
+
+function initiate_SF(){
+	console.log('initiate_SF');
+	
+	//get the canvas element and ctx
+	SF['backdrop_canvas'] = document.getElementById("SF_backdrop_canvas");
+	SF['backdrop_ctx'] = SF['backdrop_canvas'].getContext("2d");
+	SF['canvas'] = document.getElementById("SF_canvas");
+	SF['ctx'] = SF['canvas'].getContext("2d");
+	SF['ctx'].font = '40pt Calibri';
+	SF['width'] = SF['canvas'].width;
+	SF['height'] = SF['canvas'].height;
+	SF['half_width'] = SF['canvas'].width/2;
+	SF['half_height'] = SF['canvas'].height/2;
+	SF['quarter_width'] = SF['canvas'].width/4;
+	SF['quarter_height'] = SF['canvas'].height/4;
+	SF['players'] = [];
+	SF['players'].push(new SF_Player(SF['width']*.05, SF['height']*.05));
+	SF['players'].push(new SF_Player(SF['width']*.55, SF['height']*.05));
+	SF['players'].push(new SF_Player(SF['width']*.05, SF['height']*.55));
+	SF['players'].push(new SF_Player(SF['width']*.55, SF['height']*.55));
+	SF['number_of_players'] = 0;
+	SF['gamepads'] = {};//timestamp as uid?
+	SF['game_mode'] = 'setup';
+	SF['colors'] = ['#FF0000', '#00FF00', '#00FFFF', '#FF00FF', '#000000'];
+}
+
+function stop_SF(){
+	console.log('stop_SF');
+	clearInterval(intervals['SF_draw_interval']);
+	clearInterval(intervals['SF_step_interval']);
+	clearInterval(intervals['SF_second_interval']);
+}
+
+function start_SF(){
+	//should probs make a gamepad system that works for every tab rather than redo it everytime
+	//but at least this way I get better at it?
+	console.log('start_SF');
+	intervals['SF_draw_interval'] = setInterval(function(){
+		SF['ctx'].clearRect(0, 0, SF['width'], SF['height']);
+		switch(SF['game_mode']){
+			case 'setup':
+				//draw 4 colored squares?
+				SF['ctx'].globalAlpha = .2;
+				SF['ctx'].fillStyle = SF['colors'][0];
+				SF['ctx'].fillRect(0,0,SF['half_width'],SF['half_height']);
+				SF['ctx'].fillStyle = SF['colors'][1];
+				SF['ctx'].fillRect(SF['half_width'],0,SF['width'],SF['half_height']);
+				SF['ctx'].fillStyle = SF['colors'][2];
+				SF['ctx'].fillRect(0,SF['half_height'],SF['half_width'],SF['height']);				
+				SF['ctx'].fillStyle = SF['colors'][3];
+				SF['ctx'].fillRect(SF['half_width'],SF['half_height'],SF['width'], SF['height']);
+				SF['ctx'].fillStyle = '#FFFFFF';
+				_.forEach(SF['players'], function(player){
+					if(player.ready){
+						SF['ctx'].fillText('joined', player.text_x, player.text_y);
+					}
+					else{
+						SF['ctx'].fillText('Press X to join', player.text_x, player.text_y);
+					}
+				});
+				
+				break;
+			case 'start':
+				break;
+			default:
+		}
+	}, 30);
+	intervals['SF_step_interval'] = setInterval(function(){
+		_.forEach(SF['gamepads'], function(gamepad){
+			var index = gamepad.gamepad_index;
+			var gamepad = navigator.getGamepads()[index];
+			if(gamepad){
+				_.forEach(gamepad.buttons, function(butt){
+					var buttIndex = gamepad.buttons.indexOf(butt);
+					do_SF_gamepad(index, buttIndex, butt);
+				});
+			}
+		});
+	}, 30);
+	intervals['SF_second_interval'] = setInterval(function(){
+		document.getElementById('SF_gamepad_p').innerHTML = 'Gamepads Connected: ' + Object.keys(bekaari['gamepads']).length;
+		_.forEach(navigator.getGamepads(), function(gamepad){
+			if(gamepad){
+				if(!gamepad.id.includes('Unknown')){
+					var playa = _.filter(SF['gamepads'], {'gamepad_index': gamepad.index});
+					if(!playa.length){
+						console.log('gamepad detected');
+						SF['gamepads'][gamepad.index] = {
+							gamepad_index: gamepad.index,
+							buttons: [],
+							skip: false,
+							ready: false,
+							player_index: false
+						};
+						_.forEach([0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17], function(i){
+								SF['gamepads'][gamepad.index].buttons[i] = {
 									pressed: false,
 								}
 						});
