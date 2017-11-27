@@ -4580,7 +4580,7 @@ function draw_patterns(dude, display, activating){;
 			});
 			_.forEach(get_attack_positions(dude.type, dude.position, display), function(position){
 				bekaari['ctx'].setLineDash([20,bekaari['position_radius']-40, 20, 0]);
-				bekaari['ctx'].lineWidth=3;
+				bekaari['ctx'].lineWidth=7;
 				bekaari['ctx'].strokeStyle= dude.color;
 				bekaari['ctx'].strokeRect(
 					position[0]*bekaari['position_radius'],
@@ -4612,7 +4612,7 @@ function draw_patterns(dude, display, activating){;
 			bekaari['ctx'].globalAlpha = 1.0;
 			_.forEach(get_attack_positions(dude.type, dude.position, display), function(position){
 				bekaari['ctx'].setLineDash([20,bekaari['position_radius']-40, 20, 0]);
-				bekaari['ctx'].lineWidth=3;
+				bekaari['ctx'].lineWidth=7;
 				bekaari['ctx'].strokeStyle= dude.color;
 				bekaari['ctx'].strokeRect(
 					position[0]*bekaari['position_radius'],
