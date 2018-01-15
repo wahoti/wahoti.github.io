@@ -50,6 +50,12 @@ function tab_event(tab_name) {
 	else if (tab_name != 'SF' && hold_last_tab == 'SF'){
 		stop_SF();
 	}
+	if (tab_name == 'REM' && hold_last_tab != 'REM'){
+		start_REM();
+	}
+	else if (tab_name != 'REM' && hold_last_tab == 'REM'){
+		stop_REM();
+	}
 }
 
 domready(function() {
@@ -59,6 +65,7 @@ domready(function() {
 	initiate_chess_clock();
 	initiate_bekaari();
 	initiate_SF();
+	initiate_REM();
 	// controller_stuff()//NOT NEEDED YO... YO
 });
 
@@ -1419,6 +1426,7 @@ var intervals = {};
 var chess_clock = {};
 var bekaari = {};
 var SF = {};
+var REM = {};
 
 function reset_chess_clock(){
 var now = new Date().getTime();
@@ -4772,7 +4780,28 @@ function start_bekaari(){
 	}, 1000);
 }
 
-function do_SF_gamepad(index, buttIndex, butt){
+var SF_actions = {
+	punch: object = {
+		tag: 'punch',
+		go: function(){
+			console.log('punch');
+		}
+	},
+	dash: object = {
+		tag: 'dash',
+		go: function(){
+			console.log('dash');
+		}		
+	},
+	kick: object = {
+		tag: 'kick',
+		go: function(){
+			console.log('kick');
+		}
+	}
+}
+
+function do_SF_gamepad_setup(index, buttIndex, butt){
 	//on_hold
 	// if(butt.pressed && bekaari['gamepads'][index].buttons[buttIndex].pressed){
 		// bekaari['gamepads'][index].buttons[buttIndex].pressed_count += 1;
@@ -4884,6 +4913,9 @@ function SF_Player(text_x, text_y){
 	this.text_y = text_y;
 	this.gamepad_index = false;
 	this.ready = false;
+	this.square = 'punch';
+	this.triangle = 'kick';
+	this.circle = 'dash';
 }
 
 function initiate_SF(){
@@ -4941,6 +4973,11 @@ function start_SF(){
 				_.forEach(SF['players'], function(player){
 					if(player.ready){
 						SF['ctx'].fillText('joined', player.text_x, player.text_y);
+						SF['ctx'].fillText('X: jump', player.text_x, player.text_y+40);
+						SF['ctx'].fillText('square: ' + SF_actions[player.square].tag, player.text_x, player.text_y+80);
+						SF['ctx'].fillText('triangle: ' + SF_actions[player.triangle].tag, player.text_x, player.text_y+120);
+						SF['ctx'].fillText('circle: '  + SF_actions[player.circle].tag, player.text_x, player.text_y+160);
+						//gucci
 					}
 					else{
 						SF['ctx'].fillText('Press X to join', player.text_x, player.text_y);
@@ -4990,6 +5027,113 @@ function start_SF(){
 			}
 		})
 	}, 1000);
+}
+
+function initiate_REM(){
+	console.log('initiate_REM');
+	//25 - 100 reps
+	//cycle through up down, left right, diagonals, figure eight, infinity
+	//or choose a mode 
+	REM['canvas'] = document.getElementById("REM_canvas");
+	REM['ctx'] = REM['canvas'].getContext("2d");
+	REM['ctx'].fillStyle = '#FF00FF';
+	REM['height'] = REM['canvas'].height;
+	REM['width'] = REM['canvas'].width;
+	console.log(REM['height'], REM['width']);
+	REM['modes'] = ['N', 'W', 'NW', 'NE', 'inf', 'rinf', '8', 'r8'];
+	REM['mode_index'] = 0;
+	REM['reps_list'] = [1, 5, 10, 25, 50, 75, 100];
+	REM['reps'] = 1;
+	REM['current_reps'] = 0;
+	REM['tempo'] = 1;
+	REM['v'] = new victor(REM['width']/2, REM['height']/2);
+	REM['size'] = 10;
+	REM['radius'] = REM['size']/2;
+	REM['t'] = 0;
+}
+
+function REM_set_mode(mode){
+	REM['v'].x = REM['width']/2;
+	REM['v'].y = REM['height']/2;
+	REM['mode_index'] = mode;
+	console.log('set_mode ', mode);
+}
+
+function REM_next_mode(){
+	if((REM['mode_index']+1) == REM['modes'].length){
+		REM_set_mode(0);
+	}
+	else{
+		REM_set_mode(REM['mode_index']+1);
+	}
+}
+
+function stop_REM(){
+	console.log('stop_REM');
+	clearInterval(intervals['REM_step_interval']);
+}
+
+function start_REM(){
+	console.log('start_REM');
+	intervals['REM_step_interval'] = setInterval(function(){
+		if((REM['t'] += .05) >= Math.PI*2){
+			REM['t'] = 0; 
+			if((REM['current_reps'] += 1) >= REM['reps']){
+				REM_next_mode();
+			}
+		}
+		
+		// console.log(Math.sin(REM['t']));
+		
+		//increment position
+		switch(REM['mode_index']){
+			case 0:
+				//up down
+				REM['v'].y = (Math.sin(REM['t']) * ((REM['height']/2)-40)) + ((REM['height']/2)-40);
+				break;
+			case 1:
+				//left right
+				REM['v'].x = (Math.sin(REM['t']) * ((REM['height']/2)-40)) + (REM['width']/2);
+				break;
+			case 2:
+				//NW
+				REM['v'].y = (Math.sin(REM['t']) * ((REM['height']/2)-40)) + ((REM['height']/2)-40);
+				REM['v'].x = (Math.sin(REM['t']) * ((REM['height']/2)-40)) + (REM['width']/2);
+				break;
+			case 3:
+				//NE
+				REM['v'].y = (Math.sin(REM['t']) * ((REM['height']/2)-40)) + ((REM['height']/2)-40);
+				REM['v'].x = (Math.sin(REM['t']) * ((REM['height']/2)-40) * -1) + (REM['width']/2);
+				break;
+			case 4:
+				//inf
+				REM['v'].y = (Math.sin(2*REM['t']) * ((REM['height']/2)-40)) + ((REM['height']/2)-40);
+				REM['v'].x = (Math.sin(REM['t']) * ((REM['width']/2)-40)) + (REM['width']/2);
+				break;
+			case 5:
+				//reverse inf
+				REM['v'].y = (Math.sin(2*REM['t']) * ((REM['height']/2)-40) * -1) + ((REM['height']/2)-40);
+				REM['v'].x = (Math.sin(REM['t']) * ((REM['width']/2)-40)) + (REM['width']/2);
+				break;
+			case 6:
+				//8
+				REM['v'].y = (Math.sin(REM['t']) * ((REM['height']/2)-40)) + ((REM['height']/2)-40);
+				REM['v'].x = (Math.sin(2*REM['t']) * ((REM['height']/2)-40)) + (REM['width']/2);			
+				break;
+			case 7:
+				//r8
+				REM['v'].y = (Math.sin(REM['t']) * ((REM['height']/2)-40)) + ((REM['height']/2)-40);
+				REM['v'].x = (Math.sin(2*REM['t']) * ((REM['height']/2)-40) * -1) + (REM['width']/2);	
+				break;
+			default:
+		}
+		//draw
+		REM['ctx'].clearRect(0, 0, REM['width'], REM['height']);
+		// REM['ctx'].fillRect(REM['v'].x - REM['radius'], REM['v'].y - REM['radius'], REM['size'], REM['size']);
+		REM['ctx'].beginPath();
+		REM['ctx'].arc(REM['v'].x, REM['v'].y, REM['size'], Math.PI*2, false);
+		REM['ctx'].fill();
+	}, 30)
 }
 
 function stop_dark_squares(){
