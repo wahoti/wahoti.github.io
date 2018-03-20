@@ -520,6 +520,14 @@
 			top: 0%;
 			margin-top: 40px;
 		}
+		.chart div {
+		  font: 10px sans-serif;
+		  background-color: steelblue;
+		  text-align: right;
+		  padding: 3px;
+		  margin: 1px;
+		  color: white;
+		}
 	</style>
 	</head>
 	<body>
@@ -529,8 +537,9 @@
 		<button class="tablinks" onclick="openTab(event, 'Box')">Box</button>
 		<button class="tablinks" onclick="openTab(event, 'Chess Clock')">Chess Clock</button>
 		<button class="tablinks" onclick="openTab(event, 'Bekaari')">Bekaari</button>
-		<button class="tablinks" onclick="openTab(event, 'SF')">SquareFighter</button>
 		<button class="tablinks" onclick="openTab(event, 'REM')">REM</button>
+		<!--<button class="tablinks" onclick="openTab(event, 'SF')">SquareFighter</button>-->
+		<!--<button class="tablinks" onclick="openTab(event, 'd3_stuff')">d3_stuff</button>-->
 	</div>
 	
 	<div id="About Me" class="tabcontent">
@@ -635,6 +644,10 @@
 	<div id="REM" class="tabcontent">
 		<canvas id="REM_canvas" width="2000" height="1000" ></canvas>
 	</div>
+	<div id="d3_stuff" class="tabcontent">
+		<div class="chart">
+		</div>
+	</div>
 	<div id="resources">
 		<img id="my_pixelized_dude" src="res/my_pixelized_dude.png" alt="my_pixelized_dude">
 		<img id="gascoigne" src="res/gascoigne.png" alt="gascoigne">
@@ -657,6 +670,7 @@
 		<img id="pawn" src="res/pawn.png" alt="pawn">
 	</div>
 	<script src="js/three.min.js"></script>
+	<script src="js/d3.min.js"></script>
 	<script src="js/wahotiScript.js"></script>
 	<script src="bundle.js"></script>
 	<audio id="omae.mp3" src="res/omae.mp3"></audio>

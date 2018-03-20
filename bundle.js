@@ -243,6 +243,12 @@ function tab_event(tab_name) {
 	else if (tab_name != 'REM' && hold_last_tab == 'REM'){
 		stop_REM();
 	}
+	if (tab_name == 'd3_stuff' && hold_last_tab != 'd3_stuff'){
+		start_d3_stuff();
+	}
+	else if (tab_name != 'd3_stuff' && hold_last_tab == 'd3_stuff'){
+		stop_d3_stuff();
+	}
 }
 
 domready(function() {
@@ -5321,6 +5327,23 @@ function start_REM(){
 		REM['ctx'].arc(REM['v'].x, REM['v'].y, REM['size'], Math.PI*2, false);
 		REM['ctx'].fill();
 	}, 30)
+}
+
+function stop_d3_stuff(){
+	console.log('stop_d3_stuff');
+}
+
+function start_d3_stuff(){
+	console.log('start_d3_stuff');
+	var data = [30, 86, 168, 281, 303, 365];
+
+	d3.select(".chart")
+	  .selectAll("div")
+	  .data(data)
+		.enter()
+		.append("div")
+		.style("width", function(d) { return d + "px"; })
+		.text(function(d) { return d; });
 }
 
 function stop_dark_squares(){

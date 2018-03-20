@@ -17,6 +17,10 @@ app.get('/js/three.min.js', function(req,res) {
 	res.sendFile(__dirname + '/js/three.min.js');
 });
 
+app.get('/js/d3.min.js', function(req,res) {
+	res.sendFile(__dirname + '/js/d3.min.js');
+});
+
 app.get('/bundle.js', function(req,res) {
 	res.sendFile(__dirname + '/bundle.js');
 });
