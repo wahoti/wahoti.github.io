@@ -17,6 +17,9 @@
 			background-image: url("res/symphony.png");
 			background-repeat: repeat;
 			overflow: hidden;
+			-webkit-user-select: none; /* Chrome/Safari */        
+			-moz-user-select: none; /* Firefox */
+			-ms-user-select: none; /* IE10+ */
 		}
 		p {
 			display:table-cell;
@@ -215,6 +218,7 @@
 			left: 0px;
 			background-color: #9966ff;
 			font-size: 300%;
+			z-index: -1;
 		}
 		div#player2_div{
 			width: 50%;
@@ -222,6 +226,39 @@
 			right: 0px;
 			background-color: #9933ff;
 			font-size: 300%;
+			z-index: -1;
+		}
+		div#player1_score{
+			width: 120px;
+			height: 60px;
+			background-color: #cc99ff;
+			font-size: 150%;
+			cursor: pointer;
+			z-index: 1;
+			position: absolute;
+			left: 50%;
+			margin-left: -122px;
+			top: 50%;
+			margin-top: -33px;
+			border:1px solid #000000;
+			text-align: center;
+			color: #FFFFFF;
+		}
+		div#player2_score{
+			width: 120px;
+			height: 60px;
+			background-color: #9900cc;
+			font-size: 150%;
+			cursor: pointer;
+			z-index: 1;
+			position: absolute;
+			left: 50%;
+			margin-left: 0px;
+			top: 50%;
+			margin-top: -33px;
+			border:1px solid #000000;
+			text-align: center;
+			color: #FFFFFF;
 		}
 		div#chess_clock_start_stop{
 			width: 25%;
@@ -608,6 +645,8 @@
 	<div id="Chess Clock" class="tabcontent">
 		<div id="player1_div" class="chess_clock_div"></div>
 		<div id="player2_div" class="chess_clock_div"></div>
+		<div id="player1_score">0</div>
+		<div id="player2_score">0</div>
 		<div id="chess_clock_start_stop" class="chess_clock_div">Start/Stop</div>
 		<div id="chess_clock_switch" class="chess_clock_div">Switch</div>
 		<div id="chess_clock_reset" class="chess_clock_div">Reset</div>

@@ -1622,7 +1622,7 @@ var SF = {};
 var REM = {};
 
 function reset_chess_clock(){
-var now = new Date().getTime();
+	var now = new Date().getTime();
 	chess_clock['end_time'] = new Date(now + 60*60000).getTime();
 	chess_clock['player1_time'] = new Date(now).getTime();
 	chess_clock['player1_turn_start_time'] = new Date(now).getTime();
@@ -1630,6 +1630,11 @@ var now = new Date().getTime();
 	chess_clock['player2_turn_start_time'] = new Date(now).getTime();
 	chess_clock['turn'] = 0;
 	chess_clock['hold_turn'] = 1; //for pausing
+	chess_clock['player1_score'] = 0;
+	chess_clock['player2_score'] = 0;
+	chess_clock['player1_score_div'].innerHTML = chess_clock['player1_score'];
+	chess_clock['player2_score_div'].innerHTML = chess_clock['player2_score'];
+	chess_clock['start_stop_div'].classList.remove('active_player');
 	display_chess_clock('player1');
 	display_chess_clock('player2');	
 }
@@ -1638,6 +1643,11 @@ function initiate_chess_clock(){
 	console.log('initiate chess clock');
 	chess_clock['player1_div'] = document.getElementById("player1_div");
 	chess_clock['player2_div'] = document.getElementById("player2_div");
+	chess_clock['player1_score_div'] = document.getElementById("player1_score");
+	chess_clock['player2_score_div'] = document.getElementById("player2_score");
+	chess_clock['start_stop_div'] = document.getElementById("chess_clock_start_stop");
+	chess_clock['player1_score'] = 0;
+	chess_clock['player2_score'] = 0;
 	var now = new Date().getTime();
 	chess_clock['end_time'] = new Date(now + 60*60000).getTime();
 	chess_clock['player1_time'] = new Date(now).getTime();
@@ -1664,6 +1674,33 @@ function initiate_chess_clock(){
 	}
 	document.getElementById("chess_clock_switch").onclick = turn_switch_chess_clock;
 	document.getElementById("chess_clock_reset").onclick = reset_chess_clock;
+	chess_clock['player1_score_div'].onclick = player1_score
+	chess_clock['player2_score_div'].onclick = player2_score
+}
+
+function player1_score(e){
+	var pWidth = chess_clock['player1_score_div'].offsetWidth;
+	var pOffset = chess_clock['player1_score_div'].offsetLeft; 
+	var x = e.pageX - pOffset;
+    if(pWidth/2 > x){
+		chess_clock['player1_score'] -= 1;
+	}
+	else{
+		chess_clock['player1_score'] += 1;
+	}
+	chess_clock['player1_score_div'].innerHTML = chess_clock['player1_score'];
+}
+function player2_score(e){
+	var pWidth = chess_clock['player2_score_div'].offsetWidth;
+	var pOffset = chess_clock['player2_score_div'].offsetLeft; 
+	var x = e.pageX - pOffset;
+    if(pWidth/2 > x){
+		chess_clock['player2_score'] -= 1;
+	}
+	else{
+		chess_clock['player2_score'] += 1;
+	}
+	chess_clock['player2_score_div'].innerHTML = chess_clock['player2_score'];
 }
 
 function turn_start_chess_clock(player){
@@ -1690,6 +1727,7 @@ function turn_switch_chess_clock(){
 }
 
 function pause_chess_clock(){
+	chess_clock['start_stop_div'].classList.remove('active_player');
 	if (chess_clock['turn'] == 1){
 		chess_clock['hold_turn'] = chess_clock['turn'];
 		chess_clock['turn'] = 0;
@@ -1703,6 +1741,7 @@ function pause_chess_clock(){
 }
 
 function unpause_chess_clock(){
+	chess_clock['start_stop_div'].classList.add('active_player');
 	if (chess_clock['hold_turn'] == 1){
 		turn_start_chess_clock('player1');
 		chess_clock['turn'] = 1;
@@ -1719,7 +1758,6 @@ function display_chess_clock(player){
 	var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60)).toString();
 	var seconds = Math.floor((distance % (1000 * 60)) / 1000).toString();
 	chess_clock[player + '_div'].innerHTML = hours + ':' + minutes + ':' + seconds;
-	
 	if(chess_clock['turn'] == 1){
 		chess_clock['player1_div'].classList.add('active_player');
 		chess_clock['player2_div'].classList.remove('active_player');
