@@ -565,16 +565,58 @@
 		  margin: 1px;
 		  color: white;
 		}
+		
+		.testReact_game {
+			display: flex;
+			flex-direction: row;
+		}
+		.testReact_square:focus {
+			outline: none;
+		}
+		.testReact_square {
+			background: #fff;
+			border: 1px solid #999;
+			float: left;
+			font-size: 24px;
+			font-weight: bold;
+			line-height: 34px;
+			height: 34px;
+			margin-right: -1px;
+			margin-top: -1px;
+			padding: 0;
+			text-align: center;
+			width: 34px;
+		}
+		.testReact_board-row:after {
+			clear: both;
+			content: "";
+			display: table;
+		}
+		.testReact_game-info {
+			margin-left: 20px;
+		}
 	</style>
 	</head>
 	<body>
 	<div class="tab">
+		<!--when adding a new tab add..
+			-button here
+			-div with id = name of tab
+			-in main.js
+				-start function, stop function, initiate function
+				-object with name = name of tab
+				-tab events to tab_event
+				-initiate function to domready
+				
+		-->
 		<button class="tablinks" onclick="openTab(event, 'About Me')" id="defaultOpen">About</button>
 		<button class="tablinks" onclick="openTab(event, 'Dark Squares')">Dark Squares</button>
 		<button class="tablinks" onclick="openTab(event, 'Box')">Box</button>
 		<button class="tablinks" onclick="openTab(event, 'Chess Clock')">Chess Clock</button>
 		<button class="tablinks" onclick="openTab(event, 'Bekaari')">Bekaari</button>
 		<button class="tablinks" onclick="openTab(event, 'REM')">REM</button>
+		<button class="tablinks" onclick="openTab(event, 'testReact')">testReact</button>
+		
 		<!--<button class="tablinks" onclick="openTab(event, 'SF')">SquareFighter</button>-->
 		<!--<button class="tablinks" onclick="openTab(event, 'd3_stuff')">d3_stuff</button>-->
 	</div>
@@ -682,6 +724,8 @@
 	</div>
 	<div id="REM" class="tabcontent">
 		<canvas id="REM_canvas" width="2000" height="1000" ></canvas>
+	</div>
+	<div id="testReact" class="tabcontent">
 	</div>
 	<div id="d3_stuff" class="tabcontent">
 		<div class="chart">

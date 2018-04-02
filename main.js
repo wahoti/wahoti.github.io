@@ -1,4 +1,7 @@
 //browserify main.js -o bundle.js
+//react???
+//npm install --save babelify babel-preset-react
+//browserify -t [ babelify --presets [ react ] ] main.js -o bundle.js
 //node server.js
 var victor = require('victor');
 var _ = require('lodash');
@@ -8,6 +11,10 @@ var shortid = require('shortid');
 var async = require('async');
 // var sequence = Futures.sequence();
 var sequence = async.series();
+
+var React = require('react');
+var ReactDOM = require('react-dom');
+
 
 function test_main() {
 	console.log('test_main success! \t document.baseURI: ' + document.baseURI);
@@ -62,6 +69,17 @@ function tab_event(tab_name) {
 	else if (tab_name != 'd3_stuff' && hold_last_tab == 'd3_stuff'){
 		stop_d3_stuff();
 	}
+	// if (tab_name == 'testReact' && hold_last_tab != 'testReact'){
+		// start_testReact();
+	// }
+	// else if (tab_name != 'testReact' && hold_last_tab == 'testReact'){
+		// stop_testReact();
+	// }
+	// there is probs a better way to do this
+	//group up tab stuff into objects
+	//store all objects in an object
+	//active tabs list
+	//then call objects[tab_name].start, stop, initiate etc
 }
 
 domready(function() {
@@ -72,6 +90,7 @@ domready(function() {
 	initiate_bekaari();
 	initiate_SF();
 	initiate_REM();
+	initiate_testReact();
 	// controller_stuff()//NOT NEEDED YO... YO
 });
 
@@ -3473,29 +3492,34 @@ function activate_dude(dude_id){
 		return !dude.activated && dude_list[dude.type].is_piece;// && (dude.color == bekaari['dudes'][dude_id].color);
 	}).length < 1){
 		console.log('all_dudes_activated');
-		_.forEach(bekaari['scenario_zones'], function(zone){
-			//get occupants of the zone
-			//if there is only 1 color of pieces in the zone
-			//that team gets a point
-			var occupant_colors = {};
-			_.forEach(zone, function(position){
-				var x = position[0];
-				var y = position[1];
-				var occupant = get_occupant_position([x,y]);
-				if(occupant){
-					if(dude_list[occupant.type].is_piece){
-						occupant_colors[occupant.color] = true;
+		if(!bekaari['is_first_turn']){
+			_.forEach(bekaari['scenario_zones'], function(zone){
+				//get occupants of the zone
+				//if there is only 1 color of pieces in the zone
+				//that team gets a point
+				var occupant_colors = {};
+				_.forEach(zone, function(position){
+					var x = position[0];
+					var y = position[1];
+					var occupant = get_occupant_position([x,y]);
+					if(occupant){
+						if(dude_list[occupant.type].is_piece){
+							occupant_colors[occupant.color] = true;
+						}
 					}
+				});
+				var keys = Object.keys(occupant_colors);
+				if(keys.length == 1){
+					var team = _.filter(bekaari['teams'], function(t){
+						return t.color == keys[0];
+					})[0];
+					//no score on t1
+					team.game_points +=1;
 				}
 			});
-			var keys = Object.keys(occupant_colors);
-			if(keys.length == 1){
-				var team = _.filter(bekaari['teams'], function(t){
-					return t.color == keys[0];
-				})[0];
-				team.game_points +=1;
-			}
-		});
+		} else {
+			bekaari['is_first_turn'] = false;
+		}
 		_.forEach(bekaari['teams'], function(team){
 			draw_game_points(team);
 			if(team.game_points >= bekaari['max_game_points']){
@@ -4016,6 +4040,7 @@ function bekaari_restart(){
 	bekaari['game_mode'] = 'game_start';
 	bekaari['game_start'].mode = 'idle';
 	bekaari['game_mode_infobox'].innerHTML = 'mode: Game Start';
+	bekaari['is_first_turn'] = true;
 	_.forEach(bekaari['teams'], function(team){
 		team.game_points = 0;
 		draw_game_points(team);
@@ -4043,6 +4068,7 @@ function bekaari_start(){
 	bekaari['game_mode'] = 'game_start';
 	bekaari['game_start'].mode = 'idle';
 	bekaari['game_mode_infobox'].innerHTML = 'mode: Game Start';
+	bekaari['is_first_turn'] = true;
 	_.forEach(bekaari['teams'], function(team){
 		team.game_points = 0;
 		draw_game_points(team);
@@ -4086,6 +4112,7 @@ function initiate_bekaari(){
 	bekaari['infobox'] = document.getElementById('bekaari_infobox');
 	bekaari['game_mode_infobox'] = document.getElementById("bekaari_mode");
 	
+	bekaari['is_first_turn'] = true;
 	bekaari['max_dude_points'] = 100;
 	bekaari['max_game_points'] = 10;
 	bekaari['teams'] = [
@@ -5071,6 +5098,151 @@ function start_SF(){
 			}
 		})
 	}, 1000);
+}
+
+
+function TestReact_Square(props) {
+	return (
+		<button className="testReact_square" onClick={props.onClick}>
+			{props.value}
+		</button>
+	);
+}
+
+class TestReact_Board extends React.Component {	
+	renderSquare(i) {
+		return (
+			<TestReact_Square
+				value={this.props.squares[i]}
+				onClick={() => this.props.onClick(i)}
+			/>
+		);
+	}
+
+	render() {
+		return (
+			<div>
+			<div className="testReact_board-row">
+				{this.renderSquare(0)}
+				{this.renderSquare(1)}
+				{this.renderSquare(2)}
+			</div>
+			<div className="testReact_board-row">
+				{this.renderSquare(3)}
+				{this.renderSquare(4)}
+				{this.renderSquare(5)}
+			</div>
+			<div className="testReact_board-row">
+				{this.renderSquare(6)}
+				{this.renderSquare(7)}
+				{this.renderSquare(8)}
+			</div>
+			</div>
+		);
+	}
+}
+
+class TestReact_Game extends React.Component {
+	constructor(props) {
+		super(props);
+		this.state = {
+			history: [{
+				squares: Array(9).fill(null),
+			}],
+			historyIndex: 0,
+			xIsNext: true,
+			stepNumber: 0
+		};
+	}
+	
+	jumpTo(step) {
+		this.setState({
+			stepNumber: step,
+			xIsNext: (step % 2) === 0,
+		});
+	}
+
+	handleClick(i) {
+		const history = this.state.history.slice(0, this.state.stepNumber + 1);
+		const current = history[history.length - 1];
+		const squares = current.squares.slice();
+		if(!calculateWinner(squares) && !squares[i]){
+			squares[i] = this.state.xIsNext ? 'X' : 'O';
+			this.setState({
+				history: history.concat([{
+					squares: squares,
+				}]),
+				xIsNext: !this.state.xIsNext,
+				stepNumber: history.length,
+			});
+		}
+	}
+	
+	render() {
+		const history = this.state.history;
+		const current = history[this.state.stepNumber];
+		const winner = calculateWinner(current.squares);
+
+		const moves = history.map((step, move) => {
+			const desc = move ? 'Go to move #' + move : 'Go to game start';
+			return (
+				<li key={move}>
+					<button onClick={() => this.jumpTo(move)}>{desc}</button>
+				</li>
+			);
+		});
+		
+		let status;
+		if (winner) {
+			status = 'Winner: ' + winner;
+		} else {
+			status = 'Next player: ' + (this.state.xIsNext ? 'X' : 'O');
+		}
+		
+		return (
+			<div className="testReact_game">
+				<div className="testReact_game-board">
+					<TestReact_Board 
+						squares={current.squares}
+						onClick={(i) => this.handleClick(i)}
+					/>
+				</div>
+				<div className="testReact_game-info">
+					<div>{status}</div>
+					<ol>{moves}</ol>
+				</div>
+			</div>
+		);
+	}
+}
+
+function calculateWinner(squares) {
+  const lines = [
+    [0, 1, 2],
+    [3, 4, 5],
+    [6, 7, 8],
+    [0, 3, 6],
+    [1, 4, 7],
+    [2, 5, 8],
+    [0, 4, 8],
+    [2, 4, 6],
+  ];
+  for (let i = 0; i < lines.length; i++) {
+    const [a, b, c] = lines[i];
+    if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
+      return squares[a];
+    }
+  }
+  return null;
+}
+
+
+function initiate_testReact(){
+	console.log('initiate_testReact');
+	ReactDOM.render(
+		<TestReact_Game />,
+		document.getElementById('testReact')
+	);
 }
 
 function initiate_REM(){
