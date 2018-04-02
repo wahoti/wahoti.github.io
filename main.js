@@ -3,6 +3,15 @@
 //npm install --save babelify babel-preset-react
 //browserify -t [ babelify --presets [ react ] ] main.js -o bundle.js
 //node server.js
+
+//add sounds to dark squares?
+// sword sounds - stab and swing
+// dash sound
+// hit sound
+// beam sound
+// ai spawn sound? - metal gear solid sound
+//
+
 var victor = require('victor');
 var _ = require('lodash');
 var domready = require("domready");
@@ -15,6 +24,9 @@ var sequence = async.series();
 var React = require('react');
 var ReactDOM = require('react-dom');
 
+var howler = require('howler');
+
+sounds = {}
 
 function test_main() {
 	console.log('test_main success! \t document.baseURI: ' + document.baseURI);
@@ -85,6 +97,44 @@ function tab_event(tab_name) {
 domready(function() {
 	//this is called after all the resources are loaded available - I think???
 	test_main();
+	
+	sounds['omae'] = new Howl({
+		src: ['res/omae.mp3']
+    });
+	sounds['alert'] = new Howl({
+		src: ['res/alert.wav']
+    });
+	sounds['stab'] = new Howl({
+		src: ['res/stab.mp3']
+    });
+	sounds['slash'] = new Howl({
+		src: ['res/slash.mp3']
+    });
+	sounds['guh'] = new Howl({
+		src: ['res/guh.mp3']
+    });
+	sounds['sword_hit'] = new Howl({
+		src: ['res/sword_hit.wav']
+    });
+	sounds['clang'] = new Howl({
+		src: ['res/clang.mp3']
+    });
+	sounds['bullets'] = new Howl({
+		src: ['res/bullets.mp3']
+    });
+	sounds['dramatic'] = new Howl({
+		src: ['res/dramatic.mp3']
+    });
+	sounds['spawn'] = new Howl({
+		src: ['res/spawn.mp3']
+    });
+	sounds['dash'] = new Howl({
+		src: ['res/dash.mp3']
+    });
+	sounds['warp'] = new Howl({
+		src: ['res/warp.wav']
+    });
+	
 	add_event_listeners();//put this in tab - and add remove_event_listeners()?????
 	initiate_chess_clock();
 	initiate_bekaari();
@@ -399,10 +449,12 @@ var actions = {
 			if(thing.id == this.owner.id) console.log('owner in collide');
 			if(!(things[this.weapon_root].collisions.indexOf(thing.id) >= 0)){				
 				if(thing.is_agent){
+					sounds['sword_hit'].play()
 					hit(thing, 5);
 					knockback(thing.id, this.owner)
 				}
 				if(thing.isweapon){
+					sounds['clang'].play()
 					if(thing.owner != this.owner){
 						knockback(thing.owner, this.owner)
 					}
@@ -437,6 +489,8 @@ var actions = {
 		go: function(player, coord){
 			if(player.weapons['sword']){ things[player.weapons['sword']].end(); }
 
+			sounds['slash'].play()
+			
 			var direction = new victor(coord[0] - player.pos.x, coord[1] - player.pos.y);
 			direction.rotate(-1.5).normalize();	
 			direction.normalize();
@@ -495,6 +549,7 @@ var actions = {
 			}
 		},
 		go: function(player, coord){
+			sounds['bullets'].play()
 			var shots = 0;
 			beam_interval = setInterval(function(){
 				if(shots >= 10){
@@ -520,6 +575,7 @@ var actions = {
 	dodge: object = {//note this is for players not agents
 		cost: 1,
 		go: function(player, coord){
+			sounds['warp'].play()
 			if(player.phase == "moving"){
 				var dx = player.pos.x;
 				var dy = player.pos.y;
@@ -575,7 +631,7 @@ var actions = {
 			if(thing.id == this.owner.id) console.log('owner in collide');
 			if(!(things[this.weapon_root].collisions.indexOf(thing.id) >= 0)){				
 				if(thing.is_agent){
-					document.getElementById('omae.mp3').play();
+					sounds['omae'].play()
 					setTimeout(function(){
 						var tl = new victor(-.5, -.5);
 						var tr = new victor(.5, -.5);
@@ -670,11 +726,13 @@ var actions = {
 			if(thing.id == this.owner.id) console.log('owner in collide');
 			if(!(things[this.weapon_root].collisions.indexOf(thing.id) >= 0)){			
 				if(thing.is_agent){
+					sounds['sword_hit'].play();
 					hit(thing, 5);
 					knockback(thing.id, this.owner)
 				}
 				if(thing.isweapon){
 					if(thing.owner != this.owner){
+						sounds['clang'].play()
 						knockback(thing.owner, this.owner)
 					}
 				}
@@ -706,7 +764,9 @@ var actions = {
 		},
 		go: function(player, coord){
 			if(player.weapons['sword']){ things[player.weapons['sword']].end(); }
-
+			
+			sounds['stab'].play()
+			
 			var direction = new victor(coord[0] - player.pos.x, coord[1] - player.pos.y);
 			direction.normalize();
 			var id = shortid.generate();
@@ -750,6 +810,7 @@ var actions = {
 
 
 function new_agent(agent) {
+	sounds['alert'].play()
 	agents[agent].go();
 }
 
@@ -791,6 +852,7 @@ var agents = {
 					this._pos.y += this.direction.y*this.speed;
 					this.dodge_cd_count++;
 					if(this.dodge_cd_count >= this.dodge_cd){//if dodge cd up - do a dodge - make cd variable????
+						sounds['warp'].play()
 						if(!x_left && !y_top){//bottom right
 							this.phase_direction.x = Math.random() - 1;
 							this.phase_direction.y = Math.random() - 1;
@@ -852,7 +914,6 @@ var agents = {
 			
 		},
 		end: function(){
-			
 		},
 		go: function(){
 			var id = shortid.generate();
@@ -887,6 +948,7 @@ var agents = {
 						}
 						this.attack_phase_count++;
 						if(this.attack_phase_count == this.attack_duration){//retreat if attack duration is up
+							sounds['warp'].play()
 							this.attack_phase = 'waiting';
 							this.has_attacked = false;
 							this.attack_phase_count = 0;
@@ -924,6 +986,7 @@ var agents = {
 								this._pos.y = this.pos.y - (this.direction.y * this.speed);
 							}
 							if(this.attack_phase_count >= this.attack_cd){//if attack cooldown is up - attack
+								sounds['warp'].play()
 								this.attack_phase = 'attacking';	
 								this.attack_phase_count = 0;
 							
@@ -977,7 +1040,8 @@ var agents = {
 			
 		},
 		end: function(){
-			
+			console.log('samurai_end');
+			sounds['guh'].play()
 		},
 		go: function(){
 			var id = shortid.generate();
@@ -1287,6 +1351,7 @@ function hit(thing, damage){
 		}
 	
 		if(thing.health <= 0){
+			sounds['guh'].play();
 			thing.end();
 			return;
 		}
@@ -1398,11 +1463,13 @@ function player_step() {
 function player_collide(square) {}//this is supposed to be empty
 
 function player_end() {
+	sounds['dramatic'].play()
 	var id = this.id;
 	things[id].phase = 'dead';
 	things[id].pos.x = -100;
 	things[id].pos.y = -100;
 	setTimeout(function(){
+		sounds['spawn'].play()
 		things[id].health = 10;
 		things[id].phase = 'moving';
 		random_teleport(things[id]);

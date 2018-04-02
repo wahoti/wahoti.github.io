@@ -125,6 +125,51 @@ app.get('/res/omae.mp3', function(req,res) {
 	res.sendFile(__dirname + '/res/omae.mp3');
 });
 
+app.get('/res/alert.wav', function(req,res) {
+	res.sendFile(__dirname + '/res/alert.wav');
+});
+
+app.get('/res/stab.mp3', function(req,res) {
+	res.sendFile(__dirname + '/res/stab.mp3');
+});
+
+app.get('/res/slash.mp3', function(req,res) {
+	res.sendFile(__dirname + '/res/slash.mp3');
+});
+
+app.get('/res/guh.mp3', function(req,res) {
+	res.sendFile(__dirname + '/res/guh.mp3');
+});
+
+app.get('/res/sword_hit.wav', function(req,res) {
+	res.sendFile(__dirname + '/res/sword_hit.wav');
+});
+
+app.get('/res/clang.mp3', function(req,res) {
+	res.sendFile(__dirname + '/res/clang.mp3');
+});
+
+app.get('/res/bullets.mp3', function(req,res) {
+	res.sendFile(__dirname + '/res/bullets.mp3');
+});
+
+app.get('/res/dramatic.mp3', function(req,res) {
+	res.sendFile(__dirname + '/res/dramatic.mp3');
+});
+
+app.get('/res/spawn.mp3', function(req,res) {
+	res.sendFile(__dirname + '/res/spawn.mp3');
+});
+
+app.get('/res/dash.mp3', function(req,res) {
+	res.sendFile(__dirname + '/res/dash.mp3');
+});
+
+app.get('/res/warp.wav', function(req,res) {
+	res.sendFile(__dirname + '/res/warp.wav');
+});
+
+
 http.listen(app.get('port'), function() {
 	console.log('listening on ' + app.get('port') + '...');
 });
